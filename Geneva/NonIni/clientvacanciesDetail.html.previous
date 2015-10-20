@@ -1,0 +1,116 @@
+<!--[onload;tplvars;vacancies='GenevaNetClientVacancies?pStartDate&pEndDate&pPageNo&SearchString&SampleSize']-->
+
+<!-- 20121112 modify navigation buttons to hide on NaN -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+		$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+
+	$('#tblclivacs').data('IQXdtDateFilter',{dateColumn:3,clearButtonText:"Clear"});
+	var oTbl=$('#tblclivacs').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"sDom": '<"clear">rt',	
+		"iDisplayLength":100,
+		"aaSorting": [ [6,'desc'] ],
+		"aoColumnDefs": [{aTargets:[0],fnRender: function(oObj){
+			if (oObj.aData[18]){
+				return oObj.aData[0]+'<br/>'+oObj.aData[18];
+			} else {
+				return oObj.aData[0];
+			}
+		}},
+		{aTargets:[10,11,12,13,14,],bVisible:false,bSearchable:false}]
+	});
+	if (!IQXDeepLink("R",oTbl)){
+		setThisWeek(oTbl);
+		}
+	
+	var RecordCount=$('#RecordCount').val();
+	var SampleSize=$('#VacSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1};
+	PageCount=Root+Mantissa;
+	$('#LastPage').html(PageCount);
+	$('#NavButtons').hide();
+	if($('#LastPage').html() != 'NaN'){
+		$('#NavButtons').show();
+		}  
+	});
+	
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+
+<table class="Xtablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+		<th>Position</th>
+		<th>Shift Note</th>
+		<th>Client Ref</th>
+		<th>Start Date</th>
+		<th>Start Time</th>
+		<th>Finish Time</th>
+		<th>Shift Ref</th>
+		<th>Client Comment</th>
+		<th>Geneva Temp</th>
+		<th></th>
+		<th>Filled</th>
+		<th>Unconfirmed</th>
+		<th>VacancyID</th>
+		<th>TempShiftPlanID</th>
+		<th>Shift Description</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]">
+	    <td>[vacancies.Position;noerr]</td>
+	    <td>[vacancies.Location;noerr]</td>
+	    <td>[vacancies.PONumber;noerr]</td>
+	    <td id="SD[vacancies.RowID]" class="longdate">[vacancies.StartDate;noerr]</td>
+	    <td id="STime[vacancies.RowID]" class="time" ><span id="SpanSTime[vacancies.RowID]" onclick="EditTime(this)">[vacancies.StartTime;noerr]</span><input id="InputSTime[vacancies.RowID]" class="validFourDigitTime" style="visibility:hidden;display:none" onblur="UpdateTime(this)" ></input></td>
+	    <td id="FTime[vacancies.RowID]" class="time" ><span id="SpanFTime[vacancies.RowID]" onclick="EditTime(this)">[vacancies.FinishTime;noerr]</span><input id="InputFTime[vacancies.RowID]" class="validFourDigitTime" style="visibility:hidden;display:none" onblur="UpdateTime(this)"></input></td>
+	    <td>[vacancies.ShiftRef;noerr]</td>
+	    <td id="CC[vacancies.ShiftRef]"  title='[vacancies.ClientComment;noerr]'>[vacancies.ClientCommentShort;noerr]<span style="display:none">[vacancies.ClientComment;noerr]</span></td>
+		<td><span id="[vacancies.PersonID;noerr]" class="CandidateLink[vacancies.Filled;noerr]" onclick="OpenCandidateDetails(this,'[vacancies.DepartmentID;noerr]');" >[vacancies.FilledBy;noerr]</span></td>
+		<td id="Info[vacancies.RowID]"  class='Status[vacancies.BlockColour;noerr]' title='[vacancies.TextStatus;noerr]'>[vacancies.CombinedStatus;noerr]<span style="display:none">[vacancies.TextStatus;noerr]</span></td>
+		<td>[vacancies.Filled;noerr]</td>
+		<td>[vacancies.Unconfirmed;noerr]</td>
+		<td>[vacancies.VacancyID;noerr]</td>
+		<td>[vacancies.TempShiftPlanID;noerr]</td>
+		<td></td>
+		<td class="center"><img id="I[vacancies.RowID]" class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="showShiftActions(this,'[vacancies.RowID;]','[vacancies.CancelButton;]','[vacancies.ConfirmButton;]','[vacancies.RejectButton;]','[vacancies.FillButton;]')" /><input id="CB[vacancies.RowID]" type="hidden" value="[vacancies.CreatedBy;noerr]" /><input id="CT[vacancies.RowID]" type="hidden" value="[vacancies.CreateTime;noerr]" /><input id="RecordCount" type="hidden" value="[vacancies.RowCount;noerr]" /></td>
+		</tr>
+	</tbody>
+</table>
+<p>
+    <span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+</p>
+
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="CandDetailsPopups" class="ui-helper-hidden"></div>
+<div id="DocDetails" class="ui-helper-hidden"></div>
+
+<input type="hidden" id="TempShiftDate" ></input>
+
+<div id="FormDiv" ></div>
+
+

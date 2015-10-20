@@ -1,0 +1,85 @@
+<!--[onload;tplvars;cand='GenevaNetCandidateProfileBank']-->
+
+<!-- modified per email from Viola 2011-11-15 -->
+<!-- Release date 2011-11-16 -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#frmcandAdmin");
+		$("#frmcandAdmin .questionnaire").questionnaire();
+	});
+	
+	function SplitBankCode(){
+		// split combined bank and account field into original separate fields
+		
+		$('#cand_BankSortCode').val($('#cand_FullBankCode').val().substr(0,7));
+		$('#cand_BankAcNo').val($('#cand_FullBankCode').val().substr(8,19));
+	}
+	
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_profile_Bank_top.html;noerr]</div>
+<form id="frmcandAdmin" name="candAdmin" action="IQXPost.php?proc=GenevaNetCandidateProfileSetBank" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+        <input type="hidden" id="cand_personid" name="ppersonid" value="[cand.PersonID;block=fieldset]" />
+        <input type="hidden" name="poldBankName" value="[cand.BankName;noerr]" />
+		<input type="hidden" name="poldBankBranch" value="[cand.BankBranch;noerr]" />
+		<input type="hidden" name="poldBankAcName" value="[cand.BankAcName;noerr]" />
+        <input type="hidden" name="poldBankSortCode" value="[cand.BankSortCode;noerr]" />
+        <input type="hidden" name="poldFullBankCode" value="[cand.BankSortCode;noerr]" />
+        <input type="hidden" name="poldBankAcNo" value="[cand.BankAcNo;noerr]" />
+        <input type="hidden" name="poldird" value="[cand.ni;noerr]" />
+        <input type="hidden" name="poldTaxCode" value="[cand.TaxCode;noerr]" />
+		<div class="questionnaire">
+			<div class="qquestrow">
+        		<div class="qquestion">Name Of Bank</div>
+				<div class="qanswer"><input type="text" id="cand_BankName" name="pBankName" value="[cand.BankName;noerr]" class="qpseudoquestanswer" /></div>
+        	</div>
+			<div class="qquestrow">
+        		<div class="qquestion">Branch Name</div>
+				<div class="qanswer"><input type="text" id="cand_BankBranch" name="pBankBranch" value="[cand.BankBranch;noerr]" class="qpseudoquestanswer" /></div>
+        	</div>
+			<div class="qquestrow">
+           		<div class="qquestion">Account Name</div>
+				<div class="qanswer"><input type="text" id="cand_BankAcName" name="pBankAcName" value="[cand.BankAcName;noerr]" class="qpseudoquestanswer" /></div>
+        	</div>
+        	<div class="qquestrow">
+        	    <div class="qquestion">Bank and Account Number</div>
+				<div class="qanswer"><input type="text" id="cand_FullBankCode" name="pFullBankCode" value="[cand.BankSortCode;noerr]-[cand.BankAcNo;noerr]" class="validFullNZBankAccountNo qpseudoquestanswer" onChange="SplitBankCode()" /></div>
+        	</div>
+        	<div class="qquestrow">
+        	    <div class="qquestion">IRD Number</div>
+				<div class="qanswer"><input type="text" id="cand_ird" name="pird" value="[cand.ni;noerr]" class="validIRDNumber uppercase qpseudoquestanswer" /></div>
+        	</div>
+			<div class="qquestrow">
+           		<div class="qquestion">Tax Code</div>
+				<div class="qanswer"><input type="text" id="cand_TaxCode" name="pTaxCode" value="[cand.TaxCode;noerr]" class="validNZTaxCode qpseudoquestanswer" /></div>
+        	</div>
+    	</div>
+		<input type="hidden" id="cand_BankSortCode" name="pBankSortCode" value="[cand.BankSortCode;noerr]" class="validBankSortCode qpseudoquestanswer" />
+		<input type="hidden" id="cand_BankAcNo" name="pBankAcNo" value="[cand.BankAcNo;noerr]" class="validNZBankAccountNo qpseudoquestanswer"  />
+		
+		<div class="cleardiv" ></div>
+	   	<!--div>[candquest;block=div]</div-->  
+	    <p>
+            <button type="button" id="cand_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+                Edit
+            </button>
+            <button type="button" id="cand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+                Refresh
+            </button>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+                Undo
+            </button>
+	    </p>
+		<p>
+	    		<span class="errormessage">[var.x_errormessage]</span>
+				<div class="usertext">[onload;file=txt_candidate_profile_Bank_bottom.html;noerr]</div>
+		</p>
+    </fieldset>
+</form>
+
+

@@ -1,0 +1,171 @@
+<Job title="Export Vacancies to Web" dateformat="ddd dd/mm/yyyy" autoclose="Yes">
+<!-- Job vacancy file uploader
+	 use in conjunction with VacancyUploader.xml
+	 20120316 RC1 -->
+	 
+	<Library>
+		<MakeFormField fieldtype="" caption="" name="" multiple="multiple or blank" class="e.g. required" sql="select value,description">
+			<WriteXMLTag tag="SearchField" _fieldtype="{fieldtype}" _caption="{caption}" _name="{name}" _multiple="{multiple}" _class="{class}">
+				<If x1="{sql}" x2="" trim="YES" comparison="!=">
+					<SQLQuery>
+						<SQLSelect>{sql}</SQLSelect>
+						<ForEachRow>
+							<WriteXMLTag nocrlf="YES" tag="option" _value="{value}"><Write xmlsafe="YES">{description}</Write></WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</If>
+			</WriteXMLTag>
+		</MakeFormField>
+		<MakeCaption fieldname="" caption="">
+			<WriteXMLTag nocrlf="YES" tag="Caption" _fieldname="{fieldname}"><Write xmlsafe="YES">{caption}</Write></WriteXMLTag>
+		</MakeCaption>
+		<MakeField fieldname="" inRow="1 if should appear in the table row" inExpansion="1 if should appear in the expanded details">
+			<WriteXMLTag nocrlf="YES" tag="{fieldname}" _tbl="{inRow}" _exp="{inExpansion}"><WriteField cdata="YES">{fieldname}</WriteField></WriteXMLTag>
+		</MakeField>
+	</Library>
+	
+	<!-- User Variables -->
+	<SetVariable name="Verbose" value="yes" />
+	<SetVariable name="ExportFileName" value="WebVacancies.xml" />
+	<SetVariable name="FileExtension" value="xml" />
+	<!-- User Variables -->
+	
+	<!-- check for FTP uploader, otherwise use websiteFolder in database -->
+	<IfFileExists filename="{jobdir}vacancyuploader.xml">
+		<If x1="{Verbose}" x2="yes" ><MessageDialog text="Using FTP job: {jobdir}vacancyuploader.xml" /></If>
+  		<SetVariable name="doUpload" value="1"/>
+  		<SetVariable name="exportfolder" value="{tempdir}"/>
+	</IfFileExists>
+	<Else>
+		<If x1="{Verbose}" x2="yes" ><MessageDialog text="No upload job" /></If>
+  		<SetVariable name="doUpload" value="0"/>
+  		<SetVariable name="exportfolder" sql="select first websitefolder from IQXNetEmailDetails"/>
+	</Else>
+ 
+ 	<!-- reset filename to empty, to force save dialog -->
+	<If x1="{Verbose}" x2="yes" >
+		<MessageDialog text="Projected Export pathway: upload={doUpload} {exportfolder}\{ExportFileName}" />
+ 		<SetVariable name="ExportFileName" value=""/>
+ 	</If>
+ 	
+	<Block>
+  		<ExportFile directory="{exportfolder}" filename="{ExportFileName}" extension="{FileExtension}">
+    		<WriteLn text="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>"/>
+    		<WriteXMLTag tag="JobSearch">
+      		
+      			<WriteXMLTag tag="SearchForm">
+      				<Call fieldtype="select" caption="Job Type" name="xpath_tempperm" multiple="" class="required" sql="select 'T' as value,'Temp' as description union select 'P','Perm'">MakeFormField</Call>
+      				<Call fieldtype="select" caption="Department" name="xpath_departmentid" multiple="" class="required" sql="select departmentid as value,name as description from department where searchable=1 and publishtoweb=1 order by sortorder">MakeFormField</Call>
+					<SQLQuery>
+						<SQLSelect>select tagid,taglocation,description,tagtype from tag where taglocation like 'V%' and publiconweb=1 and tagtype in ('M','L') order by sortorder</SQLSelect>
+						<ForEachRow>
+							<If x1="{tagtype}" x2="L" ignorecase="YES">
+								<SetVariable name="isMultiple" value="multiple" />
+								<SetVariable name="squareBrackets" value="[]" />
+								<SetVariable name="xValue" value="tagchoiceid" />
+							</If>
+							<Else>
+								<SetVariable name="isMultiple" value="" />
+								<SetVariable name="squareBrackets" value="" />
+								<SetVariable name="xValue" value="(if tagchoiceid='_' then '$NONE$' else tagchoiceid endif)" />
+							</Else>
+       						<Call fieldtype="select" caption="{description}" name="xpath_Q_{taglocation}_{tagid}{squareBrackets}" multiple="{isMultiple}" class="" sql="select {xValue} as value, description from tagchoice where charindex('%',tagchoiceid)=0 and tagid=:tagid and taglocation=:taglocation and subchoice=0 and isnull(donotpublishtoweb,0)=0 order by sortorder">MakeFormField</Call>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			
+				<If x1="{Verbose}" x2="yes" ><MessageDialog text="Writing captions" /></If>
+				<WriteXMLTag tag="Captions">
+					<Call fieldname="ourref" caption="Reference">MakeCaption</Call>
+					<Call fieldname="position" caption="Position">MakeCaption</Call>
+					<Call fieldname="jobtype" caption="Job Type">MakeCaption</Call>
+					<Call fieldname="department" caption="Department">MakeCaption</Call>
+					<Call fieldname="branch" caption="Branch">MakeCaption</Call>
+					<Call fieldname="startdate" caption="Start Date">MakeCaption</Call>
+					<SQLQuery>
+						<SQLSelect>select tagid,taglocation,description from tag where taglocation like 'V%' and publiconweb=1 order by sortorder</SQLSelect>
+						<ForEachRow>
+							<Call fieldname="VQ_{taglocation}_{tagid}" caption="{description}">MakeCaption</Call>
+							<SetVariable name="VQ_FieldList" value="{VQ_FieldList},getquestanswer('{taglocation}','{tagid}',vacancy.vacancyid) as VQ_{taglocation}_{tagid}" />
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			
+				<If x1="{Verbose}" x2="yes" ><MessageDialog text="Writing Jobs" /></If>
+				<WriteXMLTag tag="Jobs">
+      				<SQLQuery>
+        				<SQLSelect><![CDATA[select 
+							Vacancy.VacancyID, 
+							(if isnull(Vacancy.Temp,0)=1 then 'T' else 'P' endif) as tempperm,
+							(if isnull(Vacancy.Temp,0)=1 then 'Temp' else 'Perm' endif) as jobtype,
+							vacancy.departmentid,department.name as department,
+							vacancy.position,vacancy.startdate,vacancy.refcode as ourref,vacancy.othernotes as description,
+							agencydetails.name as branch,staff.name as contactname,staff.email as contactemail{VQ_FieldList},vacancy.vacancyid as JobId
+							from vacancy key join staff key join agencydetails,vacancy key join department
+							where vacancy.status='C' and trim(isnull(vacancy.position,'')) != '' and trim(isnull(contactemail,'')) != '' and trim(isnull(ourref,'')) != ''
+							and vacancy.startdate is not null and department.searchable=1 and department.publishtoweb=1
+							order by ourref ]]>
+						</SQLSelect>
+						<ForEachRow>
+							<Message text="{Row} vacancies exported" />
+							<WriteXMLTag tag="Job" _id="{vacancyid}">
+								<Call fieldname="ourref" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="position" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="jobtype" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="department" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="branch" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="startdate" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="JobId" >MakeField</Call>
+								<Call fieldname="description">MakeField</Call>
+								<Call fieldname="contactname">MakeField</Call>
+								<Call fieldname="contactemail">MakeField</Call>
+								<Call fieldname="tempperm">MakeField</Call>
+								<Call fieldname="departmentid">MakeField</Call>
+								<FieldQuery>
+									<ForEachRow>
+										<If x1="{FieldName}" x2="VQ_" comparison="%">
+											<Call fieldname="{FieldName}" inExpansion="1">MakeField</Call>
+										</If>
+									</ForEachRow>
+								</FieldQuery>
+								<SQLQuery name="vactagval">
+									<SQLSelect>select tag.tagid,tag.taglocation,tagvalue.tagchoiceid from tagvalue key join tag where tag.taglocation like 'V%' and tagvalue.id=:vacancyid and tag.publiconweb=1 and tag.tagtype in ('M','L')</SQLSelect>
+									<ForEachRow>
+										<WriteXMLTag nocrlf="YES" tag="Q_{taglocation}_{tagid}"><Write cdata="YES">{tagchoiceid}</Write></WriteXMLTag> 
+									</ForEachRow>
+								</SQLQuery>
+							</WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			</WriteXMLTag>
+		</ExportFile>
+	</Block>
+	<Catch>
+		<MessageDialog text="an error occurred in File Export: {exception}" />	
+		<Cancel />
+	</Catch>
+	
+	<!-- check for FTP job -->
+	<If x1="{doUpload}" x2="1">
+		<If x1="{Verbose}" x2="yes" ><MessageDialog text="Run FTP Job: {jobdir}vacancyuploader.xml" /></If>
+		<Block>
+			<RunJob job="{jobdir}vacancyuploader.xml">
+				<Writeln>{exportfolder}</Writeln>
+				<Writeln>{ExportFileName}</Writeln>
+				<Writeln>{Verbose}</Writeln>
+			</RunJob>
+		</Block>
+		<Catch>
+			<MessageDialog text="an error occurred before FTP upload: {exception}" />	
+			<Cancel />
+		</Catch>
+	</If>
+	<Else>
+		<If x1="{ExportFileName}" x2="" comparison="!=" >
+			<SetVariable name="FileSaved" value=" to: {exportfolder}{ExportFileName}" />
+		</If>
+		<MessageDialog text="Export file saved {FileSaved}" />
+	</Else>
+	
+</Job>

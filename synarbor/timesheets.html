@@ -1,0 +1,65 @@
+<!-- 20121031 change fetch to select -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('.divFilterTableDetail').html('');
+	IQXInitSection($("#divTimesheetFilter"));
+	
+	var OffsetInDays=7;
+	var StartDate = new Date();
+	var EndDate = new Date();
+	
+	$('#TimesheetFilterStart').val(CreateDate(StartDate,OffsetInDays));
+	$('#TimesheetFilterEnd').val(CreateDate(EndDate,0));
+	
+	$('#TimesheetFilterStart').datepicker({defaultDate: OffsetInDays*-1,dateFormat:'dd/mm/yy'});
+	$('#TimesheetFilterEnd').datepicker({defaultDate: 0,dateFormat:'dd/mm/yy'});
+	
+	$('#TimesheetFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#TimesheetFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(){
+	var StartDate=$('#TimesheetFilterStart').val();
+	var EndDate=$('#TimesheetFilterEnd').val();
+	if(StartDate && EndDate){
+		IQXChain('#divTimesheetDetail',{action:'load',page:'timesheetsDetail&pFromDate='+StartDate+'&pToDate='+EndDate});
+	}else{
+		$('.errormessage').html('Please ensure both Filter dates are present');
+	}
+}
+
+</script>
+
+<div id="divTimesheetFilter" class="dataTables_wrapper">
+	<div class="LoadPage" style="padding: 10px">
+		Fetch between
+		<input id="TimesheetFilterStart" class="dataTables_dateRange_from" >
+		and
+		<input id="TimesheetFilterEnd" class="dataTables_dateRange_to" >
+		<button class="fixed dataTables_search" onClick="LoadData()" >Search Data</button>
+	</div>
+	<div class="clear" ></div>
+	<div id="divTimesheetDetail" ><span class="EmptyTable">No data has been selected.</span></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+
+

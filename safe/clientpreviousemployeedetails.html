@@ -1,0 +1,53 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliprevtempdetails_[var.x_params.pid]"));
+	
+	$(".questionnaire","#divcliprevtempdetails_[var.x_params.pid]").questionnaire({disabled:true});
+	
+	$("tbody","#divcliprevtempdetails_[var.x_params.pid]").prepend($("tbody","#divhiddendetails_[var.x_params.pid]").html());
+	   
+	$("td.qanswer > input[value='']","#divcliprevtempdetails_[var.x_params.pid]").closest('tr.qquestrow').remove();
+	
+	if ($("table","#divhiddendetails_[var.x_params.pid]").attr('border')=='1'){   // Will be set if candidate has an image
+		$('img','#pimage_[var.x_params.pid]').attr('src','IQXRawData.php?page=S_FileDownload&binary=1&type=PRIMARY_PHOTO&personid=[var.x_params.pid]');
+	} else {   // Hide broken link
+		$("#pimage_[var.x_params.pid]").hide();
+	}
+	
+	$('#divcliprevtempdetails_[var.x_params.pid]').dialog({
+		title:$("table","#divhiddendetails_[var.x_params.pid]").attr('title'),   
+		modal:false,
+		width:630,
+		buttons: {
+			"Close": function(){
+				IQXcloseUIdialog(this);
+			}
+		}
+	});
+	});
+
+</script>
+
+<div id="divcliprevtempdetails_[var.x_params.pid]">
+	
+<p id="pimage_[var.x_params.pid]" align="center">
+	<img src="" alt="" width="300px" />
+</p> 
+
+<div>[candpubquest;block=div]</div> 
+
+</div>
+
+<div id="divhiddendetails_[var.x_params.pid]" class="ui-helper-hidden">
+	<table title="[cand.Name;block=table;noerr]" border="[cand.hasPhoto;noerr]">
+		<tbody>
+			<tr class="qquestrow">
+	   			<td class="qquestion ui-widget-header">Date of Birth</td>
+	   			<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.DOB;noerr]" /></td>
+			</tr>	
+	   </tbody>
+	</table>
+</div>
+

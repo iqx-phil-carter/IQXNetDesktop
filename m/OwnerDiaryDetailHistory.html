@@ -1,0 +1,48 @@
+﻿<!--[onload;tplvars;DiaryListHistory='MobileNetOwnerContactEventHistory?pLineID']-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnOwnerDDDiaryHelp').attr('href', window.HelpRoot + 'hat_1');
+        $('#btnOwnerDDDiaryHistory').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=P' + $('#ProgressID').val() + '&pEventType=P');
+    });
+
+    </script>
+
+<nav role="navigation" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnOwnerDDDiaryHistory" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Diary</a></span>
+</nav>
+<span>Diary History</span>
+<nav role="navigation" style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnOwnerDDHistoryHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<br />
+
+<table class="tablesorter">
+
+    <tr id="HistoryGroup_[DiaryListHistory.ProgressHistoryID;block=tr]">
+        <td>
+            <div style="overflow:auto;background-color:aliceblue">
+                <input id="ProgressID" type="hidden" value="[DiaryListHistory.ProgressID]" />
+                <div style="float:left">Event Time</div>
+                <div style="float:right">[DiaryListHistory.HistoryDate] [DiaryListHistory.HistoryTime]</div>
+            </div>  
+            <div style="overflow:auto">
+                <div style="float:left">Status</div>
+                <div style="float:right">[DiaryListHistory.Status]</div>
+            </div>
+            <div style="overflow:auto;background-color:aliceblue">
+                <div style="float:left">Staff Name</div>
+                <div style="float:right">[DiaryListHistory.StaffName]</div>
+            </div>
+            <div style="overflow:auto">
+                <div style="float:left">Interview Time</div>
+                <div style="float:right">[DiaryListHistory.InterviewDate] [DiaryListHistory.InterviewTime]</div>
+            </div>
+            <div style="overflow:auto;background-color:aliceblue">
+                <div style="float:left">Note</div>
+                <div style="float:right">[DiaryListHistory.Note]</div>
+            </div>
+        </td>
+    </tr>
+
+</table>

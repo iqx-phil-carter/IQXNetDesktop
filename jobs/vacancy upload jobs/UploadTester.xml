@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Job>
+	<ExportFile directory="{tempdir}" filename="test.xml">
+    	<WriteLn text="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>"/>
+    	<WriteXMLTag tag="JobSearch" />
+	</ExportFile>
+	<RunJob job="{jobdir}vacancyuploader.xml">
+		<Writeln>{tempdir}test.xml</Writeln>
+	</RunJob>
+</Job>

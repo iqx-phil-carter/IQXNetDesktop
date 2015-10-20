@@ -1,0 +1,128 @@
+<!--[onload;tplvars;ebt='NetCandidateExpenseBenefitTimesheets';]-->
+
+<script>
+
+    var ResultString;
+
+$(document).ready(function(){
+    IQXInitSection($("#divEBtimesheets"));
+	});
+
+function CreateCombo(ExpenseTypeID, ComboGroup) {
+    // referred to on CandidateExpensesDetail
+
+    var PreviousValue;
+    if (ResultString == null) {
+        $.get('IQXRawData.php?page=NetCandidateExpenseBenefitListOuter?pExpenseBenefitTypeID=' + ExpenseTypeID, function (data, textStatus) {
+            ResultString = data;		// below: lose xml headers and add option tags
+            var StartPoint = ResultString.indexOf('![CDATA[');
+            var Endpoint = ResultString.indexOf(']]><');
+            ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+            ResultString = "<option value='0'>None</option>" + ResultString + "</option>";
+            $('[id*= "comboExpenseVal_"]').each(function () {
+                $(this).html(ResultString);
+                PreviousValue = $('#PreviousExpenseValue_' + $(this).attr('id').substring(16)).val();
+                $(this).val(PreviousValue);
+            });
+        });
+    };
+    $('[id*= "comboExpenseVal_"]').each(function () {
+        $(this).html(ResultString);
+        PreviousValue = $('#PreviousExpenseValue_' + $(this).attr('id').substring(16)).val();
+        $(this).val(PreviousValue);
+    });
+}
+
+function CompleteEBTimesheet(btn){
+	
+	var TimesheetID=$(btn).attr('id').substring(4);
+	var SubmitString='';
+	$('[id*= "ExpenseTypeSelector_"]').each(function(){
+		var TempShiftID=$(this).attr('id').substring(20);
+		var comboValue=$('#comboExpenseVal_'+TempShiftID).val();
+		var ExpenseType=$('#ExpenseTypeID_'+TempShiftID).val();
+		SubmitString=SubmitString+TempShiftID+'~'+ExpenseType+'~'+comboValue+':';
+	});
+	$.post('IQXPost.php?proc=NetCandidateExpenseBenefitTimesheetsSave','pExpenseDetails='+SubmitString,function(data, textStatus){
+		if (textStatus == 'success') {
+			var retval=data;
+			if(retval!='Ok'){
+				$('#divExpenseMessage').html(retval);
+				alert('Error: '+retval);
+			} else {
+			    $('.dataTableExpand').attr('title', 'Show Details');
+			    $('.dataTableExpand').attr('src','css/images/details_open.png');
+			    $(btn).parent().parent().parent().remove();
+			}
+		} else {
+		    $('#divExpenseMessage').html(data);
+		   
+		}
+	},'text');
+}
+
+function zoomdetail(img,tsid){
+
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#divEBtimesheets").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		$(row).next('tr').remove();
+		return;
+	}
+	
+	$('.dataTableExpand').each(function(){
+		$(this).attr('src','css/images/details_open.png');
+		$(this).attr('title','Show Details');
+	});	
+	$('.divExpenselines').each(function(){
+		$(this).parent().parent().remove();
+	});
+	
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	
+	$(row).rowafter({dataTable:dt,alldivsclass:"zoomeddiv",divs:[
+		{divclass:"divExpenselines"},
+		{divclass:"divButtons"},
+		{divclass: "divExpenseMessage"}]});
+
+	var newrow=$(row).next('tr');	
+	$("div.divButtons",newrow).html('<button type="button" id="btn_'+tsid+'" class="fixed nonformbutton" onclick="CompleteEBTimesheet(this)">Complete</button>');	
+	IQXInitSection(newrow);
+
+	IQXChain('.divExpenselines',{action:'load',page:'CandidateExpensesDetail&pEBTimesheetID='+tsid});
+}
+
+</script>
+
+<div id="divEBTimesheets" >
+	<table class="tablesorter" id="tblEBTimesheets">
+		<thead>
+			<tr>
+				<th>Company</th>
+				<th>Position</th>
+				<th>Ref</th>
+				<th>WeekNo</th>
+				<th>Completed</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id="tblEBTimesheetsbody">
+			<tr id="[ebt.TimesheetID;block=tr]" >
+				<td>[ebt.CompanyName;noerr;]</td>
+				<td>[ebt.Placement;noerr;]</td>
+				<td>[ebt.SerialNumber;noerr;]</td>
+				<td>[ebt.Period;noerr;]</td>
+				<td>[ebt.IsCompleted;noerr;]</td>
+				<td class="center">
+					<img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="zoomdetail(this,'[ebt.TimesheetID]')" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+

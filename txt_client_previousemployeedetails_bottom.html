@@ -1,0 +1,8 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	var d=new Date();
+		var s=d.toLocaleDateString()+' '+d.toLocaleTimeString()+' ';
+		$('#timeofday').text(s);
+});
+</script>
+<p style="font-size: 12pt">Data is correct as of <span id="timeofday" ></span></p>

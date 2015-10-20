@@ -1,0 +1,157 @@
+#divheading {
+height: 105px;
+margin-bottom: 10px;
+background-color: white;
+text-align:center;
+color: #66409A;
+font-family: Arial, Nimbus Sans L, sans-serif;
+background-image: url(images/sitelogo.png);
+background-repeat: no-repeat;
+background-position:left;
+}  
+ 
+#divheading h1 {
+color:#66409A;
+margin-bottom:2px;
+}
+
+#divheading h2 {
+font-size:14px;
+margin-top:8px;
+margin-bottom:2px;
+}
+
+#divheading h3 {
+margin-top:10px;
+font-weight:normal;
+}
+
+div.ToolTipPopup {
+	position:absolute;
+	top:100;
+	left:100;
+	z-index:1;
+	background-color: #FFFFE0;	
+}
+
+div.FurgsInformationPanel{ 				/* background for furgs note div. */
+	float:right;
+	padding: 3px;
+}
+
+.ui-tabs .tabFurgsComplete.Highlight { 	/* highlight colour for furgs tab title */
+	color: #EC008C;	
+}
+
+.ui-tabs .tabFurgsComplete { 			/* grey for tab title when no furgs present */
+	color: #999999;	
+}
+
+.dashboardIcon
+{
+	text-align:right;
+	position:absolute;
+	top:3px;
+	right:5px;
+	z-index:99;
+}
+.modalPopupContainer
+{
+	color: #674099;
+	font-family: Tahoma;
+	font-size:small;
+	font-variant: normal;	
+}
+
+.modalPopupContainer DIV.modalBackground {
+	position: fixed;
+	z-index: 99;
+	top: 0px;
+	left: 0px;
+	background-color:Gray;
+	width: 100%;
+	height: 100%;
+	filter:alpha(opacity=70);
+	opacity:0.7;
+}
+.modalPopupContainer TABLE.modalPopup
+{
+	background-color:Transparent;
+	position: fixed;
+	z-index: 99;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	height:100%;
+	text-align:center;
+	vertical-align:middle;
+}
+.modalPopupContainer TABLE.modalPopup TD
+{
+	text-align:center;
+	vertical-align:middle;
+	background: Transparent url(dashboardLg.png) no-repeat center center;
+}
+.modalPopupContainer DIV.dashboardLinks
+{
+	text-align:left;
+	vertical-align:top;
+	background-color:White;
+	width:250px;
+	height:255px;
+	border: groove 1px gray;
+	margin:0 auto;
+	padding-top:0px;
+	padding:5px;
+	position:relative;
+	overflow:auto;
+}
+.modalPopupContainer DIV.dashboardLinks h2
+{
+	margin:0;
+	margin-bottom:10px;
+	color: #674099;
+	font-variant: normal;	
+	font-family: Tahoma;
+	font-size:small;
+	text-align:center;
+	font-weight:bold;
+}
+.modalPopupContainer DIV.dashboardFixedClose
+{
+	position:absolute; 
+	bottom:3px; 
+	right:5px;
+}
+.modalPopupContainer DIV.dashboardRelativeClose
+{
+	position:static; 
+	top:0; 
+	right:0;
+	padding-top:8px;
+	text-align:right;
+}
+.modalPopupContainer DIV.dashboardFixedClose a, .modalPopupContainer DIV.dashboardFixedClose a:visited, .modalPopupContainer DIV.dashboardFixedClose a:hover, .modalPopupContainer DIV.dashboardRelativeClose a, .modalPopupContainer DIV.dashboardRelativeClose a:visited, .modalPopupContainer DIV.dashboardRelativeClose a:hover
+{
+	font-family: Tahoma;
+	font-size:small;
+	color:#674099;
+	text-decoration:underline;
+	cursor:pointer;
+	cursor:hand;
+}
+.modalPopupContainer DIV a, .modalPopupContainer DIV a:visited, .modalPopupContainer DIV a:hover
+{
+	font-family: Tahoma;
+	font-size:small;
+	color:#674099;
+	text-decoration:none;
+	cursor:pointer;
+	cursor:hand;
+}
+
+IMG
+{
+	border:0;
+}

@@ -1,0 +1,150 @@
+<!--[onload;tplvars;tss='NetProvTimesheetShifts?ptempprovtimesheetid';ViewOnly='']-->
+
+<script>
+    
+$(document).ready(function() {
+   	$('#spanHeadline').html('Timesheet number '+$('#tsSerial').html()); 
+   	$('#btnQuery').attr('onclick',"LoadPage('message&CorH=C&TSID="+$('#tsid').html()+"&TSNo="+$('#tsSerial').html()+"&ReturnPage=CandProvTimesheets')");
+   	if('[var.x_params.ViewOnly]'=='1'){
+   		$('#btnCalculate').hide();
+   		$('#btnView').show();
+   	}else{
+   		$('#btnCalculate').show();
+   		$('#btnView').hide();
+   	}
+});
+
+
+function EditPage(NewPage){
+
+	if($('#Completed').html()=='1'){return;}
+	var ShiftID=$(NewPage).attr('id').substr(6);
+	var PageLink='provTimesheetShiftEdit&pTempShiftID=' + encodeURIComponent(ShiftID);		
+	NewPage(PageLink);
+}
+	
+function processshifts(){
+	var shiftlist = '';
+	var TSID=$('#tsid').html();
+	$("[id*=checkbox]").each(function(){
+		if($(this).html()=='worked'){
+			shiftlist=shiftlist+','+$(this.parentNode.parentNode).attr('id').substr(6);
+		}
+	});
+	
+	shiftlist=shiftlist.substr(1);
+	$('#pShiftList').val(shiftlist);
+	$('#pTempProvTimesheetID').val(TSID);
+	var SubmitString='IQXPost.php?proc=NetProvTimesheetShiftsSelect';
+	$('#frmProvTimesheetShift').attr('action',SubmitString);
+	$('#frmProvTimesheetShift').ajaxSubmit({
+			success: function (data, textStatus){
+				if (textStatus=='success') {
+					if(data=='Ok'){	
+						LaunchService();
+					}else{
+						$('.localerrormessage').html('Error AA: '+data);	
+					}
+				} else {
+					$('.localerrormessage').html('Error AB: '+data);
+				}
+			},
+			error: function(data,textStatus){
+				$('.localerrormessage').html('Error AC: '+data);
+			},
+			dataType: "html"
+		});
+}
+
+function LaunchService(){
+	
+	var SubmitString='IQXPost.php?service=ProvTSProcessRateScript';
+	$('#tsidTransmit').val($('#tsid').html());
+	
+	$('#frmSubmitToService').attr('action',SubmitString);
+	$('#frmSubmitToService').ajaxSubmit({
+			success: function (data, textStatus){
+				if (textStatus=='success') {
+					if(data=='Ok'){	
+						LoadRates('0');
+					}else{
+						$('.localerrormessage').html('Error BA: '+data);	
+					}
+				} else {
+					$('.localerrormessage').html('Error BB: '+data);
+				}
+			},
+			error: function(data,textStatus){
+				$('.localerrormessage').html('Error BC: '+data);
+			},
+			dataType: "html"
+		});
+}
+
+function LoadRates(ViewOnly){
+
+	if(ViewOnly=='1'){$('#tsidTransmit').val($('#tsid').html());}
+	var tsid=$('#tsidTransmit').val();
+	var NewPage='provtimesheetrates&ptempprovtimesheetid=' + encodeURIComponent(tsid)+'&ViewOnly='+ViewOnly;
+	LoadPage(NewPage);
+}
+
+function ChangeWorked(CB){
+	if($('#Completed').html()=='1'){return;}
+	if($(CB).html()=='worked'){
+		$(CB).html('Not worked');
+		$(CB).attr('value','0');
+	}else{
+		$(CB).html('worked');
+		$(CB).attr('value','1');
+	}	
+}
+
+function LoadPage(NewPage){
+	jQuery.mobile.changePage('iqxnet.php?P='+NewPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+
+</script>
+<span id="spanHeadline"></span>
+<div id="ShowTSDetail">
+	<div>
+		<table class="tablesorter" id="tblshifts" >
+			<thead>
+				<tr>
+					<th>Times</th>
+					<th>Worked</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody id="tblshiftsbody">
+				<tr id="Shift_[tss.tempshiftid;block=tr]" >
+					<td id="trs[tss.#]_pshiftdate" class="tdeditable required longdate" tabindex="1" onclick="EditPage(this.parentNode)">[tss.ShiftSerialNumber]&nbsp;[tss.shiftdate],<br/>[tss.timefrom]&nbsp;-&nbsp;[tss.timeto],<br/>[tss.breakminutes;noerr]&nbsp;minutes</td>
+	    			<td id="trs[tss.#]_pworked" ><a id="checkbox[tss.#]" type="checkbox" value="[tss.tick;noerr]"  onclick="ChangeWorked(this)">worked</a></td>
+	    			<td id="trs[tss.#]_description" >
+	    				[tss.description;noerr]
+	    				<span id="tsid" hidden="true">[tss.tempprovtimesheetid;noerr]</span>
+	    				<span id="tsSerial" hidden="true">[tss.TSSerialNumber;noerr]</span>
+	    				<span id="Completed" hidden="true">[tss.Completed;noerr]</span>
+	    			</td>
+				</tr>
+			</tbody>
+		</table>
+	<div id="divtimesheetrates" >
+		<a id="btnCalculate" data-role="button" onclick="processshifts()">Calculate</a>
+	</div>
+    <a id="btnView" class="btnMenu" data-role="button" onclick="LoadRates('1')">View Rates</a>
+    <a id="btnQuery" class="btnMenu" data-role="button">Query</a>
+    <a data-role="button" class="btnMenu" onclick="LoadPage('CandProvTimesheets')">Back to timesheets</a>
+</div>
+
+<form id="frmProvTimesheetShift" method="post" data-ajax="false" >
+	<input type="hidden" id="pTempProvTimesheetID" name="pTempProvTimesheetID" />
+	<input type="hidden" id="pShiftList" name="pShiftList" />
+</form>
+<form id="frmSubmitToService" method="post" data-ajax="false" >
+	<input type="hidden" id="tsidTransmit" name="id" />
+</form>

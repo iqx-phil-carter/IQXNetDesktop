@@ -1,0 +1,27 @@
+<!--[onload;tplvars;tst='NetTimesheetTimes?ptemptimesheetid']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("div.divFtimesheetshifts"));
+	});
+	
+</script>
+
+<table class="tablesorter">
+	<thead>
+		<tr>
+		<th>Date</th>
+		<th class="rightalign">Hours</th>
+		<th>Start Time</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[tst.placementid;block=tr]_[tst.shiftdate]" >
+		<td class="longdate">[tst.shiftdate]</td>
+		<td class="number twodp rightalign">[tst.hours;noerr]</td>
+		<td class="time">[tst.timefrom;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<span class="errormessage">[var.x_errormessage]</span>

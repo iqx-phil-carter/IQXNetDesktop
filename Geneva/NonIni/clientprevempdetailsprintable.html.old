@@ -1,0 +1,65 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid';deptpubquest='F_questions_table?pTaglocation=AAA&pid']-->
+
+<!-- 20120625 remove photo and date of birth -->
+<!-- 20120626 change pDeptID in top line to match department code -->
+<!-- 20120627 move bottom questionnaire section to top, and vice versa -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divCliPrevEmpDetsPrintable"));
+	
+	$(".questionnaire","#divCliPrevEmpDetsPrintable").questionnaire({disabled:true});
+	
+	$("tbody","#divCliPrevEmpDetsPrintable").prepend($("tbody","#divCliPrevEmpDetsHidden").html());
+	$("#tempname","#divCliPrevEmpDetsPrintable").text($("table","#divCliPrevEmpDetsHidden").attr('title'));
+	
+	$("tbody td.qanswer","#divCliPrevEmpDetsPrintable").each(function(){
+		var s=$('input.qsingleentry',this).val() || $('input.qmultisummary',this).val();
+		if (s){
+			$(this).text(s);
+		} else {
+			$(this).closest('tr.qquestrow').remove();
+		}
+	
+	});
+	 
+	IQXChain('#DocDetails', {
+		action: 'load',
+		page: 'ClientCandidateDocuments&pPersonID=' + encodeURIComponent('[var.x_params.pid]')
+	});
+	  	
+	
+	var d=new Date();
+	var s=d.toLocaleDateString()+' '+d.toLocaleTimeString()+' ';
+	$('#timeofday').text(s);
+	
+	$('a').attr('href','');
+	$('a').attr('target','');
+	});
+	
+</script>
+
+<div id="divCliPrevEmpDetsPrintable" class="printablePage">
+
+	
+<div class="usertext">[onload;file=txt_cliprevempdets_printable_top.html;noerr]</div>
+
+<div class="printableSection">
+
+<h4 id="tempname">Temp Details for [cand.Name;block=div;noerr]</h4>
+
+<br/>
+
+<div id="DeptQuest">[deptpubquest;block=div]</div>
+
+<div>[candpubquest;block=div]</div> 
+
+<div id="DocDetails"></div>
+
+<p id="timeofday" align="right"></p>
+
+</div>
+
+<div class="usertext">[onload;file=txt_cliprevempdets_printable_bottom.html;noerr]</div>
+
+</div>

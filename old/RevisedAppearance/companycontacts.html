@@ -1,0 +1,89 @@
+<!--[onload;tplvars;cx='NetContactList']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("#divcontacts"));
+	});
+	
+function EditContact(row) {
+	var employmentid=$(row).attr("id");
+	IQXEnableForm("#frmcontacts",{
+		row:row,
+		idfieldname: "pemploymentid",
+		idvalue: employmentid
+	});
+}	
+
+function UnEditContact(){
+	IQXDisableForm();
+}
+
+function ContactRights(row) {
+	var empid=row.id;
+	$('button.tablebutton').hide();
+	$(row).after('<tr id="rowcontrights"><td colspan=10><div id="divcontrights" class="zoomeddiv"></div></td></tr>');
+	$('#divcontrights').data("empid",empid);
+	IQXChain('#divcontrights',{action:'load',page:'companycontactrights&pEmploymentID='+encodeURIComponent(empid)});
+}
+
+function UndoContactRights() {
+	$('#divcontrights').removeData("empid");
+	$('#rowcontrights').remove();
+	$("button.nonformbutton").show();
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_[var.x_userclass]_contacts_top.html;noerr]</div>
+
+<div class="ButtonGroup" align="right" >
+	<button type="button" id="contact_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+</div>
+<span id="contacterror" class="errormessage">[var.x_errormessage]</span>
+
+<div id="divcontacts">
+<form id="frmcontacts" action="IQXPost.php?proc=NetContactSet" method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tblcontacts">
+	<thead>
+		<tr>
+		<th>Name</th>
+		<th>Company</th>
+		<th>Department</th>
+		<th>Job Title</th>
+		<th>Direct Line</th>
+		<th>Mobile</th>
+		<th>Email</th>
+		<th>Direct Fax</th>
+		<th>Login ID</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[cx.EmploymentID;block=tr]">
+	    <td>[cx.PersonName;noerr]</td>
+	    <td>[cx.CompanyName;noerr]</td>
+	    <td id="cx[cx.#]_pdepartment" class="tdeditable">[cx.Department;noerr]</td>
+	    <td id="cx[cx.#]_pposition" class="tdeditable">[cx.Position;noerr]</td>
+	    <td id="cx[cx.#]_pdirectphone" class="tdeditable">[cx.DirectPhone;noerr]</td>
+	    <td id="cx[cx.#]_pmobile" class="tdeditable">[cx.Mobile;noerr]</td>
+	    <td id="cx[cx.#]_pemail" class="tdeditable required email">[cx.Email;noerr]</td>
+		<td id="cx[cx.#]_pdirectfax" class="tdeditable">[cx.DirectFax;noerr]</td>
+		<td>[cx.LoginID;noerr]</td>
+		<td>
+	    	<button type="button" class="tablebutton nonformbutton" onclick="EditContact(this.parentNode.parentNode)">Edit</button>
+	    	<button type="button" class="tablebutton nonformbutton" onclick="ContactRights(this.parentNode.parentNode)">Rights</button>
+			<button type="submit" class="tablebutton formbutton">Save</button>
+			<button type="button" class="tablebutton formbutton" onclick="UnEditContact()">Undo</button>
+		</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+        
+</div>
+<div id="divaddcontact">
+	
+</div>
+<div class="usertext">[onload;file=txt_[var.x_userclass]_contacts_bottom.html;noerr]</div>
+

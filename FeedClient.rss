@@ -1,0 +1,119 @@
+<rss version="2.0">
+<channel>
+<title>
+IQXNet Client News
+</title>
+<description>
+News and events for IQXNet Clients
+</description>
+<link>
+www.iqx.co.uk
+</link>
+<pubdate>
+10/04/2014
+</pubdate>
+<lastBuildDate>
+10/04/2014
+</lastBuildDate>
+<item>
+<title>
+Its Thursday
+</title>
+<description>
+and its cloudy
+</description>
+<link>
+see here
+</link>
+<pubdate>
+24/04/2014
+</pubdate>
+<author>
+Phil
+</author>
+<guid>
+Its Thursday
+</guid>
+</item>
+<item>
+<title>
+abc
+</title>
+<description>
+def
+</description>
+<link>
+ghi
+</link>
+<pubdate>
+23/04/2014
+</pubdate>
+<author>
+Phil
+</author>
+<guid>
+abc
+</guid>
+</item>
+<item>
+<title>
+Entry from Form
+</title>
+<description>
+It is now possible to enter feed details from a job
+</description>
+<link>
+vcxzvcxz
+</link>
+<pubdate>
+11/04/2014
+</pubdate>
+<author>
+Phil
+</author>
+<guid>
+Entry from Form
+</guid>
+</item>
+<item>
+<title>
+IQXNet RSS Channel
+</title>
+<description>
+The IQXNet RSS channel is now available
+</description>
+<link>
+
+</link>
+<pubdate>
+10/04/2014
+</pubdate>
+<author>
+Peter Jones
+</author>
+<guid>
+IQXNet RSS Channel
+</guid>
+</item>
+<item>
+<title>
+IQXNet Alerts tab
+</title>
+<description>
+Use the Alerts tab to keep up to date with news
+</description>
+<link>
+
+</link>
+<pubdate>
+09/04/2014
+</pubdate>
+<author>
+Peter Jones
+</author>
+<guid>
+IQXNet Alerts tab
+</guid>
+</item>
+</channel>
+</rss>

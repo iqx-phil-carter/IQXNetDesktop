@@ -1,0 +1,32 @@
+<!--[onload;tplvars;emps='NetClientPreviousEmployees']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#tblcliempfill"));
+	});
+
+</script>
+
+<table class="tablesorter" id="tblcliempfill">
+	<thead>
+		<tr>
+			<th>Candidate</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[emps.Name;block=tr;noerr]</td>
+		<td>
+			<button type="button" class="tablebutton nonformbutton" onclick="dofill('[emps.PersonID]','#cliempfillmessagetarget')">Request</button>
+		</td>	
+		</tr>
+		
+	</tbody>
+</table>
+<p id="cliempfillmessagetarget" ></p>
+<p>
+	<button type="button" id="cliemp_nofill" class="fixed nonformbutton" onclick="undofill()">
+   	Abandon Fill
+	</button>
+</p>

@@ -1,0 +1,127 @@
+<!--[onload;tplvars;ts='NetCandProvTimesheets']-->
+
+<!-- 20130912 add PlacementID and VacancyID -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divtimesheets"));
+	if (!('[var.x_rights.FILLTIMESHEETS;noerr]') == '1') {
+		$("#tbltimesheets tr button.zoombutton").remove();
+	}
+	else {
+		$("#tbltimesheets tr.completed button.zoombutton").text("View Details");
+	}
+	IQXDeepLink("P");
+	});
+	
+function loadshifts(){
+	var ts=$("#divtimesheets").data("zoomedts");
+	if (ts.type=='C'){
+		$("#divtimesheetshifts").text('');
+		loadrates();
+	} else {
+		var shiftpage;
+		if (ts.type == 'S') {
+			shiftpage = 'provtimesheetshifts';
+		}
+		else {
+			shiftpage = 'provtimesheettimes';
+		} 
+		var nxt;
+		if (ts.completed){           // Load the rates as well
+			nxt={action:'func',func:loadrates};
+		}
+		IQXChain('#divtimesheetshifts',{action:'load',page:shiftpage + '&ptempprovtimesheetid=' + encodeURIComponent(ts.id),nextlink:nxt});
+	}
+}
+
+function loadrates(){
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	IQXChain('#divtimesheetrates',{action:'load',page:'provtimesheetrates&ptempprovtimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function hiderates(){
+	$("#divtimesheetrates").text('');
+}
+
+function openmessage(row){
+	var dat=$("#divtimesheets").data("zoomedts");
+	var stit='pTitle=' + encodeURIComponent('Query Timesheet '+dat.serialnumber);
+	var sid='pTempProvTimesheetID=' + encodeURIComponent(dat.id);
+	var plid='pPlacementID=' + encodeURIComponent(dat.placementid);
+	IQXChain('#divmessage',{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid});
+} 
+
+function zoomtimesheet(row,tstype,tsid,completed,serialnumber,placementid){
+	$(".zoombutton").hide();
+	$("#divtimesheets").data("zoomedts",{
+		type: tstype,
+		id: tsid,
+		completed: completed,
+		serialnumber: serialnumber,
+		placementid: placementid
+	});
+	if(completed){
+		var abandontext='Close';
+	} else {
+		var abandontext='Abandon';
+	}
+	$(row).after('<tr><td colspan=6><div id="divtimesheetshifts" class="zoomeddiv"></div>'+
+	              '<div id="divtimesheetrates" class="zoomeddiv"></div>'+
+				  '<div id="divtimesheetbuttons" class="zoomeddiv">'+
+				    '<button type="button" class="fixed nonformbutton" onclick="abandontimesheet(this.parentNode.parentNode.parentNode)">'+abandontext+'</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="openmessage(this.parentNode.parentNode.parentNode)">Query</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="IQXopenInNewWindow(\'IQXNetEx.php?page=TimesheetProvSingle&wrapper=bare&tsnumber='+encodeURIComponent(serialnumber)+'&ptempprovtimesheetid=' + encodeURIComponent(tsid)+'\')">Printable Version</button>'	+
+				  '</div>'+
+				  '<div id="divmessage" class="zoomeddiv"></div>'+
+				  '</td></tr>');
+	IQXInitSection($("#divtimesheetbuttons"));
+	loadshifts();
+}
+
+function abandontimesheet(row){
+	$(row).remove();
+	$(".zoombutton").show();
+	$("#divtimesheets").removeData("zoomedts");
+}
+
+	
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_provtimesheets_top.html;noerr]</div>
+
+<div class="ButtonGroup" align="right" >[onload_BG1;block=div;when [var.x_local.Candidate.ButtonGroupTop;noerr]='1']
+	<button type="button" id="provtimesheet_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+</div>
+<div id="divtimesheets">[onload_TimesheetGroup;block=div;when [var.x_local.Switches.HideTimesheets;noerr]='']
+	<table class="tablesorter" id="tbltimesheets">
+		<thead>
+			<tr>
+			<th>Number</th>
+			<th>Temp</th>
+			<th>Client</th>
+			<th>Position</th>
+			<th>End Date</th>
+			<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="[ts.tempprovtimesheetid;block=tr]" class="[ts.completed;if [val]=1;then 'completed';else '']">
+			<td>[ts.serialnumber;noerr]</td>
+			<td>[ts.tempname]</td>
+			<td>[ts.companyname]</td>
+	    	<td>[ts.position;noerr]</td>
+	    	<td>[ts.weekenddate;noerr]</td>
+	    	<td width=100><button type="button" class="tablebutton zoombutton" onclick="zoomtimesheet(this.parentNode.parentNode,'[ts.timesheettype]','[ts.tempprovtimesheetid]',[ts.completed],'[ts.serialnumber;noerr]','[ts.placementid;noerr]')">Complete</button></td>
+			</tr>
+		</tbody>
+	</table>  
+</div>
+<p>
+   	<span class="errormessage">[var.x_errormessage]</span>
+</p>
+<div class="ButtonGroup" align="right" >[onload_BG2;block=div;when [var.x_local.Candidate.ButtonGroupBottom;noerr]='1']
+	<button type="button" id="provtimesheet_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+</div> 
+<div class="usertext">[onload;file=txt_candidate_provtimesheets_bottom.html;noerr]</div>
+

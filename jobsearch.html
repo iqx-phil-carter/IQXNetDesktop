@@ -1,0 +1,178 @@
+		<script type="text/javascript">
+		$(document).ready(function(){
+			IQXInitSection($("#divParamsForm,#divReport"));
+			$.get('IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_html__JobSearchParams.xsl',function(data){
+				$('#divParamsFields').html(data);
+				IQXInitSection($("#divParamsFields"));
+				enableParamsForm(true);
+			});
+		});
+		
+		function prepareReportJSON(data){
+			data.bAutoWidth=false;
+			data.sDom= 'lfrtip';  
+			var lastCol=data.aoColumns.length - 1;
+			if (lastCol >= 0) {
+				var col=data.aoColumns[lastCol];
+				$.each(data.aaData, function(rowi, row){
+					var tx = row[lastCol];
+					row[lastCol] = '<img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="tblExpansion(this,' + '\'' + tx + '\')" />';
+				});
+				col.bSortable = false;
+				col.bSearchable = false;
+				col.sClass = 'center dataTableExpand';
+			}
+		}
+		
+
+		function enableParamsForm(bOn){
+			if (bOn) {
+				$('#divReport').hide();
+				$('#divReport').empty();
+				$('#divReportButtons').hide();
+				$('#divParamsForm').show();
+				IQXEnableForm('#frmJobSearchParams',{successhandler:resultJSONloaded,loadmessagetarget:'#divLoadMessage',responsetype:'json'});
+				$IQXFormContext.blocktabswitch=false;
+				}
+			else {
+				IQXDisableForm();
+				$('#divParamsForm').hide();
+				$('#divReport').html('<table id="tblReport" class="display" cellspacing="0" cellpadding="0" border="0" > </table>');
+				$('#divReport').show();
+				$('#divReportButtons').show();
+			}
+		}
+		
+		function resultJSONloaded(data, textStatus) {
+			if (textStatus=='success'){
+				if (data.aoColumns == undefined) {
+					$('#labError').text('No jobs match your search criteria');
+					enableParamsForm(true);
+				}
+				else {
+					$('#labError').text('');
+					prepareReportJSON(data);
+					enableParamsForm(false); 
+					var dt = $("#tblReport").dataTable(data);
+					$("#tblReport").data('iqDataTable', dt);
+				}
+			}
+			$('#divLoadMessage').text('');
+		}
+		
+		function tblExpansion(img,svacid){
+			var dtbl=$("#tblReport").data('iqDataTable');
+			if (dtbl) {
+				var bOpen=img.src.match(/details_open/);
+				var row=$(img).closest('tr').get(0);
+				dtbl.fnClose(row);  // In case it's already open with different details. however this is a datatable function - it doesnt close an open segment.
+
+				$('img.dataTableExpand',row).each(function() {
+					
+				});
+				
+				row=$(img).closest('tr').get(0);
+				$('img.dataTableExpand',row).each(function() {
+					this.title = this.title.replace(/^Hide/, 'Show');
+					this.src = 'css/images/details_open.png';
+					$('#labError').html('');
+				});
+				if (bOpen) {
+					$.get('IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_html__[var.x_local.Switches.Template;noerr].xsl&xpath_@id='+svacid, 
+						function(data,textStatus){
+							if (textStatus=='success'){
+								img.title = img.title.replace(/^Show/, 'Hide');
+								img.src = 'css/images/details_close.png';
+								dtbl.fnOpen(row, data, '');
+								Check(svacid);
+								}	
+						});					
+					}
+				}
+			}
+	
+			
+		function apply(JobId)
+		{
+			if ($('#Applied'+JobId).text() == "Apply for this job") {
+				$('#JobID').val(JobId);
+				$('#ApplicationForm').attr('action','IQXPost.php?proc=NetIncomingApplications');
+				$('#ApplicationForm').ajaxSubmit({
+					success: function(data, textStatus){
+						if (data != 'Ok') {
+							$('#labError').html('<label>' + data + '</label>');
+						}
+						else {
+							$('#Applied'+JobId).html('You have successfully applied for this job');
+							$('#Applied'+JobId).addClass('ui-state-disabled');
+						}
+					},
+					dataType: "text"
+				});
+			}
+			var PathWay=window.location.href;
+			if(JobId=="Register"){
+				window.location.href=PathWay+"?P=newcandidateregister";
+			}
+			
+			if (JobId=="Login") {
+				window.location.href=PathWay+"?P=login";
+			}
+			
+		}
+		
+		function Check(JobId)
+		{
+			$('#JobID').val(JobId);
+			$('#ApplicationForm').attr('action','IQXPost.php?proc=NetAlreadyApplied');
+			$('#ApplicationForm').ajaxSubmit(
+			{
+				success: function(data, textStatus){
+				switch(data){
+					case 'Apply':
+						$('#Applied' + JobId).text('Apply for this job');
+						$('#Applied'+JobId).addClass('ui-state-default');
+						$('#LoginStrip' + JobId).hide();
+						break;
+					case 'Already Applied':
+						$('#Applied' + JobId).text('You have applied for this job');
+						$('#Applied' + JobId).addClass('ui-state-disabled');
+						$('#LoginStrip' + JobId).hide();
+						break;
+					default:
+						$('#Applied' + JobId).hide()
+						$('#LoginStrip' + JobId).show();
+						$('#Applied'+JobId).addClass('ui-state-default');
+						break;
+					}
+				},
+				dataType: "text"
+			});
+		}
+		
+	</script>
+
+	<div id="divParamsForm">
+		<form id="frmJobSearchParams" class="centreform" action="IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_plain__JobSearchData.xsl" method="get" accept-charset="utf-8">
+			<fieldset>
+				<div id="divParamsFields"> </div>
+				<p><button type="submit" id="paramformfield_submit" class="fixed formbutton" >Search</button></p>
+			</fieldset>
+		</form>			
+	</div>
+	
+	<div id="divLoadMessage"></div>
+
+	<div id="divReport" class="reportBody"></div>
+	
+	<div class="cleardiv" ></div>
+	
+	<div id="divReportButtons">
+		<button type="button" id="report_research" class="fixed" onclick="enableParamsForm(true)">Search Again</button>
+	</div>
+	<span class="errormessage" id="labError"></span>
+	<form id="ApplicationForm" action="IQXPost.php?proc=NetIncomingApplications" method="post">
+		<input type="hidden" id="pResult" />
+		<input type="hidden" id="JobID" name="JobID" />
+	</form>
+	

@@ -1,0 +1,360 @@
+/*  Start Custom Shift CSS */
+
+.logoutlink{	/* set colour for logout link */
+	color:black;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+
+
+div.zoomeddivCurrent{	/* current requirements subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:420px;
+	padding: 3px;
+}
+
+div.zoomeddivCentre{	/* Progress documents subform */
+	background-color:#D8D8D8;
+	padding: 3px;
+}
+
+div.zoomeddivProgressHistory{	/* Progress History subform */
+	background-color:#D8D8D8;
+	padding: 3px;
+}
+
+td.Status{    /* Pending */
+       color:#00FF00;
+}
+
+td.StatusU{	/* Unassigned */
+	color:#393;
+}
+
+td.StatusT{	/* shift prior to today  */
+	color:#000000;
+}
+
+td.StatusW{	/* Worked */
+	color:#000000;
+}
+
+td.StatusP{	/* Provisional - waiting confirmation by candidate*/
+	color:#00CC00;
+}
+
+td.StatusQ{	/* Provisional - waiting confirmation client */
+	color:#00D1FF;
+}
+
+td.StatusC{ /* Cancelled */
+      color:#FF66CC;
+}
+
+td.StatusF{ /* Cancelled but still require filled */
+      color:#FF66CC;
+}
+
+
+td.StatusB{ /* Confirmed, waiting timesheet before today */
+	color:#0000FF;
+}
+
+
+td.StatusI{   /* In Progress */
+       color:#007777;
+}
+td.StatusM{	/* Cancelled by Temp  */
+	color:#0000FF;
+}
+
+td.StatusG{	/* Cancelled by Geneva */
+	color:#963;
+}
+
+select.FixedWidth{ /* Fix width of ComboCancel on Current Requirements row detail, to stop it collapsing */
+	width:220px;
+}
+
+#frmclientnewshiftweek p label { /* set width of labels in new shift popup */
+	width:115px;
+	}
+
+#cli_newsh_vacancyid {	/* set width of new shift requirement dropdown */  
+	width:450px;
+	}
+	
+#frmClientNewEventWeek p label { /* set width of labels in popup */
+		width:115px;
+	}
+
+#cli_newvac_vacancyid {	/* set width of new vacancy requirement dropdown */ 
+		width:450px;
+	}
+		
+
+textarea.Normal{
+	background-color: #FFFFFF;
+}
+
+textarea.Overflow{
+	background-color: #B22222
+}
+
+textarea.StartingColour{	/* pale grey for instruction note in textarea */
+	color: #D8D8D8;
+}
+
+div.ToolTipPopup {
+    background-color: #B3C869;
+    border-radius: 3px;
+    color: #FFFFFF;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+}
+/*  End Custom Shift CSS */
+
+
+
+span.TimesheetEditedA{            /* class 0 */
+       background-color: #FFFFFF;
+}
+ 
+span.TimesheetEditedB{            /* class 1 */
+       background-color: #AAFFAA;
+}
+ 
+span.TimesheetEditedC{            /* class 2 */
+       background-color: #AAFFAA;
+}
+
+input.StartingColour{		  /* pale grey for instruction note Milestone date and time box */
+	color: #D8D8D8;
+}
+
+div.zoomeddivMilestones{	/* Milestone dates subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:500px;
+	padding: 3px;
+}
+div.zoomeddivWide{	/* current requirements subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:820px;
+	padding: 3px;
+}
+
+span.TooltipLink{	/* links on calendar tooltip popup */
+	color:blue;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.TooltipLink0{	/* links on calendar tooltip popup */
+	color:red;
+}
+
+span.TooltipLink1{	/* links on calendar tooltip popup */
+	color:blue;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.TooltipLink2{	/* links on calendar tooltip popup */
+	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink{	/* Pending */
+    color:#00FF00;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkU{	/* Unassigned */
+	color:#393;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkT{	/* shift prior to today  */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkW{	/* Worked */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkP{	/* Provisional - waiting confirmation by candidate*/
+	color:#00CC00;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkQ{	/* Provisional - waiting confirmation client */
+	color:#00D1FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkC{	/* Cancelled */
+      	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkF{	/* Cancelled but still require filled */
+     	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+
+span.CandidateLinkB{	/* Confirmed, waiting timesheet before today */
+	color:#663300;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+
+span.CandidateLinkI{  	/* In Progress */
+       	color:#007777;
+	text-decoration:underline;
+	cursor:pointer;
+}
+span.CandidateLinkM{	/* Cancelled by Temp  */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkG{	/* Cancelled by Geneva */
+	color:#963;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink{	/* Current Requirements */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink0{	/* Current Requirements Requested person */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink1{	/* Current Requirements Allocated person (C)  (can not link because Requested does not store ID) */
+	color:#FF66CC;
+}
+
+span.CandidateLink2{	/* Current Requirements Allocated person Cancelled (T) */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink3{	/* Current Requirements Allocated person Cancelled (G)) */
+	color:#996633;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+div.ZoomedDivSub{
+	width:100%;
+	overflow:auto;
+}
+
+span.ZoomedSpanLeft{
+	float:left;
+	display:inline;
+}
+
+span.ZoomedSpanRight{
+	float:right;
+	display:inline;
+}
+
+span.spanConfirm0{		/* Confirm shift flag on AgencyVacancies */
+	background-color: #000000;
+	visibility:hidden;
+}
+
+span.spanConfirm1{		/* Confirm shift flag on AgencyVacancies */
+	background-color: #819A30;
+	visibility: visible;
+	font-size:12pt;
+}
+
+span.spanConfirm2{		/* shift cancelled flag on AgencyVacancies */
+	background-color: #FF0000;
+	visibility: visible;
+	font-size:12pt;
+}
+
+button.FlowEdit{	/* Flow Edit button on provtimesheetshifts. Use with class FlowEdit1 */
+	color: #000000;
+}
+
+button.FlowEdit1{	/* Flow Edit button on provtimesheetshifts. Use with class FlowEdit */
+	color:#FF0000;
+}
+
+div.ToolTipPopupNarrow {
+	position:absolute;
+	float:right;
+	left:20px;
+	z-index:1;
+	background-color: #FFFACD;
+	width:250px;
+	height:100px;	
+	border-width: 1px;
+}
+
+table.Xtablesorter {
+	width:100%;
+	border-collapse: collapse;
+	border:2px solid #CDCDCD;
+}
+
+table.Xtablesorter td {
+	border-collapse: collapse;
+	border-left:2px solid #CDCDCD;
+	border-right:2px solid #CDCDCD;
+}
+
+table.Xtablesorter tbody {
+	color:#000000;
+}
+
+table.Xtablesorter thead th {
+	color:black;
+	background-color:white;
+	border-collapse: collapse;
+	border-left:2px solid #CDCDCD;
+	border-right:2px solid #CDCDCD;
+}

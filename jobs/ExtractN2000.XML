@@ -1,0 +1,102 @@
+<Job title="Extract Database Procedure Import">
+ <IfYesDialog text="This job will update the Extract database procedures. Ok to proceed?">
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.ExtractPersonData]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.ExtractPersonData(in StartDate char(50))
+result(PersonID char(20),Surname char(50),Forenames char(50),Sex char(50),AddressLine1 char(50),AddressLine2 char(50),AddressLine3 char(50),Town char(50),County char(50),Country char(50),PostCode char(50),Nationality char(50),NI char(50),PassportNumber char(50),JobTitle char(50),StandardPayGrade char(50),DateOfBirth char(50))
+begin
+  declare sDate date;
+  set sDate=iqxnetstringtodate(StartDate);
+  select personid as PersonID,
+    surname as Surname,
+    forenames as Forenames,
+    sex as Sex,
+    addr1 as AddressLine1,
+    addr2 as AddressLine2,
+    addr3 as AddressLine3,
+    town as Town,
+    county as County,
+    country as Country,
+    postcode as PostCode,
+    GetQuestAnswer('P','NTY',person.personid) as Nationality,
+    ni as NI,
+    GetQuestAnswer('P','PAS',person.personid) as PassportNumber,
+    GetQuestAnswer('ANU','SPE',person.personid) as JobTitle,
+    GetQuestAnswer('ANU','GRD',person.personid) as StandardPayGrade
+    from Person
+    where registrationdate >= sDate
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.ExtractPersonData to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.ExtractTimesheetData]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.ExtractTimesheetData(in FromDate char(50) default '1900-01-01')
+result(TrustName char(50),Department char(50),VacancyName char(50),Surname char(50),Forenames char(50),TimesheetID char(20),Ward char(50),WorkingAddressLine1 char(50),WorkingAddressLine2 char(50),WorkingAddressLine3 char(50),WorkingAddressTown char(50),WorkingAddressCounty char(50),WorkingAddressCountry char(50),WorkingAddressPostcode char(50),ShiftDate char(15),ShiftStartTime char(15),ShiftEndTime char(15),PayRateName char(100),PayRate decimal(10,2),UnitsCharged decimal(10,2),JobGrade char(50),Description char(200),Notes char(200),GrossPay decimal(10,2),NetPay decimal(10,2),WTD decimal(10,2),NI decimal(10,2),Expenses decimal(10,2),InvoiceNo char(50),InvoiceDate char(50),AuthoriserName char(100))
+begin
+  declare sDate date;
+  declare WTDVal decimal(10,4);
+  declare ENICKey char(3);
+  declare WTDKey char(3);
+  declare ExpenseKey char(3);
+  set sDate=iqxnetstringtodate(FromDate);
+  set WTDVal=1.1207; -- WTD Factor
+  set ENICKey='ENIC'; -- National Insurance Key
+  set WTDKey='WTD'; -- WTD Key
+  set ExpenseKey='EX'; -- Expenses Key
+  select(select company.name from company where companyid = GetInvoiceCompanyID(c.clientcode)) as TrustName,
+    (select name from department where departmentid = v.departmentid) as Department,
+    v.position as VacancyName,
+    pe.surname as Surname,
+    pe.forenames as Forenames,
+    s.SerialNumber as TimesheetID,
+    c.name as Ward,
+    c.addr1 as WorkingAddressLine1,
+    c.addr2 as WorkingAddressLine2,
+    c.addr3 as WorkingAddressLine3,
+    c.town as WorkingAddressTown,
+    c.county as WorkingAddressCounty,
+    c.country as WorkingAddressCountry,
+    c.postcode as WorkingAddressPostcode,
+    dateformat(ts.ShiftDate,'dd/mm/yyyy') as ShiftDate,
+    dateformat(ts.TimeFrom,'hh:nn') as ShiftStartTime,
+    dateformat(ts.TimeTo,'hh:nn') as ShiftEndTime,
+    b.description as PayRateName,
+    (IQXNetStringToDouble(l.payrate)) as PayRate,
+    (if charindex(ExpenseKey,b.AnalysisCode) > 0
+    then l.unitscharged
+    else(if ShiftEndTime > ShiftStartTime
+    then(IQXNetStringToDouble(datediff(minute,ShiftStartTime,ShiftEndTime))-ts.BreakMinutes)/60
+    else(((IQXNetStringToDouble(datediff(minute,ShiftStartTime,'23:59:59.999'))+IQXNetStringToDouble(datediff(minute,'00:00:00.000',shiftEndTime)))-ts.BreakMinutes)/60)+.02
+    endif)
+    endif) as UnitsCharged,
+    isnull(l.grade,'') as JobGrade,
+    isnull(s.description,'') as Description,
+    isnull(l.description,'') as Notes,
+    (if charindex(ExpenseKey,b.AnalysisCode) = 0 then(IQXNetStringToDouble(PayRate)*IQXNetStringToDouble(UnitsCharged)) else 0
+    endif) as GrossPay,(if charindex(WTDKey,PayRateName) > 0 then GrossPay/WTDVal else GrossPay
+    endif) as NetPay,(GrossPay-NetPay) as WTR,
+    (if charindex(ENICKey,PayRateName) > 0 then(IQXNetStringToDouble(ChargeRate)*IQXNetStringToDouble(UnitsCharged)) else 0
+    endif) as NI,(if charindex(ExpenseKey,b.AnalysisCode) > 0 and ts.shiftdate = (select min(shiftdate) from TempShift where placementid = p.placementid) then(IQXNetStringToDouble(PayRate)*IQXNetStringToDouble(l.UnitsCharged)) else 0
+    endif) as Expenses,isnull((select OurRef from IQacDocument where XrefID = s.Temptimesheetid),'') as InvoiceNo,
+    dateformat((select AccountingDate from IQacDocument where XrefID = s.Temptimesheetid),'dd/mm/yyyy') as InvoiceDate,
+    (if isnull(ts.ConfirmedWith,'') = '' then(select person.name from person where personid = e.personid) else ts.ConfirmedWith
+    endif) as AuthoriserName
+    from company as c
+    key join employment as e
+    key join vacancy as v key join placement as p
+    key join(TempTimeSheet as s key join(person as pe,TempTimeSheetline as l key join TempPayBand as b,tempshift as ts))
+    where s.StartDate >= isnull(sDate,'1900-01-01') and(GrossPay+NI+Expenses) > 0 order by
+    TrustName asc,Department asc,VacancyName asc,pe.keyname asc,pe.personid asc,s.temptimesheetid asc,ShiftDate asc,PayRateName asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.ExtractTimesheetData to IQXNet]]>
+  </SQLExec>
+ </IfYesDialog>
+</Job>

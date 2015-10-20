@@ -1,0 +1,68 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#agencytabs");
+	
+	if('[var.x_global.Layout.ReducedHeightHeader;noerr]'=='1'){
+		$('a').click(function(){
+			if($(this).attr('href') == '#tabcontent-1'){
+				$('#divheading').show();
+				$('#divheadingSmall').hide();
+			}else{
+				$('#divheading').hide();
+				$('#divheadingSmall').show();
+			}
+		})
+	}
+});
+
+//if('[var.x_local.Switches.HistoricTimesheetsExtendedTab;noerr]'!=''){
+	// set default date values
+	$.data(document.body,'CurrentRequirements',{Start:0,End:0,Search:'',Sample:25});
+	$.data(document.body,'CurrentTimesheets',{Start:0,End:0,Search:'',Sample:25});
+	$.data(document.body,'HistoricTimesheets',{Start:0,End:0,Search:'',Sample:25});
+//}
+
+</script>
+   
+ <div id="agencytabs" >
+    <ul>
+        <li>[onload_IP1;block=li;when [var.x_local.Switches.WelcomeTab;noerr]!='']<a href="#tabcontent-1"><span>[var.x_local.Switches.WelcomeTab;noerr]</span></a></li>
+        <li>[onload_IP2;block=li;when [var.x_local.Switches.ContactDetailsTab;noerr]!='']<a href="IQXPage.php?page=agencyprofile"><span>[var.x_local.Switches.ContactDetailsTab;noerr]</span></a></li>
+        <li>[onload_IP3;block=li;when [var.x_local.Switches.CandidatesTab;noerr]!='']<a href="IQXPage.php?page=agencycandidates"><span>[var.x_local.Switches.CandidatesTab;noerr]</span></a></li>
+        <li id="R">[onload_IP4;block=li;when [var.x_local.Switches.CurrentOpportunitiesTab;noerr]!='']<a href="IQXPage.php?page=agencyvacancies&pGroupID=A&pFormName=R"><span>[var.x_local.Switches.CurrentOpportunitiesTab;noerr]</span></a></li>
+        <li id="P">[onload_IP5;block=li;when [var.x_local.Switches.CurrentTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=agencyprovtimesheets&pGroupID=A&pFormName=C"><span>[var.x_local.Switches.CurrentTimesheetsTab;noerr]</span></a></li>
+        <li id="T">[onload_IP6;block=li;when [var.x_local.Switches.HistoricTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=timesheetsExtended&pGroupID=A&pFormName=T"><span>[var.x_local.Switches.HistoricTimesheetsTab;noerr]</span></a></li>
+        <li>[onload_IP7;block=li;when [var.x_local.Switches.ContactsTab;noerr]!='']<a href="IQXPage.php?page=companycontacts"><span>[var.x_local.Switches.ContactsTab;noerr][onload_conts;block=li;when [var.x_rights.MAINTAINCONTACTS;noerr]=1]</span></a></li>
+        <li>[onload_IP8;block=li;when [var.x_local.Switches.ReportsTab;noerr]!='']<a href="IQXPage.php?page=reports"><span>[var.x_local.Switches.ReportsTab;noerr][onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+   </ul>
+   <div style='color:red;'>[onload_UT1;block=div; when [var.x_global.general.VisualUpdateWarningText;noerr]!=''][var.x_local.Switches.VisualUpdateWarningText;noerr]</div>
+		
+    <div id="tabcontent-1">
+    	<div class="usertext">[onload;file=txt_agency_welcome_top.html;noerr;]</div>
+		<div id="Agencynonstandardtext" class="usertext">[onload;file=txt_agency_nonstandard_welcome.html;noerr;]</div>
+		<div id="Agencystandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title] Agency Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Update your contact details and password</li>
+				<li>Update the contact mechanism for cascaded opportunities</li>
+				<li>Maintain candidates</li>
+				<li>View opportunities and submit candidates</li>
+				<li>Complete temporary workers' timesheets</li>
+				<li>View historical details and management information</li>
+			</ul>
+			<p>Please explore the options, and if you have queries, contact [var.x_title].</p>
+		</div>
+		<div class="usertext">[onload;file=txt_agency_welcome_bottom.html;noerr]</div>
+    </div>
+    <div id="tabcontent-blank">
+    </div>
+ </div>
+
+<p>[onload_IP17;block=p;when [var.x_local.Switches.ShowLogOutButton;noerr]='1']
+<button type="button" id="button_logout" class="fixed" onclick="IQXLogout()">
+   	Logout
+</button>
+</p>
+

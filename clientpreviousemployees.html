@@ -1,0 +1,133 @@
+<!--[onload;tplvars;DateOffset='NetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20130911 extended search -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	var OffsetInDays='[var.x_local.client.OffsetDays;noerr]';
+	if(OffsetInDays==0){OffsetInDays=183;}
+	var StartDate = new Date();
+	var EndDate = new Date();
+	
+	var StoredStartDate=$.data(document.body,'PreviousTemps').Start;
+	var StoredEndDate=$.data(document.body,'PreviousTemps').End;
+	var StoredSearchString=$.data(document.body,'PreviousTemps').Search;
+	var StoredSampleString=$.data(document.body,'PreviousTemps').Sample;
+	if(StoredSearchString!=''){$('#TSSearchString').val(StoredSearchString)};
+	$('#TSSampleSize option[value="'+StoredSampleString+'"]').attr('selected','selected');
+		
+	$('#TEFilterStart').val(CreateDate(StartDate,OffsetInDays));
+	$('#TEFilterEnd').val(CreateDate(EndDate,0));
+	
+	if ($('#divPrevEmpDetail').html()==''){
+		if(StoredStartDate!='0'){
+			$('#TEFilterStart').val(StoredStartDate);
+			$('#TEFilterEnd').val(StoredEndDate);
+		}
+	}
+	
+	$('#TEFilterStart').datepicker({defaultDate: OffsetInDays*-1,dateFormat:'dd/mm/yy',firstDay:'[var.x_global.general.DatePickerStartday]'});
+	$('#TEFilterEnd').datepicker({defaultDate: 0,dateFormat:'dd/mm/yy',firstDay:'[var.x_global.general.DatePickerStartday]'});
+	
+	$('#TEFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#TEFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('#TENavButtons').hide();
+	
+	LoadData('1');
+	
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(PageNo){
+	var StartDate=$('#TEFilterStart').val();
+	var EndDate=$('#TEFilterEnd').val();
+	var SearchString=$('#TESearchString').val();
+	var SampleSize=$('#TESampleSize').val();
+	
+	$('#TEOutDateStart').html(StartDate);
+	$('#TEOutDateEnd').html(EndDate);
+	$('#TERowCount').html(PageNo);
+	$('.errormessage').html('');
+	
+	if(StartDate && EndDate){
+		IQXChain('#divPrevEmpDetail',{action:'load',page:'clientpreviousemployeesDetail&pFromDate='+StartDate+'&pToDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+	
+}
+
+function MoveOnePage(Direction){
+	// move to next or previous data page
+	
+	var LastPage=$('#TELastPage').html();
+	if(Direction=='Z')
+		{NextPage=LastPage}
+	else
+		{
+		var NextPage=parseInt($('#TERowCount').html())+parseInt(Direction);
+		if(Direction==0){NextPage=0}
+		if(NextPage<=1){
+			NextPage=1;
+		}
+	}
+	if(NextPage>LastPage){return};
+	$('#TERowCount').html(NextPage);
+	LoadData(NextPage);	
+}
+
+</script>
+
+<div id="divPrevEmpFilter" class="dataTables_wrapper">
+	<div class="LoadPage" style="padding: 10px">		
+		Search between
+		<input id="TEFilterStart" class="" size="12" onChange="StoreDateChange('TE')" value="[DateOffset.StartDate]">
+		and
+		<input id="TEFilterEnd" class="" size="12" onChange="StoreDateChange('TE')" value="[DateOffset.EndDate]" >
+		filter:
+		<input id="TESearchString" class="" onChange="StoreDateChange('TE')">
+		size:
+		<select id="TESampleSize" name="TESampleSize" class="" style="width:100" onChange="StoreDateChange('TE')" >
+			<option value="10">10</option>
+			<option value="25" selected="true">25</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+		</select>
+		<span style="padding:10px;"></span>
+		<button class="fixed dataTables_search" onClick="LoadData('1')" >Search</button>
+		<span style="padding:10px;"></span>
+		<span id="TENavButtons">
+			<button onClick="MoveOnePage('0')">First</button>
+			<button onClick="MoveOnePage('-1')">Previous</button>
+			<span id="TERowCount" style="padding:3px;">1</span> of <span id="TELastPage" style="padding:3px;">0</span>
+			<button onClick="MoveOnePage('1')">Next</button>
+			<button onClick="MoveOnePage('Z')">Last</button>
+			<button class="fixed dataTables_search" onClick="LoadData('1')" >[onload_Reload;block=button;when [var.x_local.client.btnReload;noerr]=1]Refresh</button>
+		</span>
+		<span style="padding:10px;"></span>
+				
+	</div>
+	<div class="clear" ></div>
+	<div id="divPrevEmpDetail" class="divFilterTableDetail" ></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

@@ -1,0 +1,49 @@
+<!--[onload;tplvars;ebtd='NetCandidateExpenseBenefitTimesheetsDetail?pEBTimesheetID']-->
+
+<script>
+
+	$(document).ready(function(){
+		var tsid;
+		var PreviousValue;
+		$('[id*= "ExpenseType_"]').each(function(){
+		tsid=$(this).attr('id').substring(12);
+		var ExpenseType=$(this).val();
+		PreviousValue=$('#PreviousExpenseValue_'+tsid).val();
+		if(ExpenseType=='CHOICE'){
+			$(this).after('<div id="ExpenseTypeSelector_'+tsid+'">'+
+			'<select id="comboExpenseVal_'+tsid+'" ></select>'+
+			'</div>');	
+		}
+	});
+	CreateCombo($('#ExpenseTypeID_'+tsid).val(),'C');
+	});
+	
+
+</script>
+
+
+<div id="divEBTimesheetsDetail" >
+	<table class="tablesorter" id="tblEBTimesheetsDetail">
+		<thead>
+			<tr>
+				<th>Description</th>
+				<th>Number</th>
+				<th>Date</th>
+				<th>Expense Type</th>
+			</tr>
+		</thead>
+		<tbody id="tblEBshiftsbody">
+			<tr id="[ebtd.TempShiftID;block=tr]" >
+				<td>[ebtd.Description]</td>
+				<td>[ebtd.ShiftSerialNumber]</td>
+				<td>[ebtd.ShiftDate]</td>
+				<td style="width: 50%">
+					<label for="ExpenseTypeSelector_[ebtd.TempShiftID;]">[ebtd.ExpenseTitle;]</label>
+					<input type="hidden" id="ExpenseType_[ebtd.TempShiftID;]" value="[ebtd.ExpenseClass]" />
+					<input type="hidden" id="ExpenseTypeID_[ebtd.TempShiftID;]" value="[ebtd.ExpenseBenefitTypeID]" />
+					<input type="hidden" id="PreviousExpenseValue_[ebtd.TempShiftID;]" value="[ebtd.DefaultValue]" />
+				</td>
+			</tr>
+		</tbody>
+	</table>			
+</div>

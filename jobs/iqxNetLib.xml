@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<Job autoclose="YES">
+    <Library>
+        <GetIQXNetSettings>
+            <SQLQuery>
+                <SQLSelect>
+                    select SMTPHost,
+                    SMTPUserID,
+                    SMTPPassword,
+                    AgencyName,
+                    WebAddress,
+                    EmailRoot
+                    from IQXNetEmailDetails where IQXNetEmailDetailsID ='DEFAULT'
+                </SQLSelect>
+                <SetVariable type="S" name="IQXNet_SMTPHost" value="{SMTPHost}"/>
+                <SetVariable type="S" name="IQXNet_SMTPUserID" value="{SMTPUserID}"/>
+                <SetVariable type="S" name="IQXNet_SMTPPassword" value="{SMTPPassword}"/>
+                <SetVariable type="S" name="IQXNet_AgencyName" value="{AgencyName}"/>
+                <SetVariable type="S" name="IQXNet_WebAddress" value="{WebAddress}"/>
+                <SetVariable type="S" name="IQXNet_EmailRoot" value="{EmailRoot}"/>
+            </SQLQuery>
+            <SetVariable name="CRLF" sql="select string(char(13),char(10))"/>
+            <SetVariable name="LF" sql="select string(char(10))"/>
+            <SetVariable name="TAB" sql="select string(char(9))"/>
+        </GetIQXNetSettings>
+    </Library>
+</Job>

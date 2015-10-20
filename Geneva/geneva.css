@@ -1,0 +1,635 @@
+﻿#button_logout
+{
+	display:none;
+}
+/* hide the refresh button on the timesheets to authorise tab on client and 'current timesheets' tab on candidate*/
+#divtimesheets #provtimesheet_refresh
+{
+/* couldn't use display:none because of inline style being set in jquery */
+visibility:hidden;
+}
+
+#timesheetstoauthorised_custom_text, #currenttimesheets_custom_text
+{
+	color: #85A52B;
+ font-weight: bold;
+ font-family: Arial,sans-serif;
+    font-size: 16px;
+ margin-left:5px;
+margin-top:10px;
+}
+
+div .zoomeddivCurrent
+{
+  background-color:#f0f0f0;
+}
+
+#divheading {
+height: 100px;
+margin-bottom: 10px;
+background-color: #fdfdfd;
+text-align:center;
+color: white;
+background-image: url(images/genevaportal.png);
+background-repeat: no-repeat;
+background-position:left;
+}  
+
+
+
+#divheading{
+	/*width:960px;*/
+	margin: auto;
+
+	}
+
+#divcontent{
+	/*width:960px;*/
+
+	margin: auto;
+		padding-bottom: 40px;
+	xxborder-bottom: 2px dashed #d7dfbd;
+	} 
+
+
+#divheading h1 {
+		display:none;
+}
+
+#divheading h2 {
+text-align:right;
+color: #666;
+}
+
+#divheading h3 {
+color: #333;
+text-align:right;
+}
+
+
+body {
+    background: url("http://www.genevahealth.co.nz/images/bg/page-bg.png") repeat-x scroll 0 0 #E0ECE0;
+	margin:0;
+	padding:0;
+}
+.floatdivlogo{
+	width:960px;}
+
+.ui-tabs {
+padding:0;
+}
+
+.ui-state-default, .ui-state-default, .ui-widget-content .ui-state-default {
+    background: url("http://www.genevahealth.co.nz/images/bg/nav-primary-bg.png") repeat-x scroll 50% 50% #0B678E;
+    color: #fff;
+    font-weight: bold;
+    outline: medium none;
+}
+
+#clienttabs li.ui-tabs-selected, #candtabs li.ui-tabs-selected, #agencytabs li.ui-tabs-selected, #clienttabs .ui-tabs-nav li, #candtabs .ui-tabs-nav li, #agencytabs .ui-tabs-nav li, #clienttabs .ui-tabs-nav li a, #candtabs .ui-tabs-nav li a, #agencytabs .ui-tabs-nav li a {
+    background:none;
+	border:0;
+color:#0E253A;
+font-size:12px;
+text-transform:uppercase;
+}
+
+#clienttabs .ui-widget-header, #agencytabs .ui-widget-header, #candtabs .ui-widget-header {
+background:none;
+}
+
+#clienttabs .ui-tabs-selected  a, #agencytabs .ui-tabs-selected  a , #candtabs .ui-tabs-selected  a  {
+border-bottom:2px solid #E63B4F !important;
+}
+
+#CandCalendar td.ui-state-default{
+    background: none;
+	background-color: #fff;
+    border: 1px solid #AED0EA;
+    color: #2779AA;
+    font-weight: bold;
+    outline: medium none;
+}
+
+
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
+    color: #fff;
+    outline: medium none;
+}
+
+
+.ui-widget-header {
+    background: url("..") repeat-x scroll 50% 50% #819a30;
+    border:none;
+    color: #222222;
+    font-weight: bold;
+}
+
+
+.ui-widget-content {
+    background: linear-gradient(to bottom, #E5E5E8, #FFFFFF) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border: 1px solid #DDDDDD;
+    color: #362B36;
+}
+
+
+#frmlogin fieldset{padding: 40px; border-width:0px;}
+
+#frmlogin label{color:#000000;}
+
+
+#frmlogin label.error{color:#000; font-size: 0.7em;}
+
+#frmlogin .errormessage{color:#FF0000; padding-top: 20px; padding-left: 120px;}
+
+#tblclivacs_wrapper .dataTables_dateRange
+{
+	width:40%;
+
+}
+
+tr.odd {
+    background-color: #F0F0F0;
+}
+tr.odd td.sorting_1 {
+    background-color: #DCDCDC;
+}
+tr.odd td.sorting_2 {
+    background-color: #DCDCDC;
+}
+tr.odd td.sorting_3 {
+    background-color: #F7F7F7;
+}
+tr.even td.sorting_1 {
+    background-color: #FCFCFC;
+}
+tr.even td.sorting_2 {
+    background-color:  #FCFCFC;
+}
+
+
+/* DataTable Sorting */
+ 
+
+.sorting_asc {
+	background: url('/css/images/g_sort_asc.png') no-repeat center right;
+}
+
+
+.sorting_desc {
+	background: url('/css/images/g_sort_desc.png') no-repeat center right;
+}
+
+
+.sorting {
+	background: url('/css/images/g_sort_both.png') no-repeat center right;
+}
+
+
+.sorting_asc_disabled {
+	background: url('/css/images/g_sort_asc_disabled.png') no-repeat center right;
+}
+
+.sorting_desc_disabled {
+	background: url('/css/images/g_sort_desc_disabled.png') no-repeat center right;
+}
+
+
+
+
+
+
+
+
+#banner
+{
+   /*width:945px;*/
+   height:72px;  
+   border-top: 3px solid #0B678E; 
+   padding: 10px 0px 10px 15px;
+   position:relative;
+     
+}
+
+.fleft
+{
+    float:left;   
+}
+.fright
+{
+    float:right;  
+}
+.fclear
+{
+    clear:both;
+}
+
+#genioslogo {
+    margin-right: 15px;
+    margin-top: 4px;
+    width: 192px;
+}
+
+#geniosheading
+{
+    width:500px;
+    height:30px;
+    padding:10px 5px 5px 5px;
+}
+.border
+{
+     border: 1px solid red; 
+}
+#headicon
+{
+     
+}
+#personname
+{
+    line-height:30px;
+    color:#000000;
+    
+}
+.spaceleft
+{
+    margin-left:10px; 
+}
+.titlegrey
+{
+    line-height:30px;
+    color:#b2b2b2;  
+    font-size:16px; 
+}
+.titlelittlegrey
+{
+     line-height:30px;
+    color:#b2b2b2; 
+    font-size:12px;  
+}
+
+
+#gh_button_logout
+{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background: none repeat scroll 0 0 #FABF3A;
+    border-radius:3px;
+	border:1px solid #FABF3A;
+    color: #333333;
+    display: block;
+    margin: 10px 0 0;
+    padding: 5px 5px 5px 5px;
+
+}
+#gh_button_welcome
+{
+    position:absolute;
+    top:57px;
+    left:235px;
+    height:33px;
+    width:126px;
+    background-image:url('/css/images/logout.png');
+    border:none;
+    color:#000000;
+    font-weight:bold;
+}
+
+#welcomenav
+{
+  /* width:960px;*/
+   height:300px;  
+  /* position:relative;
+   top:0px;
+   left:-20px; */
+position:relative;
+   top:0px;
+   margin-left:0;
+margin-right:auto;
+width:90%;
+
+
+
+   
+}
+#welbuttonlarge button
+{
+    width: 195px;
+    height:118px;  
+    font-family: Arial,sans-serif;
+    font-size:20px;
+    font-weight:bold;
+    color:#ffffff;
+    background-image: url('/css/images/welcomebutton.png');
+    border:none;
+    padding:none;
+    margin:none;
+    
+}
+#welbuttonlarge button:hover
+{
+    opacity:0.4;
+    filter:alpha(opacity=40); /* For IE8 and earlier */
+    
+}
+#bookstaff
+{
+    padding-bottom:45px;
+    padding-right:20px;
+   
+    
+}
+#viewdiary
+{
+
+ padding-bottom:45px;
+    padding-right:20px;
+  
+
+    
+}
+#checkbookings
+{
+    padding-bottom:45px;
+    padding-right:20px;
+  
+    
+}
+
+#downloadtimesheets
+{
+
+  padding-bottom:45px;
+    padding-right:20px;
+  
+  
+}
+
+
+
+#updatemydiary
+{
+    padding-bottom:45px;
+    padding-right:20px;
+  
+    
+}
+#reportsandstatistics
+{
+    padding-bottom:45px;
+    padding-right:20px;
+    
+}
+#viewpaidtimesheets
+{
+
+    padding-bottom:45px;
+    padding-right:20px;
+  
+}
+#welbuttonsmall button
+{
+    width: 230px;
+    height:60px;  
+    font-family: Arial,sans-serif;
+    font-size:14px;
+    font-weight:bold;
+    color:#ffffff;
+    background-image: url('/css/images/welcomebutton-small.png');
+    border:none;
+    padding:none;
+    margin:none;
+ 
+    
+}
+#welbuttonsmall button:hover
+{
+    opacity:0.4;
+    filter:alpha(opacity=40); /* For IE8 and earlier */
+    
+}
+#permcontractplacement
+{
+   
+    padding-right:20px;
+    
+}
+
+#updatepayrolldetails
+{
+    
+    padding-right:20px;
+    
+}
+#historicaltimesheets
+{
+
+ padding-bottom:45px;
+    padding-right:20px; 
+   
+}
+#uploaddocument
+{
+    
+    padding-right:20px;
+    
+}
+#timesheetstoauthorise
+{
+
+   
+    padding-right:20px;
+  
+}
+
+#previoustemps
+{
+
+
+    padding-right:20px;
+}
+#changepassword
+{
+
+    padding-right:20px;
+    
+}
+
+
+#updatecontactdetails
+{
+
+    padding-right:20px;
+    
+}
+#staffingintelligence
+{
+    width:100px;
+    height:50px;   
+    margin-left:15px;
+    
+    font-style:italic;
+    
+}
+#geniosicon
+{
+ 
+}
+#welfooter
+{
+    position:relative;   
+    bottom:-35px;
+  /*  width:940px; */
+    margin-left:-20px;
+    padding: 10px 10px 0px 10px;
+  
+   
+    
+}
+
+#container-header-bottom {
+    background: none repeat scroll 0 0 #007DA8;
+    height: 15px;
+    width: 100%;
+}
+#container-header-bottom-inner {
+    background: url("/css/images/bg-header@2.png") no-repeat scroll 50% 0 / cover #007DA8;
+    height: 15px;
+    margin: 0 auto;
+    max-width: 1525px;
+}
+
+
+#genevalogofooter {
+    margin: 15px 0;
+    max-width: 150px;
+}
+body
+{
+ background:none;  
+}
+#copyright
+{
+    font-size:12px;
+    color:#000000;
+    text-align:right;
+}
+#divheading {
+    background-color: #FDFDFD;
+    background-image: none;
+    background-position:inherit;
+    background-repeat: no-repeat;
+    color: white;
+    height: 100px;
+    margin-bottom: 10px;
+    text-align:inherit;
+}
+
+
+
+/* remove search tab */
+/*
+.ui-tabs .ui-tabs-nav li:last-child{display:none;}
+*/
+/*
+
+removes all but the first manu tab.  can't include it here while in staging.
+*/
+/*
+.ui-tabs .ui-tabs-nav li{display:none;}
+.ui-tabs .ui-tabs-nav li:first-child{display:block;}
+*/
+
+.ui-widget-header {
+    xbackground: url("..") repeat-x scroll 50% 50% red;
+	background-color: #EEEEEE;
+}
+
+
+ 
+
+
+
+/* MB Edits 30 April 2012 */
+
+/* see the ui-state-default for td above */
+
+.ui-tabs-panel {position:relative;}
+#calbtnAvail
+{	
+	
+	 font-size: 20px;
+}
+
+.dataTables_dateRange {text-align:center; border: 3px solid #fff; padding: 10px 0 10px 0;
+        -moz-border-radius:7px;
+        -webkit-border-radius:7px;
+        border-radius: 7px;
+	background-color: #fff;
+
+}
+
+.dataTables_dateRange button {font-size: 1em;
+    background: url("http://www.genevahealth.co.nz/images/bg/nav-primary-bg.png") repeat-x scroll 50% 50% #819a30;
+	color:#fff;
+	border: 1px solid #666;
+  -moz-border-radius:3px;
+        -webkit-border-radius:3px;
+	padding: 2px;
+        border-radius: 3px;
+
+}
+
+#clivac_addcontract {display:none;}
+
+#divTimesheetFilter .dataTables_dateRange 
+{
+    width:380px;
+
+}
+#divPrevEmpFilter .dataTables_dateRange 
+{
+    width:380px;
+
+}
+
+#divTimesheetFilter .dataTables_dateRange .dataTables_search
+{
+    margin-left:10px;
+    height:25px;
+
+}
+#divPrevEmpFilter .dataTables_dateRange .dataTables_search
+{
+    margin-left:10px;
+    height:25px;
+
+}
+#divReports a 
+{
+
+font-size:14px;
+
+}
+#divReports li 
+{
+
+ padding-top:5px;
+
+}
+.calendarAvailable, .fc-agenda .calendarAvailable .fc-event-time, .calendarAvailable a, .calendarUnfilled, .fc-agenda .calendarUnfilled .fc-event-time, .calendarUnfilled a {
+    background-color: #D7DFBD;
+    border-color: #D7DFBD;
+    color: #000000;
+}
+
+
+
+#welcomenav {margin: 20px 0 0 20px;}
+#welbuttonlarge {width:470px; height: 300px; float:left;}
+
+#welbuttonlarge button{margin:0 40px 40px 0; position: relative; display:block; float:left;}
+
+#welbuttonsmall {width:200px; height: 300px; float:left;}
+
+#welbuttonsmall button{margin:0 0 12px 0; position:relative;}

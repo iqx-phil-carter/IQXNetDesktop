@@ -1,0 +1,82 @@
+﻿
+<script>
+
+    $(document).ready(function () {
+        $("#OwnerTreeRoot").delegate('li a', 'click', function () {
+            var id = $(this).closest('li').attr('id');
+            OwnerNodeClicked(id);
+            return false;
+        });
+       
+        $("#OwnerTreeRoot").jstree({
+            "xml_data": {
+                "ajax": {
+                    "url": "IQXRawData.php",
+                    "data": function (n) {
+                        return {
+                            "pParentID": n.attr ? n.attr("id") : '0',
+                            "page": 'MobileNetOwnerFavouriteList',
+                            "render": 'text_xml__OwnerTreeStructure.xsl'
+                        };
+                    }
+                }
+            },
+            "plugins": ["xml_data", "sort"]
+        });
+        
+        $('#OwnerTreeRoot').css('height', ($(document).height() - $('#OwnerTreeRoot').offset().top - ($('#button_logout').closest('p').height() * 3)) + 'px');	// resize menu to half of window size			
+    });
+
+    function OwnerNodeClicked(NodeID) {
+        var NodeType = $('#' + NodeID).attr('class').substring(0, 11);
+        var NodeTag = $('#' + NodeID).attr('tag');
+        if (NodeType == 'jstree-leaf') {
+            LoadFavouritePage(NodeID,NodeTag)
+        } else {
+            if (NodeType == 'jstree-clos') {
+                $('#OwnerTreeRoot').jstree('open_node', $('#' + NodeID));
+            } else {
+                $('#OwnerTreeRoot').jstree('close_node', $('#' + NodeID));
+            }
+        }
+        return;
+    }
+
+    function LoadFavouritePage(NodeID, NodeTag) {
+        
+        var PageType = '';
+        if (NodeTag == 'P') { PageType = 'Candidate'; }
+        if (NodeTag == 'C') { PageType = 'Company'; }
+        if (NodeTag == 'E') { PageType = 'Contact'; }
+        var DestPage = 'iqxnet.php?P=Owner' + PageType + '&p'+ PageType + 'ID=' + NodeID + '&pEventType=F';
+        window.pEventType = 'F';
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        }); 
+    };
+
+</script>
+
+<nav role="navigation" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnFavouritesHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="arrow-l" data-iconpos="notext">Home</a></span>
+</nav>
+<span>Favourites</span>
+<nav role="navigation" style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnFavouritesHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<br />
+
+
+
+<div style="overflow:auto">
+    <div id='OwnerTreeRoot' class='jstree-default' style="float:left;overflow:auto;margin-right:10px;width:90%"></div>
+    <center>
+        <div style="float:left;">
+            <div id='OwnerActiveDiv' class="FloatDivLeft"></div>
+            <div id='OwnerErrorDiv' class="FloatDivCenter errormessage">[var.x_errormessage]</div>
+            <div id='OwnerDetailDiv' class="FloatDivLeft"></div>
+        </div>
+    </center>
+</div>

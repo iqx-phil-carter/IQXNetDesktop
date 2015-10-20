@@ -1,0 +1,10 @@
+<!-- Mobile IQXNet 
+NB data-ajax="false" in various places is to allow browsers' remember password functionality to work-->
+  
+<form id="loginform" action="iqxnet.php[var.x_querystring;noerr]" method="POST" data-ajax="false">
+ <label for="userid">User ID</label>
+ <input id="userid" name="userid" type="text" value="" required="required" />
+ <label for="password">Password</label>
+ <input id="password" name="password" type="password" value="" required="required"  />
+ <input type="submit" name="doLogin" value="Login" data-ajax="false" />
+</form>

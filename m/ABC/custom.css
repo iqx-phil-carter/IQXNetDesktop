@@ -1,0 +1,18 @@
+.ui-icon-custom-phone {
+background: url("phone.png") no-repeat rgba(0, 0, 0, 0.4) !important;
+}
+.ui-icon-custom-email {
+background: url("email.png") no-repeat rgba(0, 0, 0, 0.4) !important;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+.ui-icon-custom-phone {
+background: url("phone@2x.png") no-repeat rgba(0, 0, 0, 0.4) !important;
+background-size: 18px 18px;
+}
+.ui-icon-custom-email {
+background: url("email@2x.png") no-repeat rgba(0, 0, 0, 0.4) !important;
+background-size: 18px 18px;
+}
+}
+

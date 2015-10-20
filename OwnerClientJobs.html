@@ -1,0 +1,165 @@
+<!-- 20110923 Lines 7-11: reminder about compatibility mode -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	
+	if (window.navigator.appName == 'Microsoft Internet Explorer') {
+		if (document.documentMode > 7) {
+			$('#ErrorMessage').text('If this operation appears to be taking a long time, check you have compatibility mode selected.');
+		}
+	}
+				
+	$("#OwnerTreeRoot").delegate('li a','click',function(){
+		var id=$(this).closest('li').attr('id');
+		OwnerNodeClicked(id);
+		return false;
+	});
+	
+	$("#OwnerTreeRoot").jstree({
+		"xml_data" : {            
+			"ajax": {
+				"url": "IQXRawData.php",
+				"data": function(n){
+					return {
+						"pParentID": n.attr ? n.attr("id") : '0',
+						"page": 'NetOwnerTreeSource',
+						"render": 'text_xml__OwnerTreeStructure.xsl'
+					};
+				}
+			}    
+	    },
+	    "plugins" : [ "xml_data","sort" ]
+		});
+	
+	$('#OwnerTreeRoot').css('height',($(document).height()-$('#OwnerTreeRoot').offset().top-($('#button_logout').closest('p').height()*3))+'px');	// resize menu to half of window size			
+});
+
+
+
+function OwnerNodeClicked(NodeID){
+	// ## action on node clicked, or reload action from button
+	// ## First part of NodeID is two-letter code for type of object, second part is item, separated by hash
+
+	if ($IQXFormContext && $IQXFormContext.blocktabswitch) {
+		alert($IQXFormContext.switchmessage);
+		return false;
+	}
+
+	$('#OwnerErrorDiv').html("");	// Clear any error messages
+	var hash = NodeID.indexOf("#");
+	var ObjType = NodeID.substring(0, 2);
+	var ObjIndex = NodeID.substring(3);
+	var ButtonString="";
+	
+	$('#OwnerErrorDiv').html('');
+	$('#OwnerDetailDiv').html('');
+	
+	if(ObjIndex==''){
+		$('#OwnerActiveDiv').html('');
+		return
+		};
+	
+	if(ObjIndex==0){	// if ObjIndex is zero then creating a new object, so find parent object before loading new form
+		$('#ObjID').val($('#TempParent').val());
+	}else{
+		$('#TempParent').val(ObjIndex);
+	};
+		
+	switch(ObjType){
+		case "AC":	// Division
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerAccountSubScreen&pAccountID='+ObjIndex});
+			break;
+		case "CO":	// Company
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerCompanySubScreen&pCompanyID='+ObjIndex});
+			break;
+		case "CX":	// All vacancies - just stall if node clicked. Use the tree to create list 
+			break;
+		case "EM":	// Employee
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerEmployeeSubScreen&pEmployeeID='+ObjIndex});
+			break;
+		case "VA":	// Vacancy
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerVacancySubScreen&pVacancyID='+ObjIndex});
+			$('#OwnerDetailDiv').show();
+			IQXChain('#OwnerDetailDiv',{action:'load',page:'OwnerPayRateSubScreen&pTempJobTypeID='+ObjIndex});
+			break;
+		case "PA":	// Pay Rate chained from Vacancy
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerVacancySubScreen&pVacancyID='+ObjIndex});
+			$('#OwnerDetailDiv').show();
+			IQXChain('#OwnerDetailDiv',{action:'load',page:'OwnerPayRateSubScreen&pTempJobTypeID='+ObjIndex});
+			break;
+		case "XX":	// Vacancy and Pay Rate from Pay Rate Node	
+			var Node=$('#'+NodeID).parent().closest('li').attr('id').substring(3);
+			IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerVacancySubScreen&pVacancyID='+Node});
+			IQXChain('#OwnerDetailDiv',{action:'load',page:'OwnerPayRateSubScreen&pTempJobTypeID='+Node});
+			break;
+		default:	// Should be nothing ever reaches here
+			$('#OwnerErrorDiv').html("OwnerNodeClicked Error: "+SubmitString+"");
+	}
+	
+	if(ObjIndex==0 && ObjType!='PA'){	// if ObjIndex is zero then creating a new object, so override new/edit buttons with save button
+		$('input').attr('readonly', '');
+		};
+	$('#ParentObject').val($('#TempParent').val());	// Copy parent object from previous form
+	$('li').css('background','');	// clear previous highlight and set highlight for selected row
+	var LiIdStr="[id*="+String.fromCharCode(34)+NodeID+String.fromCharCode(34)+"]";	// LIstIDSTRing - duplicate nodes in 'All Vacancies' list need highlit as well as main vacancy entry in Contact list
+	$('li'+LiIdStr).css('background','#CFCFCF');
+	
+	if (ObjIndex != '0') {
+		$('#OwnerTreeRoot').jstree("toggle_node", $('#' + ObjType + '_' + ObjIndex));
+	}
+			
+};
+
+
+function SplitReturnValue(Obj){
+	// ## send in Obj as returned from database Edit routines, split off and return ObjID and ParentID
+	// ## Object defined in routine as: var Obj={IngoingValue:response.id,ObjID:0,ParentID:0};
+	// ## where response.id is json response from database, carrying two values separated by '#'
+				
+	var hash = Obj.IngoingValue.indexOf("#");
+	Obj.ObjID = Obj.IngoingValue.substring(0, hash);
+	Obj.ParentID = Obj.IngoingValue.substring(hash+1);
+}
+
+function OwnerFormCancel(FormType){
+	// ## General Cancel Function
+	
+	IQXDisableForm('#Form'+FormType);
+	$('#OwnerActiveDiv').html('');
+}
+
+function OwnerFormNew(FormType){
+	// ## General New function
+	
+	$('#TempParent').val($('#ObjID').val());
+	OwnerNodeClicked(FormType+'#0');
+}
+
+function OwnerFormUndo(FormType){
+	// ##  General Undo function
+	
+	IQXDisableForm('#Form' + FormType);
+	if ($('#ObjID').val().length == 0) {
+		$('button[id*="New"]', '#OwnerActiveDiv').hide();
+	}
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_owner_clients_top.html;noerr]</div>
+<div style="overflow:auto">
+	<div id='OwnerTreeRoot' class='jstree-default' style="float:left;overflow:auto;width:20%;height:100px;margin-right:10px" ></div>
+	<center>
+		<div style="float:left;width:500px">	
+			<div id='OwnerActiveDiv' class="FloatDivLeft" ></div>
+			<div id='OwnerErrorDiv' class="FloatDivCenter errormessage">[var.x_errormessage]</div>	
+			<div id='OwnerDetailDiv' class="FloatDivLeft" ></div>
+		</div>
+	</center>	
+</div>
+<input id="TempParent" class="Wide hidden" ></input>		
+<div id="ErrorMessage" class="errormessage">[var.x_errormessage]</div>
+<div class="usertext">[onload;file=txt_owner_clients_bottom.html;noerr]</div>
+
+

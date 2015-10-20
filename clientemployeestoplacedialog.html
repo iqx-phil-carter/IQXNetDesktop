@@ -1,0 +1,66 @@
+<!-- 20140122 Standardised -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+			
+	$("#cliPlacDlg").delegate("button.tablebutton", "click", function(e){
+		switch(this.innerHTML)
+		{
+			case "Request":
+				doFillVacancy(this.id,$(this).closest('td').prev('td').text());
+				$('#cliPlacDlg').dialog('close');
+				break;
+			case "Details":
+				OpenCandidateDetails(this);
+				break;
+		} 
+		
+		});
+		
+	$('#cliPlacDlg').dialog({
+		modal: false,
+		width: 450,
+		height: 460,
+		close: function(){
+			$('#cliPlacDlg').trigger('PlacementEvent',['DialogClose']);
+		}
+	});
+
+	var ShiftDate= $('#TempShiftDate').val();
+	var ReverseShiftDate='';
+	if (ShiftDate !=''){
+		ReverseShiftDate = ShiftDate.substring(6)+'-'+ShiftDate.substring(3,5)+'-'+ShiftDate.substring(0,2);
+	}
+	$('#TempShiftDate').val('');
+	$.getJSON('IQXRawData.php?page=NetClientPreviousEmployees&pShiftDate='+ReverseShiftDate+'&render=text_plain__IQXNetDataTable.xsl', function(candData){
+		if (candData) {
+			candData.aoColumnDefs = [{
+				aTargets: [1],
+				bSearchable: false,
+				bSortable: false,
+				fnRender: function(oObj){
+					return '<button id="' + oObj.aData[1] + '" class="tablebutton" >Request</button><button id="' + oObj.aData[1] + '" class="tablebutton" >Details</button>';
+				}
+			}, {
+				aTargets: [2],
+				bSearchable: false,
+				bVisible: false
+			}];
+			candData.sPaginationType = "full_numbers";
+			candData.sDom = 'f<"clear">rtip';
+			candData.aaSorting = [[2, 'asc']], candData.aoColumns[1].sTitle = "";
+				
+			$("#tblPlacDlg").dataTable(candData);
+			$("#PlacDlgLoading").hide();
+			$('#cliPlacDlg').trigger('PlacementEvent', ['DialogCreate']);	
+		}
+	});
+});
+
+</script>
+
+<div id="cliPlacDlg">
+	<table id="tblPlacDlg" cellpadding="0" cellspacing="0" border="0" class="display"></table> 
+	<p id="PlacDlgLoading" class="loadmessage"><img src="css/images/loading.gif" alt=" " />Loading...</p>
+</div>
+

@@ -1,0 +1,51 @@
+<!-- 20121024 Furgs changed to Stars -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#clienttabs");
+	DisplayFurgsTotal();
+});
+
+function DisplayFurgsTotal(){
+	// Calculate and display the Furgs total, and modify tab colour. Used on load to set and populate tab name
+	
+	$.get('IQXRawData.php?page=SynNetFurgsTotalForClient', function(data,textStatus){
+		ResultString = data;
+		var FurgsRowCount=ResultString.substr(ResultString.indexOf('<LineCount>')+11,ResultString.indexOf('</LineCount>')-ResultString.indexOf('<LineCount>')-11);
+		if(FurgsRowCount>0){
+			$('#tabFurgsComplete').html('STARS To Complete ('+FurgsRowCount+')');
+			$('#tabFurgsComplete').attr('class','tabFurgsComplete Highlight');
+		}else{
+			$('#tabFurgsComplete').html('STARS To Complete (0)');
+			$('#tabFurgsComplete').attr('class','tabFurgsComplete');	
+		}
+	});
+}
+
+</script>
+    
+<div id="clienttabs" >
+    <ul>
+        <li><a href="IQXPage.php?page=SynNetCalendarShifts"><span>Diary</span></a></li>
+        <li><a href="IQXPage.php?page=clientprofile"><span>Contact Details</span></a></li>
+        <li id="P"><a href="IQXPage.php?page=clientprovtimesheets"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheets"><span>Historic Timesheets</span></a></li>
+        <li><a href="IQXPage.php?page=clientpreviousemployees"><span>Previous Temps</span></a></li>
+        <li><a href="IQXPage.php?page=companycontacts"><span>Contacts[onload_conts;block=li;when [var.x_rights.MAINTAINCONTACTS;noerr]=1]</span></a></li>
+        <li><a href="IQXPage.php?page=reports"><span>Reports</span></a></li>
+		<li><a href="IQXPage.php?page=clientquest"><span>Questionnaire[onload_QUEST;block=li;when [var.x_rights.TESTONLY;noerr]=1]</span></a></li>
+   		<li><a href="IQXPage.php?page=testclient"><span>Test[onload_TESTONLY;block=li;when [var.x_rights.TESTONLY;noerr]=1]</span></a></li>
+   		<li><a href="IQXPage.php?page=Furgs"><span>STARS</span></a></li>
+   		<li><a href="IQXPage.php?page=FurgsIncomplete"><span id="tabFurgsComplete" class="tabFurgsComplete">STARS To Complete</span></a></li>
+	</ul>
+    <div id="tabcontent-blank">
+    </div>
+</div>
+
+<p>
+<button type="button" id="button_logout" class="fixed" onclick="IQXLogout()">
+   	Logout
+</button>
+</p>

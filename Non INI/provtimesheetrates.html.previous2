@@ -1,0 +1,195 @@
+<!--[onload;tplvars;tsr='NetProvTimesheetRates?ptempprovtimesheetid']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	var zoomedts=$("#divtimesheets").data("zoomedts");
+	if (zoomedts.completed) {
+		$("#tblrates td.buttoncolumn").text("");
+		$("#timesheetcomplete").remove();
+		$("#timesheetauthorise").text("Authorise");
+	} else {
+		$("#timesheetUncomplete").remove();
+	}
+	IQXInitSection($("#divtimesheetrates"));
+	$(".tstotal","#divtimesheetrates").totalcolumn("#tstotal",2);
+	if ($("#tstotal2").length>0)$(".tstotal2","#divtimesheetrates").totalcolumn("#tstotal2",2);
+	if (zoomedts.theirrefrequired){
+		$("#pProvTimesheetRatesTheirRef").show();
+		$("#inputProvTimesheetRatesTheirRef").val(zoomedts.theirref).removeAttr("readonly");
+	}
+	});
+
+function editrate(row){
+	var rateid=$(row).attr("id");
+	IQXEnableForm("#frmtimesheetrates",{
+		successhandler:loadrates,
+		row:row,
+		idfieldname: "pTempProvTimesheetLineID",
+		idvalue: rateid,
+		errortarget: "#timesheetrateserror"
+	});
+	}
+	
+function uneditrate(row){
+	IQXDisableForm();
+	if ($(row).data("rowjustadded")==1){
+		$(row).remove();
+	};
+	}
+	
+function copyrate(row){
+	var idcount=$("#tblrates").data("rowaddid");
+	if (idcount==undefined){
+		idcount=0;
+	}
+	idcount=idcount+1;
+	$("#tblrates").data("rowaddid",idcount);
+	var newid='Copy' + idcount + $(row).attr("id");
+	$(row).clone().attr('id',newid).appendTo('#tblratesbody');	
+	var newrow=$("#"+newid).get(0);
+	$(newrow).data("rowjustadded",1);
+	$(newrow).find("td button").mouseoverclass();
+	editrate(newrow);
+	}
+	
+function processtimesheet(ts,link,authorising){
+	link.nextlink={action:'func',func:IQXRefreshTab};
+	$("#errProvTimesheetRatesTheirRef").text('');  // clear any previous their ref error message
+	if (ts.theirrefrequired){
+		var ref=$("#inputProvTimesheetRatesTheirRef").val();
+		if (authorising && !ref){   // If authorising we insist that it is filled in
+			$("#errProvTimesheetRatesTheirRef").text('Reference Required');
+			return;
+		}
+		if (ts.theirref !== ref) {
+			var postdata = {ptempprovtimesheetid: ts.id, pTheirRef: ref};
+			IQXChain('#timesheetcompletemessage', {action: 'send',proc: 'NetProvTimesheetSetTheirRef',postdata: postdata,nextlink: link});
+			return;
+			}
+		}
+	IQXChain('#timesheetcompletemessage', link);
+}
+
+function completetimesheet(instruction){
+	var ts=$("#divtimesheets").data("zoomedts");
+	var postdata={ptempprovtimesheetid:ts.id,pinstruction:instruction};
+	processtimesheet(ts,{action:'send',proc:'NetProvTimesheetComplete',postdata:postdata},false);
+}
+
+function authorisetimesheet(){
+	var ts=$("#divtimesheets").data("zoomedts");
+	var postdata={ID:ts.id};
+	var compservice;
+	if (ts.type == 'S') {
+		compservice = 'PROVTSCOMPLETE';
+	}
+	else {
+		compservice = 'PROVNONSHIFTTSCOMPLETE';
+	} 
+	processtimesheet(ts,{action:'send',service:compservice,postdata:postdata},true);
+}
+
+</script>
+
+<form id="frmtimesheetrates" action="IQXPost.php?proc=NetProvTimesheetRateSet" method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tblrates">
+	[onload_PAYandCHARGE;block=table;when [var.x_userclass;noerr]='OWNER']
+	<thead>
+		<tr>
+		<th>Pay Type</th>
+		<th>Unit</th>
+		<th class="rightalign">Units</th>
+		<th class="rightalign">Pay Rate</th>
+		<th class="rightalign">Total Pay</th>
+		<th class="rightalign">Charge Rate</th>
+		<th class="rightalign">Total Charge</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody id="tblratesbody">
+		<tr id="Rate_[tsr.TempProvTimesheetLineID;block=tr]" >
+		<td>[tsr.BandDescription]</td>
+		<td id="trr[tsr.#]_pUnitDescription" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required">[tsr.UnitDescription;noerr]</td>
+		<td id="trr[tsr.#]_pUnits" class="tdeditable required number twodp rightalign">[tsr.Units;noerr]</td>
+	    <td id="trr[tsr.#]_pRate" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required number twodp rightalign">[tsr.Rate;noerr]</td>
+		<td class="tstotal twodp rightalign">[tsr.Total]</td>
+	    <td id="trr[tsr.#]_pRate2" class="twodp rightalign">[tsr.Rate2;noerr]</td>
+		<td class="tstotal2 twodp rightalign">[tsr.Total2]</td>
+		<td class="buttoncolumn" width=120>
+			<span> [tsr.CanEdit;ope=nif:0,minv;magnet=span]
+		    	<button type="button" class="tablebutton nonformbutton" onclick="editrate(this.parentNode.parentNode.parentNode)">Edit</button>
+		    	<button type="button" class="tablebutton nonformbutton" onclick="copyrate(this.parentNode.parentNode.parentNode)">Copy[tsr.IsExpenses;ope=nif:0,minv;magnet=button]</button>
+		    	<button type="submit" class="tablebutton formbutton" onclick="">Save</button>
+		    	<button type="button" class="tablebutton formbutton" onclick="uneditrate(this.parentNode.parentNode.parentNode)">Undo</button>
+			</span>
+		</td>
+		</tr>
+		<tr>
+		<td colspan=4>Total</td>	
+		<td id="tstotal" class="twodp rightalign"></td>	
+		<td></td>
+		<td id="tstotal2" class="twodp rightalign"></td>	
+		<td>
+		</td>
+		</tr>
+	</tbody>
+</table>
+<table class="tablesorter" id="tblrates">
+	[onload_PAYandCHARGE;block=table;default]
+	<thead>
+		<tr>
+		<th>Pay Type</th>
+		<th>Unit</th>
+		<th class="rightalign">Units</th>
+		<th class="rightalign">Rate</th>
+		<th class="rightalign">Total</th>
+		<th></span>
+		</tr>
+	</thead>
+	<tbody id="tblratesbody">
+		<tr id="Rate_[tsr.TempProvTimesheetLineID;block=tr]" >
+		<td>[tsr.BandDescription]</td>
+		<td id="trr[tsr.#]_pUnitDescription" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required">[tsr.UnitDescription;noerr]</td>
+		<td id="trr[tsr.#]_pUnits" class="tdeditable required number twodp rightalign">[tsr.Units;noerr]</td>
+	    <td id="trr[tsr.#]_pRate" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required number twodp rightalign">[tsr.Rate;noerr]</td>
+		<td class="tstotal twodp rightalign">[tsr.Total]</td>
+		<td class="buttoncolumn" width=120>
+			<span> [tsr.CanEdit;ope=nif:0,minv;magnet=span]
+		    	<button type="button" class="tablebutton nonformbutton" onclick="editrate(this.parentNode.parentNode.parentNode)">Edit</button>
+		    	<button type="button" class="tablebutton nonformbutton" onclick="copyrate(this.parentNode.parentNode.parentNode)">Copy[tsr.IsExpenses;ope=nif:0,minv;magnet=button]</button>
+		    	<button type="submit" class="tablebutton formbutton" onclick="">Save</button>
+		    	<button type="button" class="tablebutton formbutton" onclick="uneditrate(this.parentNode.parentNode.parentNode)">Undo</button>
+			</span>
+		</td>
+		</tr>
+		<tr>
+		<td colspan=4>Total</td>	
+		<td id="tstotal" class="twodp rightalign"></td>	
+		<td>
+		</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+<p id="pProvTimesheetRatesTheirRef" class="ui-helper-hidden">
+	<label for="inputProvTimesheetRatesTheirRef">
+		Reference
+	</label>
+	<input id="inputProvTimesheetRatesTheirRef" class="uppercase" />
+	<span class="errormessage" id="errProvTimesheetRatesTheirRef"></span>
+</p>
+
+<span id="timesheetcompletemessage" ></span>
+<span class="errormessage" id="timesheetrateserror">[var.x_errormessage]</span>
+
+<button type="button" id="timesheetcomplete" class="fixed nonformbutton" onclick="completetimesheet('')" >Complete</button>
+<button type="button" id="timesheetUncomplete" class="fixed nonformbutton" onclick="completetimesheet('REVERSE')" >Undo</button>
+<span>	[onload_AUTHORISETIMESHEETS;block=span;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+   <button type="button" id="timesheetauthorise" class="fixed nonformbutton" onclick="authorisetimesheet()" >Complete and Authorise</button>
+</span>
+<div class="usertext">
+	[onload_AUTHORISETIMESHEETS1;block=div;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+	[onload;file=txt_timesheet_authorise.html;noerr]
+</div>
+

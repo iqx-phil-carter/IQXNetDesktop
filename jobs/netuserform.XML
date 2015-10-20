@@ -1,0 +1,867 @@
+<Job title="WPK Import" dateformat="yyyy-mm-dd" timeformat="hh:nn:ss" datetimeformat="yyyy-mm-dd hh:nn:ss">
+ <IfYesDialog text="This job will import the NETUSER form. Ok to proceed?">
+  <SQLExec>
+   delete from wpkform where &#x0D;&#x0A;wpkformid=&apos;NETUSER&apos;
+  </SQLExec>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="Caption" type="S">
+    </Field>
+    <Field name="Colour" type="S">
+    </Field>
+    <Field name="DefaultDetailView" type="S">
+    </Field>
+    <Field name="DefaultLayout" type="S">
+    </Field>
+    <Field name="FormClass" type="S">
+    </Field>
+    <Field name="FormHeight" type="S">
+    </Field>
+    <Field name="FormLeft" type="S">
+    </Field>
+    <Field name="FormSwitches" type="S">
+    </Field>
+    <Field name="FormTop" type="S">
+    </Field>
+    <Field name="FormType" type="S">
+    </Field>
+    <Field name="FormWidth" type="S">
+    </Field>
+    <Field name="MasterView" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="TestSwitches" type="S">
+    </Field>
+    <Field name="UpdateCallerFlag" type="N">
+    </Field>
+    <Field name="VideoRecordType" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <Caption><![CDATA[IQXNet User {Q_name}]]></Caption>
+     <DefaultDetailView><![CDATA[LINKS]]></DefaultDetailView>
+     <DefaultLayout><![CDATA[MAIN]]></DefaultLayout>
+     <FormSwitches><![CDATA[UserID
+ClassID
+Name
+LoginID
+EmailAddress
+xID
+
+
+
+
+
+
+
+DefPassword={Q_select DefaultUserPassword from IQXNetEmailDetails where IQXNetEmailDetailsID='DEFAULT'}
+AdminUser={!?F_UserID=ADMINUSER:1:0}
+NewUser={!?F_xID=:0:1}
+
+
+]]></FormSwitches>
+     <FormType><![CDATA[Single]]></FormType>
+     <MasterView><![CDATA[Details]]></MasterView>
+     <Name><![CDATA[IQXNet User]]></Name>
+     <TestSwitches><![CDATA[TI0XLDXN110620080000
+]]></TestSwitches>
+     <UpdateCallerFlag>0</UpdateCallerFlag>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkform (CanEdit, Caption, Colour, DefaultDetailView, DefaultLayout, FormClass, FormHeight, FormLeft, FormSwitches, FormTop, FormType, FormWidth, MasterView, Name, Notes, TestSwitches, UpdateCallerFlag, VideoRecordType, WPKFormID) values &#x0D;&#x0A;(:CanEdit, :Caption, :Colour, :DefaultDetailView, :DefaultLayout, :FormClass, :FormHeight, :FormLeft, :FormSwitches, :FormTop, :FormType, :FormWidth, :MasterView, :Name, :Notes, :TestSwitches, :UpdateCallerFlag, :VideoRecordType, :WPKFormID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="BackColour" type="S">
+    </Field>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="CanSelect" type="S">
+    </Field>
+    <Field name="CaptionBackColour" type="S">
+    </Field>
+    <Field name="CaptionFontColour" type="S">
+    </Field>
+    <Field name="CaptionWidth" type="S">
+    </Field>
+    <Field name="DoubleClickButtonID" type="S">
+    </Field>
+    <Field name="DragSourceType" type="S">
+    </Field>
+    <Field name="DropTargetType" type="S">
+    </Field>
+    <Field name="Explanation" type="S">
+    </Field>
+    <Field name="FontColour" type="S">
+    </Field>
+    <Field name="FromClause" type="S">
+    </Field>
+    <Field name="GridMultiSelect" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="MultiSelectColumnTitle" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="NeedsRebuildCheck" type="S">
+    </Field>
+    <Field name="NeedsReloadCheck" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="OuterJoinIndicatorFields" type="S">
+    </Field>
+    <Field name="PreOpenScript" type="S">
+    </Field>
+    <Field name="SaveScript" type="S">
+    </Field>
+    <Field name="UpdatePrimaryKey" type="S">
+    </Field>
+    <Field name="UpdateTable" type="S">
+    </Field>
+    <Field name="UpdateVideoRecordType" type="S">
+    </Field>
+    <Field name="ValidationScript" type="S">
+    </Field>
+    <Field name="ViewType" type="S">
+    </Field>
+    <Field name="WhereClause" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <FromClause><![CDATA[IQXNetUser]]></FromClause>
+     <Name><![CDATA[IQXNetUser]]></Name>
+     <SaveScript><![CDATA[!abortif empty {F_xID}
+!if sql :F_classid = 'CANDIDATE'
+!!sql insert into IQXNetUserLink (IQXNetUserLinkID,IQXNetUserID,PersonID) values (:C_unique , :Q_IQXNETUSERID , :F_xID ) 
+!elseif  sql :F_classid in ('CLIENT','AGENCY')
+!!sql insert into IQXNetUserLink (IQXNetUserLinkID,IQXNetUserID,EmploymentID) values (:C_unique , :Q_IQXNETUSERID , :F_xID ) 
+!elseif  sql :F_classid = 'OWNER'
+!!sql update iqxnetuser set staffid =  :F_xID where iqxnetuserid = :Q_IQXNETUSERID
+
+!setformswitch xID
+
+!staticform CHANGEWEBPASSWORD
+{Q_iqxnetuserid}
+{F_DefPassword}
+!message The password has been set to '{F_DefPassword}'
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[IQXNetUserID]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[IQXNetUser]]></UpdateTable>
+     <ViewType><![CDATA[Inspector]]></ViewType>
+     <WhereClause><![CDATA[IQXNetUser.IQXNetUserID=:F_UserID]]></WhereClause>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!E}]]></CanEdit>
+     <CanSelect><![CDATA[{!?Q_IQXNETUSERCLASSID=OWNER:0:1}]]></CanSelect>
+     <DropTargetType><![CDATA[@P@E@]]></DropTargetType>
+     <FromClause><![CDATA[IQXNetUserLink key left outer join person,
+IQXNetUserLink key left outer join (employment key join (company,person cperson))]]></FromClause>
+     <Name><![CDATA[Links]]></Name>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[IQXNetUserLink.IQXNetUserID=:F_UserID]]></WhereClause>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <FromClause><![CDATA[IQXNetRightAllowed left outer join IQXNetRightAssigned on IQXNetRightAllowed.IQXNetRightID = IQXNetRightAssigned.IQXNetRightID and IQXNetRightAssigned.IQXNetUserID =:Q_IQXNETUSERID,
+IQXNetRightAllowed key join IQXNetRight]]></FromClause>
+     <Name><![CDATA[Rights]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[ASSIGNED@1]]></OuterJoinIndicatorFields>
+     <UpdatePrimaryKey><![CDATA[IQXNetRightID
+IQXNetUserID@1,IQXNetRightID@1]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[IQXNetRight
+IQXNetRightAssigned]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[IQXNetRightAllowed.IQXNetUserClassID=:Q_IQXNETUSERCLASSID and IQXNetRightAllowed.ID='*']]></WhereClause>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkview (BackColour, CanEdit, CanSelect, CaptionBackColour, CaptionFontColour, CaptionWidth, DoubleClickButtonID, DragSourceType, DropTargetType, Explanation, FontColour, FromClause, GridMultiSelect, Image, MultiSelectColumnTitle, Name, NeedsRebuildCheck, NeedsReloadCheck, Notes, OuterJoinIndicatorFields, PreOpenScript, SaveScript, UpdatePrimaryKey, UpdateTable, UpdateVideoRecordType, ValidationScript, ViewType, WhereClause, WPKFormID, WPKViewID) values &#x0D;&#x0A;(:BackColour, :CanEdit, :CanSelect, :CaptionBackColour, :CaptionFontColour, :CaptionWidth, :DoubleClickButtonID, :DragSourceType, :DropTargetType, :Explanation, :FontColour, :FromClause, :GridMultiSelect, :Image, :MultiSelectColumnTitle, :Name, :NeedsRebuildCheck, :NeedsReloadCheck, :Notes, :OuterJoinIndicatorFields, :PreOpenScript, :SaveScript, :UpdatePrimaryKey, :UpdateTable, :UpdateVideoRecordType, :ValidationScript, :ViewType, :WhereClause, :WPKFormID, :WPKViewID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="BackColour" type="S">
+    </Field>
+    <Field name="ButtonGroup" type="N">
+    </Field>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="CanView" type="S">
+    </Field>
+    <Field name="CaptionBackColour" type="S">
+    </Field>
+    <Field name="CaptionFontColour" type="S">
+    </Field>
+    <Field name="CheckValues" type="S">
+    </Field>
+    <Field name="ComboScript" type="S">
+    </Field>
+    <Field name="ComplexDataUpdateCommand" type="S">
+    </Field>
+    <Field name="DataLength" type="N">
+    </Field>
+    <Field name="DataType" type="S">
+    </Field>
+    <Field name="DefaultValue" type="S">
+    </Field>
+    <Field name="Descriptor" type="S">
+    </Field>
+    <Field name="DisplayFormat" type="S">
+    </Field>
+    <Field name="DisplaySize" type="N">
+    </Field>
+    <Field name="Expanded" type="S">
+    </Field>
+    <Field name="FontColour" type="S">
+    </Field>
+    <Field name="IDforVideoRecordType" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="Indent" type="N">
+    </Field>
+    <Field name="ItemType" type="S">
+    </Field>
+    <Field name="Mask" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="PickList" type="S">
+    </Field>
+    <Field name="Required" type="S">
+    </Field>
+    <Field name="Sortable" type="N">
+    </Field>
+    <Field name="SortExpression" type="S">
+    </Field>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+    <Field name="WPKViewItemID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanView><![CDATA[!F_AdminUser]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_EmailAddress]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetUser.EmailAddress]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Email Address]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EMAILADDRESS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[!F_AdminUser]]></CanView>
+     <DataType><![CDATA[D]]></DataType>
+     <Descriptor><![CDATA[IQXNetUser.ExpiryDate]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Expiry Date]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EXPIRYDATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?F_AdminUser::G_ccgrey}]]></BackColour>
+     <CanEdit><![CDATA[F_AdminUser]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <ComboScript><![CDATA[!ask Change User Class?
+!sql delete from IQXNetUserLink where IQXNetUserID=:F_UserID
+!sql delete from IQXNetRightAssigned where IQXNetUserID=:F_UserID
+!closeview LINKS
+!closeview RIGHTS
+!update
+]]></ComboScript>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_ClassID]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetUser.IQXNetUserClassID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Combo]]></ItemType>
+     <Name><![CDATA[User Class]]></Name>
+     <PickList><![CDATA[select 'CANDIDATE' as descrip
+union
+select 'CLIENT'
+union
+select 'AGENCY']]></PickList>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETUSERCLASSID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_UserID]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetUser.IQXNetUserID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[IQXNetUserID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETUSERID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_LoginID]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetUser.LoginID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Login ID]]></Name>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[LOGINID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_Name]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetUser.Name]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Name]]></Name>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!close]]></Descriptor>
+     <DisplaySize>32</DisplaySize>
+     <Image><![CDATA[close]]></Image>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Close{!C}]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2520</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBCLOSE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_NewUser]]></CanView>
+     <CaptionFontColour><![CDATA[G_ccred]]></CaptionFontColour>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>100</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[New IQXNet User]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>3000</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBNEWFLAG]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[!F_AdminUser]]></CanView>
+     <Descriptor><![CDATA[!ask Reset web password for this user?
+!staticform CHANGEWEBPASSWORD
+{Q_iqxnetuserid}
+{F_DefPassword}
+!message The password has been set to '{F_DefPassword}'
+]]></Descriptor>
+     <DisplaySize>100</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Reset Password]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2530</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBRESETPASSWORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!save
+!close]]></Descriptor>
+     <DisplaySize>32</DisplaySize>
+     <Image><![CDATA[saveclose]]></Image>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Save and Close]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2510</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBSAVECLOSE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_AdminUser]]></CanView>
+     <Descriptor><![CDATA[!if getstring New Admin User Password
+!!staticform CHANGEWEBPASSWORD
+{Q_iqxnetuserid}
+{F_scratch0}
+!!message The Admin User Password has been set to '{F_scratch0}'
+]]></Descriptor>
+     <DisplaySize>100</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Set Password]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2531</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBSETADMINPASSWORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!update]]></Descriptor>
+     <DisplaySize>32</DisplaySize>
+     <Image><![CDATA[update]]></Image>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Save and Refresh]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2500</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBUPDATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <Descriptor><![CDATA[!if sql :F_scratch0 = 'DRAG_P'
+!!sql insert into IQXNetUserLink (IQXNetUserLinkID,IQXNetUserID,PersonID) values (:C_unique , :Q_IQXNETUSERID , :F_scratch1 ) 
+!elseif sql :F_scratch0 = 'DRAG_E'
+!!sql insert into IQXNetUserLink (IQXNetUserLinkID,IQXNetUserID,EmploymentID) values (:C_unique , :Q_IQXNETUSERID , :F_scratch1 ) 
+!update
+
+]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Signal Button]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2540</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[SIGNALBUTTON]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetUser.StaffID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>60</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[company.name]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[G_coname]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CNAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetUserLink.EmploymentID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[EmploymentID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EMPLOYMENTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetUserLink.IQXNetUserID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[IQXNetUserID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETUSERID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetUserLink.IQXNetUserLinkID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[IQXNetUserLinkID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETUSERLINKID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Drag {G_personname} or {G_copersonname}]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>3000</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[LAB2]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[to this panel to create link]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>4000</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[LAB3]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!abortif empty {Q_IQXNetUserLinkID}
+!ask Delete link?
+!sql delete from IQXNetUserLink where IQXNetUserLinkID=:Q_IQXNetUserLinkID
+!refreshview
+]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Delete Link]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2000</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBDELETE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetUserLink.PersonID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[PersonID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PERSONID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[isnull(person.name,cperson.name)]]></Descriptor>
+     <DisplaySize>40</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[G_personname]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PNAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(select first Assigned from IQXNetRightAssigned where IQXNetUserID=:Q_IQXNetUserID and IQXNetRightID=IQXNetRight.IQXNetRightID)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Over-ride]]></Name>
+     <PickList><![CDATA[select '' as descrip,0 as value
+union all
+select 'Allow',1
+union all
+select 'Deny',-1]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ASSIGNED@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[xxx]]></ComplexDataUpdateCommand>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[if exists (select * from IQXNetRightDefault where IQXNetRightID=IQXNetRight.IQXNetRightID and IQXNetUserClassID=:Q_IQXNETUSERCLASSID and ID='*') then 'Allowed' else 'Denied' endif]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Default]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFAULTSTATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetRight.Description]]></Descriptor>
+     <DisplaySize>55</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Description]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>5</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DESCRIPTION]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[IQXNetRight.IQXNetRightID]]></Descriptor>
+     <DisplaySize>15</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[ID]]></Name>
+     <Sortable>2</Sortable>
+     <SortExpression><![CDATA[IQXNetRight.SortOrder,IQXNetRight.IQXNetRightID]]></SortExpression>
+     <SortOrder>0</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETRIGHTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_IQXNETRIGHTID}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetRightAssigned.IQXNetRightID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[IQXNetRightID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETRIGHTID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_IQXNETUSERID}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[IQXNetRightAssigned.IQXNetUserID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[IQXNetUserID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[IQXNETUSERID@1]]></WPKViewItemID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkviewitem (BackColour, ButtonGroup, CanEdit, CanView, CaptionBackColour, CaptionFontColour, CheckValues, ComboScript, ComplexDataUpdateCommand, DataLength, DataType, DefaultValue, Descriptor, DisplayFormat, DisplaySize, Expanded, FontColour, IDforVideoRecordType, Image, Indent, ItemType, Mask, Name, Notes, PickList, Required, Sortable, SortExpression, SortOrder, WPKFormID, WPKViewID, WPKViewItemID) values &#x0D;&#x0A;(:BackColour, :ButtonGroup, :CanEdit, :CanView, :CaptionBackColour, :CaptionFontColour, :CheckValues, :ComboScript, :ComplexDataUpdateCommand, :DataLength, :DataType, :DefaultValue, :Descriptor, :DisplayFormat, :DisplaySize, :Expanded, :FontColour, :IDforVideoRecordType, :Image, :Indent, :ItemType, :Mask, :Name, :Notes, :PickList, :Required, :Sortable, :SortExpression, :SortOrder, :WPKFormID, :WPKViewID, :WPKViewItemID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="CanSelect" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="MenuWidth" type="S">
+    </Field>
+    <Field name="MiddleSplitPercent" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="ShowMenuImages" type="S">
+    </Field>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="TopLeftView" type="S">
+    </Field>
+    <Field name="TopRightView" type="S">
+    </Field>
+    <Field name="TopSplitPercent" type="S">
+    </Field>
+    <Field name="Wizard" type="N">
+    </Field>
+    <Field name="WizardFinishScript" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKLayoutID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <MiddleSplitPercent><![CDATA[30]]></MiddleSplitPercent>
+     <Name><![CDATA[Main]]></Name>
+     <SortOrder>10</SortOrder>
+     <TopLeftView><![CDATA[Details]]></TopLeftView>
+     <Wizard>0</Wizard>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpklayout (CanSelect, Image, MenuWidth, MiddleSplitPercent, Name, Notes, ShowMenuImages, SortOrder, TopLeftView, TopRightView, TopSplitPercent, Wizard, WizardFinishScript, WPKFormID, WPKLayoutID) values &#x0D;&#x0A;(:CanSelect, :Image, :MenuWidth, :MiddleSplitPercent, :Name, :Notes, :ShowMenuImages, :SortOrder, :TopLeftView, :TopRightView, :TopSplitPercent, :Wizard, :WizardFinishScript, :WPKFormID, :WPKLayoutID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKLayoutID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[LINKS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[NETUSER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[RIGHTS]]></WPKViewID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpklayoutview (SortOrder, WPKFormID, WPKLayoutID, WPKViewID) values &#x0D;&#x0A;(:SortOrder, :WPKFormID, :WPKLayoutID, :WPKViewID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+ </IfYesDialog>
+</Job>

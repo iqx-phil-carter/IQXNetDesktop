@@ -1,0 +1,30 @@
+<!--[onload;tplvars;candhist='NetAgencyCandidateProgress?pPersonID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#tblagcandhist"));
+	});
+
+</script>
+
+<table class="tablesorter" id="tblagcandhist">
+	<thead>
+		<tr>
+			<th>Company</th>
+			<th>Position</th>
+			<th>Start</th>
+			<th>Finish</th>
+			<th>Status</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[candhist.CompanyName;block=tr;noerr]</td>
+	    <td>[candhist.JobDescription;block=tr;noerr]</td>
+	    <td>[candhist.sFrom;block=tr;noerr]</td>
+	    <td>[candhist.sTo;noerr]</td>
+	    <td>[candhist.State;noerr]</td>
+		</tr>
+		
+	</tbody>
+</table>

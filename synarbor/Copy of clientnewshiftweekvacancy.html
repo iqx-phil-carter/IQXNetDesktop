@@ -1,0 +1,157 @@
+<!--[onload;tplvars;newsh='SynNetClientShiftTemplates']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var dlg=$('#divclientnewshiftweek').dialog({
+		title:'New Booking Request',   
+		modal:true,
+		width:500,
+		close: function(){
+				$("#cli_newsh_startdate").datepicker('hide');
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+		buttons: {
+			"Cancel": function(){
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+			"Save": function(){
+				$("#frmclientnewshiftweek").submit();
+			}
+		}
+	});
+	IQXInitSection($("#frmclientnewshiftweek"));
+	IQXEnableForm("#frmclientnewshiftweek",{wholeformvalidator:checkStartsMonday,successhandler:function(){
+		IQXDisableForm();
+		IQXcloseUIdialog(dlg);
+		refreshCalendar();
+	}});
+	$("#cli_newsh_startdate").datepicker('option',{onSelect:calDateSelected});
+	showPicker();
+	$("#cli_newsh_startdate").click(showPicker);
+	});
+	
+function showPicker(){
+	$("#cli_newsh_startdate").datepicker('show');
+}
+
+function checkStartsMonday(){
+	var sdat=$.trim($('#cli_newsh_startdate','#frmclientnewshiftweek').val());
+	if (!sdat) {
+		return "";
+	}
+	var ddat= new Date(UKtoJSdate(sdat));
+	if (ddat.getDay() == 1) {
+		return "";
+	}
+	return "The Week Beginning date must be a Monday";
+}
+
+function calDateSelected(dateText, inst){
+	if (dateText) {
+		var ddat = new Date(UKtoJSdate(dateText));
+		var day = 1000 * 60 * 60 * 24;
+		while (ddat.getDay() != 1) {
+			ddat.setTime(ddat.getTime() - day);
+		}
+		this.value = $.datepicker.formatDate('D dd/mm/yy', ddat);
+		for (var i=0;i<=6;i++) {
+			$('#xxxlabday'+i).text($.datepicker.formatDate('D dd/mm/yy', ddat));
+			ddat.setTime(ddat.getTime() + day);
+		}
+	}
+}
+
+</script>
+
+<div id="divclientnewshiftweek">
+<form id="frmclientnewshiftweek" action="IQXPost.php?proc=SynNetClientAddShiftsWeek" method="post" accept-charset="utf-8">
+	<fieldset>
+        <p>
+            <label for="cli_newsh_startdate">
+                Week Beginning
+            </label>
+            <input type="text" id="cli_newsh_startdate" name="pstartdate" autocomplete="off" class="medium required longdate" />
+        </p>
+        <p>
+            <label id="xxxlabday0" for="cli_newsh_monday">
+                Monday 
+            </label>
+			<select id="cli_newsh_monday" class="noncheckbox" name="pmonday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday1" for="cli_newsh_tuesday">
+                Tuesday 
+            </label>
+			<select id="cli_newsh_tuesday" class="noncheckbox" name="ptuesday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday2" for="cli_newsh_wednesday">
+                Wednesday 
+            </label>
+			<select id="cli_newsh_wednesday" class="noncheckbox" name="pwednesday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday3" for="cli_newsh_thursday">
+                Thursday 
+            </label>
+			<select id="cli_newsh_thursday" class="noncheckbox" name="pthursday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday4" for="cli_newsh_friday">
+                Friday 
+            </label>
+			<select id="cli_newsh_friday" class="noncheckbox" name="pfriday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday5" for="cli_newsh_saturday">
+                Saturday 
+            </label>
+			<select id="cli_newsh_saturday" class="noncheckbox" name="psaturday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label id="xxxlabday6" for="cli_newsh_sunday">
+                Sunday 
+            </label>
+			<select id="cli_newsh_sunday" class="noncheckbox" name="psunday">
+				<option value=" "></option>
+				[newsh.TemplateList;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+        </p>
+        <p>
+            <label for="cli_newsh_note">
+                Note
+            </label>
+            <input type="text" id="cli_newsh_note" name="pnote"  />
+        </p>
+        <p>
+            <label for="cli_newsh_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newsh_ref" name="ptheirref" class="medium uppercase" />
+        </p>
+		<p>
+		    <span class="errormessage">[var.x_errormessage]</span>
+		</p>
+	</fieldset>	
+</form>
+</div>

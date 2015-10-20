@@ -1,0 +1,74 @@
+<!--[onload;tplvars;cand='NetCandidateProfileBank']-->
+
+<!-- 20120116 Edit buttons and error message moved top centre -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#frmcandAdmin");
+		$("#frmcandAdmin .questionnaire").questionnaire();
+	});
+	
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_profile_Bank_top.html;noerr]</div>
+	    
+<form id="frmcandAdmin" name="candAdmin" action="IQXPost.php?proc=NetCandidateProfileSetBank" method="POST" accept-charset="utf-8">
+    <div align="center" class="ButtonGroup" >
+            <button type="button" id="cand_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+                Edit
+            </button>
+            <button type="button" id="cand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+                Refresh
+            </button>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+                Undo
+            </button>
+            
+	    </div>
+	    <div class="errormessage" align="center" >[var.x_errormessage]</div>
+	    
+    <fieldset class="regular">
+        <input type="hidden" id="cand_personid" name="ppersonid" value="[cand.PersonID;block=fieldset]" />
+        <input type="hidden" name="poldBankName" value="[cand.BankName;noerr]" />
+        <input type="hidden" name="poldBankSortCode" value="[cand.BankSortCode;noerr]" />
+        <input type="hidden" name="poldBankAcName" value="[cand.BankAcName;noerr]" />
+        <input type="hidden" name="poldBankAcNo" value="[cand.BankAcNo;noerr]" />
+        <input type="hidden" name="poldni" value="[cand.ni;noerr]" />
+        <input type="hidden" name="poldUniqueTaxReference" value="[cand.UniqueTaxReference;noerr]" />
+		<div class="questionnaire">
+		<div class="qquestrow">
+            <div class="qquestion">Name Of Bank</div>
+			<div class="qanswer"><input type="text" id="cand_BankName" name="pBankName" value="[cand.BankName;noerr]" class="qpseudoquestanswer" /></div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">Sort Code</div>
+			<div class="qanswer"><input type="text" id="cand_BankSortCode" name="pBankSortCode" value="[cand.BankSortCode;noerr]" class="validSortCode qpseudoquestanswer" /></div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">Account Name</div>
+			<div class="qanswer"><input type="text" id="cand_BankAcName" name="pBankAcName" value="[cand.BankAcName;noerr]" class="qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">Account Number</div>
+			<div class="qanswer"><input type="text" id="cand_BankAcNo" name="pBankAcNo" value="[cand.BankAcNo;noerr]" class="validBankAccountNumber qpseudoquestanswer"  /></div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">National Insurance Number</div>
+			<div class="qanswer"><input type="text" id="cand_ni" name="pni" value="[cand.ni;noerr]" class="validNiNumber uppercase qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">Unique Tax Reference</div>
+			<div class="qanswer"><input type="text" id="cand_UniqueTaxReference" name="pUniqueTaxReference" value="[cand.UniqueTaxReference;noerr]" class="validUTRNumber qpseudoquestanswer" /></div>
+        </div>
+    
+		<div class="cleardiv" ></div>
+	   	<!--div>[candquest;block=div]</div-->  
+	    
+		<p><div class="usertext">[onload;file=txt_candidate_profile_Bank_bottom.html;noerr]</div></p>
+    </fieldset>
+</form>
+
+

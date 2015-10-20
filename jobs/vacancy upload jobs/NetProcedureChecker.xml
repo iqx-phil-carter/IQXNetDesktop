@@ -1,0 +1,134 @@
+<Job title="check database procedure" dateformat="ddd dd/mm/yyyy" autoclose="YES">
+	<Library>
+		<Setup>
+				<!-- NetAlreadyApplied, NetIncomingApplications -->
+			<SQLExec breakpoint="{bp}">insert into company (companyid, name, keyname) values ('TESTX1','Test Company 1','TESTCO1')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUser (IQXNetUserID,IQXNetUserClassID,Name,LoginID,Password,PasswordSet) VALUES ('TESTUSER1','CLIENT','TESTUSER1','TESTUSER1','x',1)</SQLExec>
+			<SQLExec breakpoint="{bp}">insert into person (personid, name, keyname,dob,Forenames) values ('TESTX1','Test Emp 1','TESTEMP1','2010-12-25 15:16:00.377','Test Forename')</SQLExec>
+			<SQLExec breakpoint="{bp}">insert into employment (employmentid,companyid,personid,startdate) values ('TESTX1','TESTX1','TESTX1','2010-12-25 15:16:00.377')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO staff (staffid,name,defaultdepartid,shortid,userid) VALUES ('TESTWEBUSER','TESTWEBUSER','AA','XX','TESTWEBUSER')</SQLExec>
+			<SqlExec breakpoint="{bp}">insert into vacancy (vacancyid,employmentid,departmentid,staffid) values ('TESTX1','TESTX1','AA','TESTWEBUSER')</SqlExec>
+			<SqlExec breakpoint="{bp}">insert into vacancy (vacancyid,employmentid,departmentid,staffid) values ('TESTX2','TESTX1','AA','TESTWEBUSER')</SqlExec>
+			<SqlExec breakpoint="{bp}">INSERT INTO placement (placementid,placedate,employmentid,vacancyid,departmentid,staffid) VALUES ('TEMPPLACEMENT','2010-01-01','TESTX1','TESTX1','AA','TESTWEBUSER')</SqlExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUserLink (IQXNetUserLinkId,IQXNetUserID,PersonID,EmploymentID) VALUES ('TESTLINK1','TESTUSER1','TESTX1','TESTX1')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO progress(progressid,vacancyid,status,staffid,personid,placementid,) VALUES ('TESTPROGRESS1','TESTX1','X','TESTWEBUSER','TESTX1','TEMPPLACEMENT')</SQLExec>	
+				<!-- TempShiftUnavailableReason -->
+			<SQLExec breakpoint="{bp}">insert into person (personid, name, keyname) values ('TESTX2','Test Emp 2','TESTEMP2')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUser (IQXNetUserID,IQXNetUserClassID,Name,LoginID,Password,PasswordSet) VALUES ('TESTUSER2','CLIENT','TESTUSER2','TESTUSER2','x',1)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO TempShiftUnavailableReason (TempShiftUnavailableReasonID,Name,Sortorder,PublishToWeb) VALUES ('X','TESTREASON',1000,1)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,VacancyID,PersonID,PlacementID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT1','TESTX1','TESTX2','TEMPPLACEMENT','2010-12-25 15:16:00.377','P','TESTWEBUSER','2010-12-25 15:16:00.377',1)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,PersonID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT2','TESTX2','2010-12-25 15:16:00.377','H','TESTWEBUSER','2010-12-25 15:16:00.377',0)</SQLExec>
+				<!-- NetCandidateDiaryActionSave -->
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,PersonID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT3','TESTX1','2010-12-25 15:16:00.377','C','TESTWEBUSER','2010-12-25 15:16:00.377',0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,PersonID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT4','TESTX1','2010-12-25 15:16:00.377','P','TESTWEBUSER','2010-12-25 15:16:00.377',0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,PersonID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT5','TESTX1','2010-12-25 15:16:00.377','P','TESTWEBUSER','2010-12-25 15:16:00.377',0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempshift (TempShiftID,PersonID,ShiftDate,State,StaffID,WhenEntered,TempConfirmed) VALUES ('TEMPSHIFT6','TESTX1','2010-12-25 15:16:00.377','A','TESTWEBUSER','2010-12-25 15:16:00.377',0)</SQLExec>
+				<!-- NetCandidateProfileBank -->
+			<SQLExec breakpoint="{bp}">INSERT INTO Pay_Employee (PersonID,BankName,BankSortCode,BankAcName,BankAcNo,SecondaryAgencyID) VALUES ('TESTX1','BANKNAME','XX-XX-XX','TEST USER','99999999','TESTX1')</SQLExec>
+				<!-- NetAgencyCandidateProgress -->
+			<SQLExec breakpoint="{bp}">INSERT INTO TempShiftPlan (TempShiftPlanID,VacancyID,EssentialSkill,Description,TimeFrom,TimeTo,Moveable,ShiftDate,StaffID) VALUES ('TESTX1','TESTX1',';;;','TEMPSHIFTPLAN','07:00:00.000','07:00:00.000',1,'2010-12-25 15:16:00.377','TESTWEBUSER')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO TempShiftProgress (TempShiftProgressID,TempShiftPlanID,Status,StaffID,PersonID,WhenEntered) VALUES ('TEMPSHIFTPROGRESS','TESTX1','A','TESTWEBUSER','TESTX1','2010-12-25 15:16:00.377')</SQLExec>
+				<!-- NetAgencyCandidateSubmit -->
+			<SQLExec breakpoint="{bp}">INSERT INTO CascadedVacancy (CascadedVacancyID,VacancyID,SecondaryAgencyID,CascadeTime,CascadeLevel,Method) VALUES ('CASCADEDVACANCY','TESTX1','TESTX1','10:00','1','A')</SQLExec>	
+			<SQLExec breakpoint="{bp}">INSERT INTO CascadedShift (CascadedShiftID,TempShiftPlanID,SecondaryAgencyID,CascadeTime,CascadeLevel,Method) VALUES ('CASCADEDSHIFT','TESTX1','TESTX1','10:00','1','A')</SQLExec>
+				<!-- NetAgencyContact -->
+			<SQLExec breakpoint="{bp}">INSERT INTO phone (phoneid,phonetypeid,who,whoid,number,numberdigits) VALUES('TESTPHONE','EP','CP','TESTX1','01999 999 999','01999999999')</SQLExec>
+				<!-- NetAgencyProvTimesheets (Change 201052 to reflect current date) -->
+			<SQLExec breakpoint="{bp}">INSERT INTO Division (divisionid,name) VALUES ('TESTDIVISION','Test Division')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO TempPayBand (TempPayBandID,Description,Unit,PayrollFlag,SortOrder) VALUES ('TESTPAYBAND','Test pay band','Hours','A','999')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempdesk (departmentid,divisionid,tempdeskid) VALUES ('AA','TESTDIVISION','TESTTEMPDESK')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempprovtimesheet (TempProvTimeSheetID,PlacementID,PersonID,VacancyID,TempDeskID,Period,PeriodLength,ExtNumber,SerialNumber) VALUES ('TEMPTIMESHEET','TEMPPLACEMENT','TESTX1','TESTX1','TESTTEMPDESK','201052','W','2','9999')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tempprovtimesheetline (TempProvTimeSheetLineID,TempProvTimeSheetID,TempPayBandID,LineNumber,PayRate,ChargeRate,StartDate,EndDate) VALUES ('TEMPTIMESHEETLINE','TEMPTIMESHEET','TESTPAYBAND','1',8.0,11.1,'2010-12-25 15:16:00.377','2010-12-25 15:16:00.377')</SQLExec>
+				<!-- NetCandidateAddEventsOneDay -->
+			<SQLExec breakpoint="{bp}">INSERT INTO TempShiftTemplate (TempShiftTemplateID,DepartmentID,Description,TimeFrom,TimeTo,Moveable,Minutes,BreakMinutes) VALUES ('TESTTEMPLATE','AA','Test template','09:00:00.000','10:00:00.000','1','60','5')</SQLExec>
+				<!-- NetCandidateDepartmentRegister --> 
+			<SQLExec breakpoint="{bp}">INSERT INTO Department (departmentid,name,searchable,divisionid,PublishToWeb) VALUES ('XX','Test department',1,'TESTDIVISION',1)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO search (searchid,temp,permanent,personid,departmentid) VALUES ('TESTSEARCH',0,0,'TESTX1','XX')</SQLExec>
+				<!-- NetCandidateDocuments -->
+			<SQLExec breakpoint="{bp}">INSERT INTO DocumentType (DocumentTypeID,Description,Class,SortOrder) VALUES ('TESTDOCTYPE','Test document type','P',40)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO oledocument (oledocumentid,description,ownertype,ownerid,RawFile,FileExtension,DocumentTypeID) VALUES ('TESTBLOB','Test document','P','TESTX1',1,'doc','TESTDOCTYPE')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO blobstore (class,id,blob,zipped,PublishToWeb,AddToInvPDF,CVSendOutApproved) VALUES ('O','TESTBLOB','x',0,1,0,0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO blobstore (class,id,blob,zipped,PublishToWeb,AddToInvPDF,CVSendOutApproved) VALUES ('V','TESTX1','x',2,1,0,0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO blobstore (class,id,blob,zipped,PublishToWeb,AddToInvPDF,CVSendOutApproved) VALUES ('J','TESTX1','x',2,1,0,0)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUser (IQXNetUserID,IQXNetUserClassID,Name,LoginID,Password) VALUES ('TESTUSER3','CANDIDATE','TESTUSER3','TESTUSER3','x')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUserLink (IQXNetUserLinkID,IQXNetUserID,PersonID,EmploymentID) VALUES ('TESTLINK2','TESTUSER3','TESTX1','TESTX1')</SQLExec>
+		</Setup>
+		
+		<TearDown>
+				<!-- NetCandidateDocuments -->
+			<SQLExec breakpoint="{bp}">DELETE FROM blobstore WHERE id LIKE 'TEST%'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM oledocument WHERE oledocumentid ='TESTBLOB'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM DocumentType WHERE DocumentTypeID ='TESTDOCTYPE'</SQLExec>
+				<!-- NetCandidateDepartmentRegister -->
+			<SQLExec breakpoint="{bp}">DELETE FROM search WHERE personid='TESTX1'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM Department WHERE departmentid='XX'</SQLExec>
+				<!-- NetCandidateAddEventsOneDay -->
+			<SQLExec breakpoint="{bp}">DELETE FROM TempShiftTemplate WHERE TempShiftTemplateID = 'TESTTEMPLATE'</SQLExec>
+				<!-- NetAgencyProvTimesheets -->
+			<SQLExec breakpoint="{bp}">DELETE FROM tempprovtimesheetline WHERE TempProvTimeSheetLineID='TEMPTIMESHEETLINE'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM tempprovtimesheet WHERE TempProvTimeSheetID='TEMPTIMESHEET'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM tempdesk WHERE tempdeskid='TESTTEMPDESK'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM TempPayBand WHERE TempPayBandID='TESTPAYBAND'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM Division WHERE divisionid='TESTDIVISION'</SQLExec>
+				<!-- NetAgencyContact -->
+			<SQLExec breakpoint="{bp}">DELETE FROM phone WHERE whoid='TESTX1'</SQLExec>	
+				<!-- NetAgencyCandidateSubmit -->
+			<SQLExec breakpoint="{bp}">DELETE FROM CascadedShift WHERE CascadedShiftID = 'CASCADEDSHIFT'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM CascadedVacancy WHERE CascadedVacancyID = 'CASCADEDVACANCY'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM diary WHERE staffid = 'TESTWEBUSER'</SQLExec>
+				<!-- NetAgencyCandidateProgress -->
+			<SQLExec breakpoint="{bp}">DELETE FROM TempShiftProgress WHERE TempShiftPlanID='TESTX1'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM TempShiftPlan WHERE VacancyID='TESTX1'</SQLExec>
+				<!--NetAgencyCandidateAdd -->
+			<SQLExec breakpoint="{bp}">DELETE FROM Pay_Employee WHERE SecondaryAgencyRef='TESTREFERENCE'</SQLExec>	
+				<!-- NetCandidateProfileBank -->
+			<SQLExec breakpoint="{bp}">DELETE FROM Pay_Employee WHERE PersonID='TESTX1'</SQLExec>
+				<!-- NetCandidateDiaryActionSave -->
+			<SQLExec breakpoint="{bp}">DELETE FROM IQXNetAction WHERE IQXNetUserID='TESTUSER1'</SQLExec>
+				<!-- TempShiftUnavailableReason -->
+			<SQLExec breakpoint="{bp}">DELETE FROM tempshift WHERE PersonID LIKE 'TESTX%'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM tempshift WHERE VacancyID LIKE 'TESTX%'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM TempShiftUnavailableReason WHERE TempShiftUnavailableReasonID='X'</SQLExec>
+			
+				<!-- NetAlreadyApplied, NetIncomingApplications -->
+			<SQLExec breakpoint="{bp}">DELETE FROM progress WHERE personid ='TESTX1'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM IQXNetUserLink WHERE IQXNetUserID LIKE 'TESTUSER%'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM placement WHERE placementid='TEMPPLACEMENT'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM vacancy WHERE employmentid='TESTX1'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM staff WHERE staffid='TESTWEBUSER'</SQLExec>
+			<SQLExec breakpoint="{bp}">delete from employment where employmentid like 'TESTX%'</SQLExec>
+			<SQLExec breakpoint="{bp}">delete from person where personid like 'TESTX%'</SQLExec>
+			<SQLExec breakpoint="{bp}">delete from person where name LIKE 'TEST USER%' OR  name LIKE 'Test User%'</SQLExec>
+			<SQLExec breakpoint="{bp}">DELETE FROM IQXNetUser WHERE IQXNetUserID LIKE 'TESTUSER%'</SQLExec>
+			<SQLExec breakpoint="{bp}">delete from company where companyid like 'TESTX%'</SQLExec>
+
+		</TearDown>
+	</Library>
+	<SetVariable name="TestDir" value="C:\TestFiles\Net\" />
+	<SetVariable name="bp" value="NO" />	<!-- Flag for breakpoint -->
+	<Call>TearDown</Call>
+	<Call>Setup</Call>
+	<ChangeDirectory path="{TestDir}Tables\" />
+	<DirectoryQuery>
+		<ForEachRow>
+			<If x1="{FileExtension}" x2="xml" comparison="=">
+				<RunJob breakpoint="{bp}" job="{TestDir}Tables\{FileName}" />
+			</If>
+		</ForEachRow>
+	</DirectoryQuery>
+	<ChangeDirectory path="{TestDir}Procedures\" />
+	<DirectoryQuery>
+		<ForEachRow>
+			<Block>
+			<If x1="{FileExtension}" x2="xml" comparison="=">
+				<RunJob breakpoint="{bp}" job="{TestDir}Procedures\{FileName}" />
+			</If>
+			</Block>
+			<Catch>
+				<MessageDialog text="Error" />
+			</Catch>
+		</ForEachRow>
+	</DirectoryQuery>
+	<!--Call>TearDown</Call-->
+	<MessageDialog text="Complete" />
+</Job>

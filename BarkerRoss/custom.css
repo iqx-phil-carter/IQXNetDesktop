@@ -1,0 +1,617 @@
+#divheading {
+	height: 80px;
+	margin-bottom: 10px;
+	background-color: black;
+	color: orange;
+	font-family: Calibri, sans-serif;
+	font-size:20px;
+	background-image: url(images/sitelogo.png);
+	background-repeat: no-repeat;
+	background-position: right;
+	overflow:auto;
+}
+
+#divheading h1 {
+	display:none;
+}
+
+#divheading h2 {
+	display:none;
+}
+
+#divheading h3 {
+	text-align:left;
+	vertical-align:top;
+	top:25%;
+	height: 50%;
+	position:relative;
+	text-indent:170px;
+	color: white;
+}
+
+#divheadingSmall {
+	height: 25px;
+	margin-bottom: 10px;
+	background-color: black;
+	text-align:center;
+	vertical-align:top;
+	color: orange;
+	background-repeat: no-repeat;
+	background-position:right;
+	display: none;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#divheadingSmallSpanLeft {
+	font-size:20px;
+	color: #FFFFFF;
+	margin-bottom:10px;
+	float:left;
+	padding-left:10px;
+}
+
+#divheadingSmallSpanCentre {
+	font-size:18px;
+	color: #FFFFFF;
+	margin-bottom:10px;
+	margin-bottom:2px;
+}
+
+#divheadingSmallSpanRight {
+	font-size:18px;
+	margin-bottom:10px;
+	float:right;
+	padding-right:10px;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+.logoutlink{	/* set colour for logout link */
+	color:blue;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+
+
+div.zoomeddivCurrent{	/* current requirements subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:420px;
+	padding: 3px;
+}
+
+div.zoomeddivCentre{	/* Progress documents subform */
+	background-color:#D8D8D8;
+	padding: 3px;
+}
+
+div.zoomeddivProgressHistory{	/* Progress History subform */
+	background-color:#D8D8D8;
+	padding: 3px;
+}
+
+td.Status{    /* Pending */
+       color:#00FF00;
+}
+
+td.StatusU{	/* Unassigned */
+	color:#393;
+}
+
+td.StatusT{	/* shift prior to today  */
+	color:#000000;
+}
+
+td.StatusW{	/* Worked */
+	color:#000000;
+}
+
+td.StatusP{	/* Provisional - waiting confirmation by candidate*/
+	color:#00CC00;
+}
+
+td.StatusQ{	/* Provisional - waiting confirmation client */
+	color:#00D1FF;
+}
+
+td.StatusC{ /* Cancelled */
+      color:#FF66CC;
+}
+
+td.StatusF{ /* Cancelled but still require filled */
+      color:#FF66CC;
+}
+
+
+td.StatusB{ /* Confirmed, waiting timesheet before today */
+	color:#0000FF;
+}
+
+
+td.StatusI{   /* In Progress */
+       color:#007777;
+}
+td.StatusM{	/* Cancelled by Temp  */
+	color:#0000FF;
+}
+
+td.StatusG{	/* Cancelled by Geneva */
+	color:#963;
+}
+
+select.FixedWidth{ /* Fix width of ComboCancel on Current Requirements row detail, to stop it collapsing */
+	width:220px;
+}
+
+#frmclientnewshiftweek p label { /* set width of labels in new shift popup */
+	width:115px;
+	}
+
+#cli_newsh_vacancyid {	/* set width of new shift requirement dropdown */  
+	width:450px;
+	}
+	
+#frmClientNewEventWeek p label { /* set width of labels in popup */
+		width:115px;
+	}
+
+#cli_newvac_vacancyid {	/* set width of new vacancy requirement dropdown */ 
+		width:450px;
+	}
+		
+
+textarea.Normal{
+	background-color: #FFFFFF;
+}
+
+textarea.Overflow{
+	background-color: #B22222
+}
+
+textarea.StartingColour{	/* pale grey for instruction note in textarea */
+	color: #D8D8D8;
+}
+
+div.ToolTipPopup {
+    background-color: #FFFACD;
+    border-radius: 1px;
+    color: #000000;
+    padding: 0px 2px;
+    position: absolute;
+    z-index: 1;
+}
+/*  End Custom Shift CSS */
+
+
+
+span.TimesheetEditedA{            /* class 0 */
+       background-color: #FFFFFF;
+}
+ 
+span.TimesheetEditedB{            /* class 1 */
+       background-color: #AAFFAA;
+}
+ 
+span.TimesheetEditedC{            /* class 2 */
+       background-color: #AAFFAA;
+}
+
+input.StartingColour{		  /* pale grey for instruction note Milestone date and time box */
+	color: #D8D8D8;
+}
+
+div.zoomeddivMilestones{	/* Milestone dates subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:500px;
+	padding: 3px;
+}
+div.zoomeddivWide{	/* current requirements subform */
+	background-color:#D8D8D8;
+	float:right;
+	width:820px;
+	padding: 3px;
+}
+
+span.TooltipLink{	/* links on calendar tooltip popup */
+	color:blue;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.TooltipLink0{	/* links on calendar tooltip popup */
+	color:red;
+}
+
+span.TooltipLink1{	/* links on calendar tooltip popup */
+	color:blue;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.TooltipLink2{	/* links on calendar tooltip popup */
+	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink{	/* Pending */
+    color:#00FF00;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkU{	/* Unassigned */
+	color:#393;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkT{	/* shift prior to today  */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkW{	/* Worked */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkP{	/* Provisional - waiting confirmation by candidate*/
+	color:#00CC00;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkQ{	/* Provisional - waiting confirmation client */
+	color:#00D1FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkC{	/* Cancelled */
+      	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkF{	/* Cancelled but still require filled */
+     	color:#FF66CC;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+
+span.CandidateLinkB{	/* Confirmed, waiting timesheet before today */
+	color:#663300;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+
+span.CandidateLinkI{  	/* In Progress */
+       	color:#007777;
+	text-decoration:underline;
+	cursor:pointer;
+}
+span.CandidateLinkM{	/* Cancelled by Temp  */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLinkG{	/* Cancelled by Agency */
+	color:#963;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink{	/* Current Requirements */
+	color:#000000;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink0{	/* Current Requirements Requested person */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink1{	/* Current Requirements Allocated person (C)  (can not link because Requested does not store ID) */
+	color:#FF66CC;
+}
+
+span.CandidateLink2{	/* Current Requirements Allocated person Cancelled (T) */
+	color:#0000FF;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+span.CandidateLink3{	/* Current Requirements Allocated person Cancelled (G)) */
+	color:#996633;
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+div.ZoomedDivSub{
+	width:100%;
+	overflow:auto;
+}
+
+span.ZoomedSpanLeft{
+	float:left;
+	display:inline;
+}
+
+span.ZoomedSpanRight{
+	float:right;
+	display:inline;
+}
+
+span.spanConfirm0{		/* Confirm shift flag on AgencyVacancies */
+	background-color: #000000;
+	visibility:hidden;
+}
+
+span.spanConfirm1{		/* Confirm shift flag on AgencyVacancies */
+	background-color: #819A30;
+	visibility: visible;
+	font-size:12pt;
+}
+
+span.spanConfirm2{		/* shift cancelled flag on AgencyVacancies */
+	background-color: #FF0000;
+	visibility: visible;
+	font-size:12pt;
+}
+
+button.FlowEdit{	/* Flow Edit button on provtimesheetshifts. Use with class FlowEdit1 */
+	color: #000000;
+}
+
+button.FlowEdit1{	/* Flow Edit button on provtimesheetshifts. Use with class FlowEdit */
+	color:#FF0000;
+}
+
+div.ToolTipPopupNarrow {
+	position:absolute;
+	float:right;
+	left:20px;
+	z-index:1;
+	background-color: #FFFACD;
+	width:250px;
+	height:100px;	
+	border-width: 1px;
+}
+
+table.Xtablesorter {
+	width:100%;
+	border-collapse: collapse;
+	border:2px solid #CDCDCD;
+}
+
+table.Xtablesorter td {
+	border-collapse: collapse;
+	border-left:2px solid #CDCDCD;
+	border-right:2px solid #CDCDCD;
+}
+
+table.Xtablesorter tbody {
+	color:#000000;
+}
+
+table.Xtablesorter thead th {
+	color:black;
+	background-color:white;
+	border-collapse: collapse;
+	border-left:2px solid #CDCDCD;
+	border-right:2px solid #CDCDCD;
+}
+
+/* START OF CUSTOM STYLING */
+body {
+	background: #000;
+}
+
+.header-wrapper {
+	background: #000;
+	max-width: 1004px;
+	padding: 0 20px;
+	width: 100%;
+	margin: 0 auto 30px auto;
+}
+
+#divcontent {
+	max-width: 1004px;
+	margin: 0 auto 30px auto;
+	padding-top: 1px;
+}
+
+.login-info {
+	float: right;
+}
+
+.login-info .logoutlink {
+	float: right;
+	text-align: center;
+	font-weight: bold;
+	color: #fff;
+	width: auto;
+	height: 33px;
+	line-height: 33px;
+	padding: 0 21px;
+	margin: 45px 0 0 0;
+	font-size: 0.9em;
+	background: url('../Images/nav-button-sprites.png') 0px 0px no-repeat;
+	padding-left: 45px;
+	margin-right: 0;
+}
+
+.home-link {
+	clear: both;
+	background: #0b0a0a;
+	color: #fff;
+	display: inline-block;
+	text-decoration: none;
+	padding: 0 0 0 0;
+	margin-top: 28px;
+}
+
+.ui-tabs-nav {
+	background: inherit;
+	border-top: 1px solid #2e2e2e;
+	border-bottom: 1px solid #2e2e2e;
+}
+
+.ui-tabs-nav li.ui-state-default {
+	background: inherit;
+	border: 0;
+	border-right: 1px solid #2e2e2e;
+}
+
+.ui-tabs-nav li.ui-state-focus {
+	background: #f79321;
+	border: 0;
+	border-right: 1px solid #2e2e2e;
+}
+
+	.ui-tabs-nav li.ui-state-focus a {
+		color: #fff;
+	}
+
+.ui-tabs-nav li a {
+	color: #fff;
+	display: block;
+	font-size: 15px;
+	font-weight: bold;
+	line-height: 1.5em;
+	padding: 10px 25px;
+	text-decoration: none;
+	text-transform: uppercase;
+	outline: none;
+}
+
+.ui-widget-content {
+	border: none;
+	background: url('../Images/bg-plaster.png') repeat;
+}
+
+.divheadingSmall {
+	display: none;
+}
+
+.content-wrapper {
+	background: #252525 url('../Images/background.jpg') center top no-repeat;
+	background-size: 100%;
+	padding-bottom: 100px;
+}
+
+.login-title {
+	position: absolute;
+	display: block;
+	text-align: center;
+	color: #fff;
+	margin: 0 auto;
+	width: 540px;
+	top: 60px;
+	left: 0;
+	right: 0;
+}
+
+#frmlogin {
+	margin-top: 20px;
+	padding: 26px 24px 46px;
+	font-weight: 400;
+	overflow: hidden;
+	background: none repeat scroll 0% 0% #FFF;
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.13);
+	width: 360px;
+}
+
+#frmlogin fieldset{
+	border: none;
+}
+
+#frmlogin input[type=text],
+#frmlogin input[type=password] {
+	background: none repeat scroll 0% 0% #FBFBFB;
+	font-size: 20px;
+	line-height: 1;
+	width: 100%;
+	padding: 3px;
+	margin: 2px 6px 16px 0px;
+	border: 1px solid #DDD;
+	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.07) inset;
+	transition: border-color 0.05s ease-in-out 0s;
+	color: #333;
+}
+
+#frmlogin input[type=text]:focus,
+#frmlogin input[type=password]:focus {
+	border-color: #5B9DD9;
+	box-shadow: 0px 0px 2px rgba(30, 140, 190, 0.8);
+}
+
+#frmlogin label {
+	color: #777;
+	font-size: 14px;
+	text-align: left;
+}
+
+#login_submit {
+	border-radius: 3px;
+	border: medium none;
+	background-color: #F79321;
+	background-image: linear-gradient(to bottom, #F79321, #F5831D);
+	box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.25);
+	font-weight: bold;
+	font-size: 13px;
+	line-height: 26px;
+	height: 28px;
+	margin: 0px;
+	padding: 0px 10px 1px;
+	cursor: pointer;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	white-space: nowrap;
+	box-sizing: border-box;
+	color: #fff;
+	border: none;
+	float: right;
+}
+
+.errormessage {
+	color: #fff;
+}
+
+/* END OF CUSTOM STYLING */

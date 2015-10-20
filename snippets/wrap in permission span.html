@@ -1,0 +1,9 @@
+<!--
+	category: IQX
+	name: Wrap in permission span
+	tooltip: Wrap in permission span
+	prompt(prm): Please enter the permission
+-->
+<span>	[onload_${prm};block=span;when [var.x_rights.${prm};noerr]=1]
+${selection}
+</span>

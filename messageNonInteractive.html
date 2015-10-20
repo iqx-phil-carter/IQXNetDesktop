@@ -1,0 +1,52 @@
+<!--[onload;tplvars;bd='NetBranchDetailsForTimesheet?pTimesheetID';pTitle=]-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#divMessageNonInteractive').dialog({
+			title:'[var.x_params.pTitle;noerr]',
+			modal:false,
+			width:300,
+			buttons: {
+				Close: function(){
+					CloseDialog(this);
+				},
+			}
+		});
+	});
+	
+	function CloseDialog(dlg){
+		var dat=$('#frmmessage').serializeArray();		
+		$.post('IQXPost.php?proc=netmessage',dat,function(data, textStatus){
+				IQXcloseUIdialog(dlg);
+		},'text');
+	}
+		
+</script>
+
+<div id="divMessageNonInteractive" >
+	<div id="divQueryMessageForm">
+		[onload;file=txt_messageNonInteractive.html;noerr]
+	</div>
+
+	<h4 id="[bd.AgencyID;block=h4]">
+		[bd.AgencyName]<br/>
+		[bd.BranchPhone;noerr]
+		[onload;file=txt_messageNonInteractiveBody.html;noerr]
+	</h4>
+	
+	<h4>
+		Quoting: [var.x_params.pTitle;noerr]
+	</h4>
+</div>
+
+<form id="frmmessage" name="message" method="POST" accept-charset="ISO-8859-1">
+	<input type="hidden" id="msg_type" name="ptype" value="TIMESHEET" />
+    <input type="hidden" id="msg_vacancyid" name="pvacancyid" value="[var.x_params.pVacancyID]" />
+    <input type="hidden" id="msg_placementid" name="pplacementid" value="[var.x_params.pPlacementID;noerr]" />
+    <input type="hidden" id="msg_progressid" name="pprogressid" value="[var.x_params.pProgressID;noerr]" />
+    <input type="hidden" id="msg_provtsid" name="pprovtimesheetid" value="[var.x_params.pTempProvTimesheetID;noerr]" />
+    <input type="hidden" id="msg_tsid" name="ptimesheetid" value="[var.x_params.pTempTimesheetID;noerr]" />
+    <input type="hidden" id="msg_title" name="ptitle" value="[var.x_params.pTitle;noerr]" />
+    <input type="hidden" id="msg_descrip" name="pdescription" value="The Query button was clicked" />
+    <input type="hidden" id="mChatMessage" name="pChatMessage" value="" />
+</form>

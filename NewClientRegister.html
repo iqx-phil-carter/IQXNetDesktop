@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>New Client</title>
+    <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    [onload;file=HeaderIncludes.html]
+    
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var subtitle = 'Client Registration';
+            $('#divheading h3').text(subtitle);
+            document.title = document.title + ' - ' + subtitle;
+            var nxt = { action: 'func', func: InitAfterIQXChain };
+            IQXChain("#questholderdiv", { action: 'load', page: 'newclientquestionnaire&noauth=yes', nextlink: nxt });
+        });
+
+        function InitAfterIQXChain() {
+            // Init form after IQXChain has responded
+            IQXInitSection("form");
+            IQXEnableForm('#frmnewcli', { successhandler: IQXRefreshBrowser });
+        };
+
+        function ResetForm() {
+            IQXDisableForm();
+            IQXEnableForm('#frmnewcli');
+        }
+
+
+    </script>
+
+    <style type="text/css">
+        .qsingleentry, .qpseudoquestanswer {
+	width: 400px;  
+	text-align: left;
+	border-style: solid;
+	color: black;
+	background-color: #DDD;
+}
+    </style>
+
+</head>
+
+<!-- 20150406 Based on NewCandidateRegister.html -->
+
+<body>
+
+
+    <div class="usertext">[onload;file=txt_new_client_top.html;noerr]</div>
+        <form id="frmnewcli" name="newcli" action="IQXNewClient.php?proc=NetClientRegister" method="POST" accept-charset="utf-8">
+            <fieldset class="regular">
+                <input type="hidden" id="cli_class" name="puserclass" value="CLIENT" />
+                <p>
+                    <span class="errormessage">[var.x_errormessage]</span>
+                </p>
+                <div class="questionnaire">
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Company name
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_companyname" name="pcompanyname" class="required qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Address
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_addr1" name="paddr1" class="required qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            &nbsp;
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_addr2" name="paddr2" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            &nbsp;
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_addr3" name="paddr3" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Town
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_town" name="ptown" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            County
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_county" name="pcounty" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Country
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_country" name="pcountry" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Postcode
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_postcode" name="ppostcode" class="required validPostCode uppercase qpseudoquestanswer" />
+                        </div>
+                    </div>
+
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Primary Contact Forename
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_forenames" name="pforenames" class="required qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Primary Contact Surname
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_surname" name="psurname" class="required qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Primary Contact Position
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_position" name="pposition" class="required qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Switchboard Number
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_home_phone" name="pMainphone" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Direct Telephone
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_mobile" name="pmobile" class="qpseudoquestanswer" />
+                        </div>
+                    </div>
+                    <div class="qquestrow">
+                        <div class="qquestion">
+                            Email Address
+                        </div>
+                        <div class="qanswer">
+                            <input type="text" id="cli_email" name="pemail" class="required email qpseudoquestanswer" />
+                        </div>
+                    </div>
+                </div>
+                <div class="cleardiv"></div>
+                <div id="questholderdiv"> </div>
+                <div class="cleardiv"></div>
+                <p>
+                    <button type="submit" id="cand_submit" class="fixed formbutton">
+                        Save
+                    </button>
+                    <button type="button" id="cand_reset" class="fixed formbutton" onclick="ResetForm()">
+                        Reset
+                    </button>
+                </p>
+                <p>
+                    <span class="errormessage">[var.x_errormessage]</span>
+                </p>
+            </fieldset>
+        </form>
+        <div class="usertext">[onload;file=txt_new_client_bottom.html;noerr]</div>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!--[onload;tplvars;vacancies='NetClientVacancies']-->
+
+<!-- 20120116 "Requirements" buttons moved to above table -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+	IQXInitSection("#divclivacs");
+	
+    var unfilledButtons='Unfilled';
+	var unconfirmedButtons='Unconfirmed';
+	if ("[var.x_rights.FILLJOBS;noerr]"=="1"){
+		unfilledButtons+=' <button>Fill</button>';
+	}
+	if ("[var.x_rights.AUTHORISEJOBS;noerr]"=="1"){
+		unconfirmedButtons+=' <button>Confirm</button> <button>Cancel</button>';
+	}
+	$('#tblclivacs').data('IQXdtDateFilter',{dateColumn:1,dateColumn2:3,clearButtonText:"Clear"});
+	var oTbl=$('#tblclivacs').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"sDom": 'lDf<"clear">rtip',
+		"aaSorting": [ [1,'asc'], [0,'asc'] ],
+		"aoColumnDefs": [{aTargets:[0],fnRender: function(oObj){
+			if (oObj.aData[13]){
+				return oObj.aData[0]+'<br/>'+oObj.aData[13];
+			} else {
+				return oObj.aData[0];
+			}
+		}},
+			{aTargets:[8],bSortable:false,bSearchable:false,fnRender: function(oObj){
+			if (oObj.aData[9]=="1"){return '';} // Filled
+			if (oObj.aData[10]=="1"){return unconfirmedButtons;}
+			return unfilledButtons;
+		}},
+		{aTargets:[9,10,11,12,13],bVisible:false,bSearchable:false}]
+	});
+	if (!IQXDeepLink("R",oTbl)){
+		setThisWeek(oTbl);
+		}
+		
+	$("#divclivacs").delegate("tbody tr button", "click", function(e){
+		var nRow=oTbl.fnGetPosition($(this).closest('tr').get(0));
+		var sBtn=this.innerHTML; //Button text
+		var aRow=oTbl.fnGetData(nRow);
+		var sVacID=aRow[11];
+		var sPlanID=aRow[12];
+		var sCaption=aRow[0];
+		doVacancyAction(sBtn,sVacID,sPlanID,oTbl,nRow,sCaption);
+		});
+	});
+	
+function setThisWeek(oTbl){
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+	
+function doVacancyHighlight(oTbl,nRow,bOn){
+	var tr=oTbl.fnGetNodes(nRow);
+	$(tr).toggleClass('ui-state-highlight',bOn);
+}
+
+function doVacancyAction(sBtn,sVacID,sPlanID,oTbl,nRow,sCaption){
+if ($("#divclivacs").data("selectedvacancy") || $IQXFormContext) return;
+
+$("#divclivacs").data("selectedvacancy",{
+	vacancyid: sVacID,
+	shiftplanid: sPlanID,
+	table: oTbl,
+	tablerow:nRow,
+	caption:sCaption
+});
+$IQXFormContext={blocktabswitch:true, switchmessage:"Please close any dialog before switching."};
+var actionCleanup=function(){
+	$IQXFormContext = null;
+	if (!$('#divclivacs').data('selectedvacancy')) return; // Already cleaned up
+	doVacancyHighlight(oTbl, $('#divclivacs').data('selectedvacancy').tablerow, false);
+	$("#divclivacs").removeData("selectedvacancy");
+};
+
+if (sBtn=='Fill'){
+	doVacancyHighlight(oTbl, nRow, true);
+	if ($('#divclivacs').data('dlgIsLoaded')) {
+		$('#cliPlacDlg').dialog('option','title',sCaption);
+		$('#cliPlacDlg').dialog('open');
+	} else {
+		$('body').delegate('#cliPlacDlg','PlacementEvent',function(e,sType,sID,sName){
+			if (sType=='DialogCreate'){
+				$('#divclivacs').data('dlgIsLoaded',true);
+				$('#cliPlacDlg').dialog('option','title',$('#divclivacs').data('selectedvacancy').caption);
+			} else if (sType=='DialogClose'){
+				actionCleanup();
+			} else if (sType=='Request'){
+				doFillVacancy(sID,sName);
+			}
+		});
+		IQXChain('#divclivacFillerDlg', {action: 'load', page: 'clientemployeestoplacedialog'});
+	}
+} else if (sBtn=='Confirm'){
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};
+	var nxt={action:'func',func:function(){
+		oTbl.fnUpdate('0',nRow,10,false,false);  // Unconfirmed
+		oTbl.fnUpdate('',nRow,8,false,true);  // Force fnRender on button column. Redraw not necessary since filtering not affected
+		actionCleanup();
+	}};
+	IQXChain('',{action:'send',proc:'NetVacancyConfirm',postdata:postdata,nextlink:nxt,failFunc:actionCleanup});
+} else if (sBtn=='Cancel'){
+	doVacancyHighlight(oTbl,nRow,true);
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};
+	var nxt={action:'func',func:function(){
+		oTbl.fnDeleteRow(nRow,null,true);  // true param seems important here
+		actionCleanup();  
+	}};
+	IQXUIDialog('Cancel this requirement?',{xDlgType:'YesNo',modal:false,title:sCaption},function(){
+		IQXChain('',{action:'send',proc:'NetVacancyCancel',postdata:postdata,nextlink:nxt,failFunc:actionCleanup});
+		},actionCleanup);
+} else {
+	actionCleanup();
+}
+}
+	
+function doFillVacancy(personid,personname) {
+	var filldata=$("#divclivacs").data('selectedvacancy');
+	var postdata={pvacancyid:filldata.vacancyid,pshiftplanid:filldata.shiftplanid,ppersonid:personid};
+	var nxt={action:'func',func:function(){
+		filldata.table.fnUpdate('1',filldata.tablerow,9,false,false);  // Filled
+		filldata.table.fnUpdate(personname,filldata.tablerow,7,false,false);
+		filldata.table.fnUpdate('',filldata.tablerow,8,false,true);  // Force fnRender. Avoiding redraw because filtering not affected (although sorting could be if currently sorted on candidate)
+		$('#cliPlacDlg').dialog('close');
+	}};
+	IQXChain('',{action:'send',proc:'NetVacancyFill',postdata:postdata,nextlink:nxt});
+}
+
+function doAddVacancies(sPage) {
+	if ($("#divclivacs").data("selectedvacancy") || $IQXFormContext) return;
+	IQXChain('#divclivacNewReqDlg',{action:'load',page:sPage});
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+<p id="pclivacbuttons">[onload_add;block=p;when [var.x_rights.ORDERJOBS;noerr]=1]
+	<button type="button" id="clivac_addshift" class="fixed" onclick="doAddVacancies('clientnewshiftmultidayrequirement')">
+		Add New Shift Requirements
+	</button>
+	<button type="button" id="clivac_addcontract" class="fixed" onclick="doAddVacancies('clientnewcontractrequirement')">
+		Add New Contract Requirements
+	</button>
+</p>
+
+<span class="errormessage">[var.x_errormessage]</span>
+
+<table class="Xtablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+		<th>Position</th>
+		<th>Start Date</th>
+		<th>Time</th>
+		<th>Finish Date</th>
+		<th>Time</th>
+		<th>Our Ref</th>
+		<th>Your Ref</th>
+		<th>Filled By</th>
+		<th></th>
+		<th>Filled</th>
+		<th>Unconfirmed</th>
+		<th>VacancyID</th>
+		<th>TempShiftPlanID</th>
+		<th>Address</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]">
+	    <td>[vacancies.Position;noerr] [vacancies.ShiftDescription;noerr]</td>
+	    <td class="longdate">[vacancies.StartDate;noerr]</td>
+	    <td class="time">[vacancies.StartTime;noerr]</td>
+	    <td class="longdate">[vacancies.FinishDate;noerr]</td>
+	    <td class="time">[vacancies.FinishTime;noerr]</td>
+	    <td>[vacancies.OurRef;noerr]</td>
+	    <td>[vacancies.TheirRef;noerr]</td>
+		<td>[vacancies.FilledBy;noerr]</td>
+		<td></td>
+		<td>[vacancies.Filled;noerr]</td>
+		<td>[vacancies.Unconfirmed;noerr]</td>
+		<td>[vacancies.VacancyID;noerr]</td>
+		<td>[vacancies.TempShiftPlanID;noerr]</td>
+		<td>[vacancies.CompanyAddress;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+

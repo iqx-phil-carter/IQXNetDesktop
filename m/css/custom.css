@@ -1,0 +1,138 @@
+/* Mobile IQXNet */
+
+.ui-body-e, .ui-body-e input, .ui-body-e select, .ui-body-e textarea, .ui-body-e button {
+    font-size-adjust:1.25;
+}
+
+a.ui-btn {
+    width:30px;
+    align-items:center;
+    padding-left:7px
+}
+
+a.ui-btn.btnMenu {
+    width:100%;
+    align-items:center;
+}
+input,textarea {
+    font-size:11pt;
+}
+
+table.tablesorter thead tr th {
+	font-size:10pt;
+}
+
+table.tablesorter tbody tr td{
+	font-size:11pt;
+}
+
+.errormessage .localerrormessage {
+	color: green;
+}
+
+input.ui-input-text {
+	width:50%;
+}
+
+table tbody td.calendarAvailableMobile{
+	color: green;
+}
+
+table tbody td.calendarBookedMobile{
+	color:blue;
+}
+
+table tbody td.calendarUnavailableMobile{
+	color:red;
+}
+
+table tbody td.expanded{
+	background-color:#D9D6C4;
+}
+
+a.linkfalse{
+	color:grey;
+	pointer-events:none;
+}
+
+a.linktrue{
+	color:blue;
+	cursor: pointer;
+	text-decoration:underline;
+}
+	
+input.ui-input-text{
+	width:40%;
+}
+
+input.ui-input-text-data{
+	width:40%;
+	height:35px;
+}
+
+span.ui-input-span {
+	padding:.4em;
+	margin:.5em 0;
+	line-height:1.4;
+	font-size: 16px;
+	display:block;
+	width:50%;
+	outline: 0;
+}
+
+table tbody td.TimesheetRow1{
+	background-color:#EAEBFF;
+}
+
+table tbody td.CMobile, span.CMobile{
+	color:orange;
+}
+
+table tbody td.PMobile, span.PMobile{
+	color:cornflowerblue;
+}
+
+table tbody td.DMobile, span.DMobile{
+	color:black;
+}
+
+table tbody td.PrimaryContact1{
+    background-color:lightpink;
+}
+
+table tbody td.PrimaryContact{
+    background-color:white;
+}
+
+span.Priority1{
+    background-color:pink;
+    color:white;
+}
+
+span.Priority2{
+    background-color:palegoldenrod;
+    color:white;
+}
+span.Priority3{
+    background-color:peachpuff;
+    color:white;
+}
+span.Priority4{
+    background-color:aquamarine;
+    color:white;
+}
+span.Priority5{
+    background-color:palegreen;
+    color:white;
+}
+
+span.btnNavLeft{
+    float:left;
+    padding-right:10px;
+}
+
+span.btnNavRight{
+    float:right;
+    padding-left:10px;
+}
+

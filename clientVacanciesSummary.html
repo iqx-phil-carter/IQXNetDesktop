@@ -1,0 +1,235 @@
+<script type="text/javascript">
+	
+$(document).ready(function(){
+  	IQXInitSection($("#divclivacs"));
+ 	$('#divclivacsTop').html(IQXLoadMessage());
+ 	$(":radio","#clivac_grouptype").removeAttr('disabled').click(buildOuterTable);
+ 	$.getJSON('IQXRawData.php?page=NetClientVacancies2&render=text_plain__IQXNetDataTable.xsl', null, vacJSONloaded);
+	});
+
+function getIx(dat,sname){
+   for (var i in dat.aoColumns ){
+   	  if (dat.aoColumns[i].sTitle==sname){
+	  	return i;
+	  }
+   }	
+}
+
+function buildOuterTable(){
+	$('#divclivacsTop').html(IQXLoadMessage());
+	var sFields=$(":checked","#clivac_grouptype").val();
+	var tbl='<table class="tablesorter" id="tblclivacsTop"><thead><tr>';
+	var dat=$("#divclivacs").data('vacData');
+	var arFields=sFields.split(",");
+	var arxFields=$.map(arFields,function(nm){
+		var ix=getIx(dat,nm);
+		var p=nm.indexOf('__');
+		var srt=$.fn.dataTableExt.oSort['string-asc'];
+		if (p>=0){
+			var opts=nm.substr(p+2);
+			if (opts.indexOf('D') >= 0) {
+				srt=$.fn.dataTableExt.oSort['iqx_long_date-asc'];
+			}
+			nm=nm.substr(0,p);
+			}
+		nm=nm.replace(/[_]/g,' ');
+		return {"ix":ix,"nm":nm,"srt":srt};
+	});
+	for (var i in arxFields){
+		tbl+='<th>'+arxFields[i].nm+'</th>';
+	}
+	tbl+='<th></th></tr></thead><tbody>';
+	var rowSorter = function(a, b){
+		for (var i in arxFields) {
+			var fld = arxFields[i];
+			var rv = fld.srt(a[fld.ix], b[fld.ix]);
+			if (rv != 0) {
+				return rv;
+			}
+		}
+		return 0;
+	}
+	dat.aaData.sort(rowSorter);
+	var testRow=['','','','','','','','','','','','','','','','','','','','','','','','','','','','',''];
+	var grpCnt=0;
+	var grpID=0;
+	var grpCol=getIx(dat,'GroupID__H');
+	var grpOutput=function(){
+		if (grpCnt > 0) {
+			tbl += '<tr>';
+			for (var i in arxFields) {
+				tbl += '<td>' + testRow[arxFields[i].ix] + '</td>';
+			}
+			tbl+='<td><button type="button" class="tablebutton nonformbutton" onclick="buildInnerTable(this,'+grpCol+','+grpID+')" >'+grpCnt+' Requirement'+(grpCnt>1?'s':'')+'</button></td></tr>';
+		}
+	}
+	for (var i in dat.aaData){
+		var row=dat.aaData[i];
+		var cmp=rowSorter(testRow,row);
+		if (cmp!=0){
+		   grpOutput();
+		   grpID++;
+		   grpCnt=0;
+		}
+		grpCnt++;
+		row[grpCol]=grpID;
+		testRow=row;
+	}	
+	grpOutput();
+	tbl+='</tbody></table>';
+	$('#divclivacsTop').html(tbl);
+	IQXInitSection($("#divclivacsTop"));
+}
+
+function buildInnerTable(btn,grpCol,grpID){
+	var row=btn.parentNode.parentNode;
+	if ($(row).hasClass("rowexpanded")) {
+		$(row).next('tr.rowexpansion').remove();
+		$(row).removeClass("rowexpanded");
+	}
+	else {
+		var bCanFillJobs="[var.x_rights.FILLJOBS;noerr]"=="1";
+		$(row).addClass("rowexpanded");
+    	$(row).rowafter({rowclass:'rowexpansion',divs:[{divclass:'outerzoomeddiv'}]});
+		var divx=$(row).next('tr.rowexpansion').find('div.outerzoomeddiv').get(0);
+		var tbl='<table class="tablesorter"><thead><tr><th>Position</th><th>Start Date</th>'+
+			'<th>Time</th><th>Finish Date</th><th>Time</th><th>Our Ref</th><th>Your Ref</th>'+
+			'<th>Filled By</th><th></th></tr></thead><tbody>';
+		var dat=$("#divclivacs").data('vacData');
+		var subAr=$.grep(dat.aaData,function(x){
+			return (x[grpCol]==grpID);
+		});
+		var nRow=0;
+		var getVal = function(sname){
+			return subAr[nRow][getIx(dat, sname)];
+		}
+		for (var i in subAr){
+			nRow=i;
+			tbl+='<tr id="'+getVal('RowID__H')+'">';
+    		tbl+='<td>'+getVal('Position')+'</td>';
+    		tbl+='<td class="longdate">'+getVal('Start_Date__D')+'</td>';
+    		tbl+='<td class="time">'+getVal('Start_Time')+'</td>';
+    		tbl+='<td class="longdate">'+getVal('Finish_Date__D')+'</td>';
+    		tbl+='<td class="time">'+getVal('Finish_Time')+'</td>'
+    		tbl+='<td>'+getVal('Our_Ref')+'</td>';
+    		tbl+='<td>'+getVal('Their_Ref')+'</td>';
+			tbl+='<td>'+getVal('Filled_By')+'</td>';
+			tbl+='<td>'+(bCanFillJobs && getVal('Filled__H')=='0'?'<button type="button" class="tablebutton nonformbutton" onclick="filljob(this.parentNode.parentNode,\''+
+			   getVal('VacancyID__H')+'\',\''+getVal('TempShiftPlanID__H')+'\')">Fill</button>':'')+'</td></tr>';
+
+		}
+		tbl+='</tbody></table>';
+		$(divx).html(tbl);
+		IQXInitSection($(divx));
+	}
+}
+
+function vacJSONloaded(data, textStatus){
+	if (textStatus == 'success') {
+		if (data.aoColumns == undefined) {
+			$("#clivacerror").text('No Current Requirements');
+		}
+		else {
+			$("#divclivacs").data('vacData',data);
+			buildOuterTable();
+		}
+	}
+}
+	
+function clientjobaction(dbproc,vacid,planid) {
+	var postdata={pvacancyid:vacid,pshiftplanid:planid};
+	var nxt={action:'func',func:IQXRefreshTab};
+	IQXChain('#clivacstatus',{action:'send',proc:dbproc,postdata:postdata,nextlink:nxt});
+}
+
+function confirmjob(vacid,planid) {
+	clientjobaction('NetVacancyConfirm',vacid,planid);
+}
+
+function canceljob(vacid,planid) {
+	clientjobaction('NetVacancyCancel',vacid,planid);
+}
+
+function filljob(row,vacid,planid) {
+	$("#divclivacs").data("fillingvacancy",{
+		vacancyid: vacid,
+		shiftplanid: planid
+	});
+	$('button.tablebutton').hide();
+	$('#pclivacbuttons').hide();
+	$(row).after('<tr id="rowcliempfill"><td colspan=9><div id="divcliempfill" class="zoomeddiv"></div>'+
+				  '</td></tr>');
+	IQXChain('#divcliempfill',{action:'load',page:'clientemployeestoplace'});
+}
+
+function dofill(persid,errortarget) {
+	var filldata=$("#divclivacs").data('fillingvacancy');
+	var postdata={pvacancyid:filldata.vacancyid,pshiftplanid:filldata.shiftplanid,ppersonid:persid};
+	var nxt={action:'func',func:IQXRefreshTab};
+	IQXChain(errortarget,{action:'send',proc:'NetVacancyFill',postdata:postdata,nextlink:nxt});
+}
+
+function undofill() {
+	$('#rowcliempfill').remove();
+	$("button.tablebutton").show();
+	$('#pclivacbuttons').show();
+	$("#divclivacs").removeData("fillingvacancy");
+}
+
+function seljobtoadd() {
+	$('#divclivacs').hide();
+	$('#pclivacbuttons').hide();
+	IQXChain('#divcliaddjobs',{action:'load',page:'clientvacancytemplates'});
+}
+
+function addjob(templatevacid,templateshiftid) {
+	if(templateshiftid){
+		IQXChain('#divcliaddjobs',{action:'load',page:'clientnewshiftweekvacancy&pVacancyID='+
+		       encodeURIComponent(templatevacid)+'&pShiftTemplateID='+encodeURIComponent(templateshiftid)});
+	}
+	else {
+		IQXChain('#divcliaddjobs',{action:'load',page:'clientnewcontractvacancy&pTemplateVacancyID='+encodeURIComponent(templatevacid)});
+	}
+}
+
+function unaddjob() {
+	IQXDisableForm();
+	$('#divcliaddjobs').text('');
+	$('#divclivacs').show();
+	$('#pclivacbuttons').show();
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+	<span  id="clivac_grouptype"> 
+				Group by
+				<select name="pclivac_grouptype" >
+					<option value="Start_Date__D,Position" selected="true">Start Date, Position</option>
+					<option value="Position,Start_Date__D">Position, Start Date</option>
+					<option value="Start_Date__D">Start Date</option>
+					<option value="Position">Position</option>
+					<option value="Filled_By">Filled By</option>
+				</select>
+	</span>
+	<span id="pclivacbuttons">
+		<button type="button" id="clivac_add" class="fixed nonformbutton" onclick="seljobtoadd()">
+			Add Requirement [onload_add;block=button;when [var.x_rights.ORDERJOBS;noerr]=1]
+		</button>
+		<button type="button" id="clivac_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+			Refresh
+		</button>
+	</span>
+<div id="divclivacsTop">
+</div>
+<p id="clivacstatus" ></p>
+<p>
+    <span id="clivacerror" class="errormessage">[var.x_errormessage]</span>
+</p>
+</div>
+<div id="divcliaddjobs" class="zoomeddiv">
+	
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+

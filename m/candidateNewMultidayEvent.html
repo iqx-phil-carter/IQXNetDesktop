@@ -1,0 +1,93 @@
+<!--[onload;tplvars;AvList='MobileNetCandidateShiftTemplates']-->
+
+<!-- 20140502 Mobile version -->
+
+<script type="text/javascript">
+
+function GetTemplateValues(Shift){
+		// select starting and finishing times from AvailabilityTemplate
+		
+	var OptionText=$("#selDiaryAdd option:selected").text();
+	$('#pAvailTemplate').val($("#selDiaryAdd option:selected").attr('id'));
+	var ColonPos=OptionText.indexOf(':');
+	if(OptionText.indexOf(' - ')==-1){
+		var StartTime='00:00';
+		var FinishTime='00:00';
+	}else{
+		StartTime=OptionText.substring(ColonPos-2,ColonPos+3);
+		FinishTime=OptionText.substring(ColonPos+6,ColonPos+11);
+	}
+	var TimeFormat='[var.x_global.general.TimeFormat;noerr]';
+	if(TimeFormat=='ValidFourDigitTime'){
+		StartTime=OptionText.substring(ColonPos-2,ColonPos+3).replace(':','');
+		FinishTime=OptionText.substring(ColonPos+6,ColonPos+11).replace(':','');
+	}
+	$('#pTimeFrom').val(StartTime);
+	$('#pTimeTo').val(FinishTime);
+	var OptionValue=$("#selDiaryAdd option:selected").val();
+	$('#pState').val(OptionValue);
+}
+				
+function ActionCreateEvent(event){
+	
+	event.preventDefault();		
+	var SqlString='IQXPost.php?proc=MobileNetCandidateDiaryAdd';
+	SqlStringLoop=SqlString+'&pShiftType='+$("#selDiaryAdd option:selected").attr('id');
+	SqlStringLoop=SqlStringLoop+'&pDateFrom='+$('#pDateFrom').val();
+	SqlStringLoop=SqlStringLoop+'&pTimeFrom='+$('#pTimeFrom').val();
+	SqlStringLoop=SqlStringLoop+'&pTimeTo='+$('#pTimeTo').val();
+	SqlStringLoop=SqlStringLoop+'&pState='+$('#pTimeTo').val();
+		
+	$('#frmClientNewEvent').attr('action',SqlStringLoop);
+	$('#frmClientNewEvent').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					alert('transmitted');
+					RefreshPage();
+				}else{
+					$('.localerrormessage').html('Error A: '+data);	
+				}
+			} else {
+				$('.localerrormessage').html('Error B: '+data);
+			}
+		},
+		error: function(data,textStatus){
+			$('.localerrormessage').html('Error C: '+data);
+		},
+		dataType: "html",
+		async: true,
+	});
+}	
+
+function RefreshPage(){
+    jQuery.mobile.changePage('iqxnet.php?P=candidatecalendar', {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+	
+</script>
+
+<p>Add Calendar Event</p>
+<div id="divClientNewEvent" >
+	<form id="frmClientNewEvent"  method="post" data-ajax="false" >
+		<fieldset data-role="fieldcontain">
+			<label for="selDiaryAdd" >Availability</label>
+			<select id="selDiaryAdd" data-role="select" name="pShiftType" onChange="GetTemplateValues(this.value);" >
+				<optgroup>[AvList.RowID;block=optgroup;]
+				<option id='[AvList.RowID]' value='[AvList.RowValue]'>[AvList.RowText]</option>
+				</optgroup>
+			</select>
+			<label for="pDateFrom">Date</label><input type="date" class="ui-input-text-data" id="pDateFrom" name="pdatefrom" />
+			<label for="pTimeFrom" >Time From:</label><input type="time" class="ui-input-text" id="pTimeFrom" name="ptimefrom" value="00:00"/>
+			<label for="pTimeTo" >Time To:</label><input type="time" class="ui-input-text" id="pTimeTo" name="ptimeto" value="00:00" />
+			<label for="RepeatFor">Days Required</label><input class="ui-input-text" data-role="number" id="RepeatFor" name="pRepeatFor" value="1" />
+			<button data-role="button" class="ui-btn ui-btn-e ui-corner-all" onclick="ActionCreateEvent(event)">Create</button>
+			<input type="hidden" class="" id="pIDCode" name="IDCode"/>
+			<input type="hidden" class="" id="pState" name="pState"/>
+		</fieldset>
+	</form>
+</div>
+<a data-rel="back">Back to Calendar</a>

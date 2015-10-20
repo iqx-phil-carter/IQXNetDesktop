@@ -1,0 +1,116 @@
+.dashboardIcon
+{
+	text-align:right;
+	position:absolute;
+	top:3px;
+	right:5px;
+	z-index:99;
+}
+.scsmDashboardIcon
+{
+	text-align:right;
+	position:relative;
+	top:125px;
+	right:15px;
+	z-index:99;
+}
+.scsmModalPopupContainer
+{
+	color: #674099;
+	font-family: Tahoma;
+	font-size:small;
+	font-weight: normal;	
+}
+
+.scsmModalPopupContainer DIV.modalBackground {
+	position: fixed;
+	z-index: 99;
+	top: 0px;
+	left: 0px;
+	background-color:Gray;
+	width: 100%;
+	height: 100%;
+	filter:alpha(opacity=70);
+	opacity:0.7;
+}
+.scsmModalPopupContainer TABLE.modalPopup
+{
+	background-color:Transparent;
+	position: fixed;
+	z-index: 99;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	height:100%;
+	text-align:center;
+	vertical-align:middle;
+}
+.scsmModalPopupContainer TABLE.modalPopup TD
+{
+	text-align:center;
+	vertical-align:middle;
+	background: Transparent url(dashboardLg.png) no-repeat center center;
+}
+.scsmModalPopupContainer DIV.dashboardLinks
+{
+	text-align:left;
+	vertical-align:top;
+	background-color:White;
+	width:250px;
+	height:255px;
+	border: groove 1px gray;
+	margin:0 auto;
+	padding-top:0px;
+	padding:5px;
+	position:relative;
+	overflow:auto;
+}
+.scsmModalPopupContainer DIV.dashboardLinks h2
+{
+	margin:0;
+	margin-bottom:10px;
+	color: #674099;
+	font-variant: normal;	
+	font-family: Tahoma;
+	font-size:small;
+	text-align:center;
+	font-weight:bold;
+}
+.scsmModalPopupContainer DIV.dashboardFixedClose
+{
+	position:absolute; 
+	bottom:3px; 
+	right:5px;
+}
+.scsmModalPopupContainer DIV.dashboardRelativeClose
+{
+	position:static; 
+	top:0; 
+	right:0;
+	padding-top:8px;
+	text-align:right;
+}
+.scsmModalPopupContainer DIV.dashboardFixedClose a, .scsmModalPopupContainer DIV.dashboardFixedClose a:visited, .scsmModalPopupContainer DIV.dashboardFixedClose a:hover, .scsmModalPopupContainer DIV.dashboardRelativeClose a, .scsmModalPopupContainer DIV.dashboardRelativeClose a:visited, .scsmModalPopupContainer DIV.dashboardRelativeClose a:hover
+{
+	font-family: Tahoma;
+	font-size:small;
+	font-weight:normal;
+	color:#674099;
+	text-decoration:underline;
+	cursor:pointer;
+}
+.scsmModalPopupContainer DIV a, .scsmModalPopupContainer DIV a:visited, .scsmModalPopupContainer DIV a:hover
+{
+	font-family: Tahoma;
+	font-size:small;
+	font-weight:normal;
+	color: #674099;
+	text-decoration:none;
+	cursor:pointer;
+}
+
+IMG
+{
+	border:0;
+}

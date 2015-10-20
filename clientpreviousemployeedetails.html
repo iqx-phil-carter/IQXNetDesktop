@@ -1,0 +1,98 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid';deptpubquest='F_questions_table?pTaglocation=$x_local.Switches.ShowDeptQuestionnaire&pid';pPrintable='';pTaglocation='';]-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	IQXInitSection($("#divcliprevtempdetails_[var.x_params.pid]"));
+	
+	$(".questionnaire","#divcliprevtempdetails_[var.x_params.pid]").questionnaire({disabled:true});
+	
+	if('[var.x_params.pPrintable;noerr]'==''){   
+		$("td.qanswer > input[value='']","#divcliprevtempdetails_[var.x_params.pid]").closest('tr.qquestrow').remove();
+	}else{
+		$("tbody","#divCliPrevEmpDetsPrintable").prepend($("tbody","#divCliPrevEmpDetsHidden").html());
+		$("#tempname","#divCliPrevEmpDetsPrintable").text($("table","#divCliPrevEmpDetsHidden").attr('title'));
+		
+		$("tbody td.qanswer","#divCliPrevEmpDetsPrintable").each(function(){
+			var s=$('input.qsingleentry',this).val() || $('input.qmultisummary',this).val();
+			if (s){
+				$(this).text(s);
+			} else {
+				$(this).closest('tr.qquestrow').remove();
+			}
+		});
+	}
+	
+	if('[var.x_local.Switches.ShowDocumentsTable;noerr]'==1){
+		IQXChain('#DocDetails', {
+			action: 'load',
+			page: 'ClientCandidateDocuments&pPersonID=' + encodeURIComponent('[var.x_params.pid]')
+		});
+	}
+		
+	if ($("table","#divhiddendetails_[var.x_params.pid]").attr('border')=='1'){   // Will be set if candidate has an image
+		$('img','#pimage_[var.x_params.pid]').attr('src','IQXRawData.php?page=S_FileDownload&binary=1&type=PRIMARY_PHOTO&personid=[var.x_params.pid]');
+	} else {   // Hide broken link
+		$("#pimage_[var.x_params.pid]").hide();
+	}
+	
+	if('[var.x_params.pPrintable;noerr]'==''){
+		$('#divcliprevtempdetails_[var.x_params.pid]').dialog({
+			title:$("table","#divhiddendetails_[var.x_params.pid]").attr('title'),   
+			modal:false,
+			width:630,
+			close: function(){
+				IQXcloseUIdialog(this);
+			},
+			buttons: {
+				"Close": function(){
+					IQXcloseUIdialog(this);
+				},
+				"Printable": function(){
+					var NewWindowString='IQXNetEx.php?page=clientpreviousemployeedetails&wrapper=bare&pPersonID='+ encodeURIComponent('[var.x_params.pid]')+'&pTagLocation='+'[var.x_local.Switches.ShowDeptQuestionnaire;noerr]'+ encodeURIComponent('[var.x_params.pid]') +'&pid='+ encodeURIComponent('[var.x_params.pid]') + '&pPrintable=true&pTaglocation='+'[var.x_local.Switches.ShowDeptQuestionnaire;noerr]';
+					IQXopenInNewWindow(NewWindowString);
+								
+				}
+			}
+		});
+	//}else{
+		var d=new Date();
+		var s=d.toLocaleDateString()+' '+d.toLocaleTimeString()+' ';
+		$('#timeofday').text(s);
+	}
+});
+
+</script>
+
+<div id="divcliprevtempdetails_[var.x_params.pid]" style="width: 630px">
+
+<p id="pimage_[var.x_params.pid]" align="center">
+	<img src="" alt="" height="200px" />
+</p> 
+
+<div id="divhiddendetails_[var.x_params.pid]" >
+	<table title="[cand.Name;block=table;noerr]" border="[cand.hasPhoto;noerr]" class="questionnaire" >
+		<tbody>
+			<tr class="qquestrow">
+	   			<td class="qquestion ui-widget-header">Date of Birth</td>
+	   			<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.DOB;noerr]" /></td>
+			</tr>
+			<tr class="qquestrow">
+	   			<td class="qquestion ui-widget-header">Registration</td>
+	   			<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.AppNumber;noerr]" /></td>
+			</tr>		
+	   </tbody>
+	</table>
+</div>
+
+<div id="DeptQuest">[deptpubquest;block=div]</div>
+
+<div>[candpubquest;block=div]</div> 
+
+<div id="DocDetails"></div>
+
+<div class="usertext">[onload;file=txt_client_previousemployeedetails_bottom.html;noerr]</div>
+
+<p id="timeofday" align="left"></p>
+
+</div>

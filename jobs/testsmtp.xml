@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Job autoclose="YES" breakpoint="no">
+    <Library>
+        <Include>
+            iqxNetLib.xml
+        </Include>
+    </Library>
+	<Parameters>
+		<Parameter name="sendTo" required="YES">Target Email Address</Parameter>
+	</Parameters>
+	<Call>GetIQXNetSettings</Call>
+    <SetVariable type="S" name="SenderEmailAddress" value="test@{IQXNet_EmailRoot}"/>
+    
+    <SendEmail subject="Test SMTP Settings" smtphost="{IQXNet_SMTPHost}" smtpuserid="{IQXNet_SMTPUserID}" 
+	    smtpsender="{SenderEmailAddress}" smtppassword="{IQXNet_SMTPPassword}">
+        <EmailRecipients>
+            <WriteLn>
+                {sendTo}
+            </WriteLn>
+        </EmailRecipients>
+        <EmailBody>
+            <WriteLn>
+                Agency: {IQXNet_AgencyName}
+            </WriteLn>
+            <WriteLn>
+                Site: {IQXNet_WebAddress}
+            </WriteLn>
+       </EmailBody>
+    </SendEmail>
+</Job>

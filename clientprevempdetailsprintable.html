@@ -1,0 +1,74 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid';deptpubquest='F_questions_table?pTaglocation=$x_local.Switches.ShowDeptQuestionnaire&pid';]-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("#divCliPrevEmpDetsPrintable"));
+	
+	$(".questionnaire","#divCliPrevEmpDetsPrintable").questionnaire({disabled:true});
+	
+	$("tbody","#divCliPrevEmpDetsPrintable").prepend($("tbody","#divCliPrevEmpDetsHidden").html());
+	$("#tempname","#divCliPrevEmpDetsPrintable").text($("table","#divCliPrevEmpDetsHidden").attr('title'));
+	
+	$("tbody td.qanswer","#divCliPrevEmpDetsPrintable").each(function(){
+		var s=$('input.qsingleentry',this).val() || $('input.qmultisummary',this).val();
+		if (s){
+			$(this).text(s);
+		} else {
+			$(this).closest('tr.qquestrow').remove();
+		}
+	});
+	   
+	if ($("table","#divCliPrevEmpDetsHidden").attr('border')=='1'){   // Will be set if candidate has an image
+		$('img','#pempimage').attr('src','IQXRawData.php?page=S_FileDownload&binary=1&type=PRIMARY_PHOTO&personid=[var.x_params.pid]');
+	} else {   // Hide broken link
+		$("#pempimage").hide();
+	}
+	
+	var d=new Date();
+	var s=d.toLocaleDateString()+' '+d.toLocaleTimeString()+' ';
+	$('#timeofday').text(s);
+	});
+	
+</script>
+
+<div id="divCliPrevEmpDetsPrintable" class="printablePage">
+
+	
+<div class="usertext">[onload;file=txt_cliprevempdets_printable_top.html;noerr]</div>
+
+<div class="printableSection">
+	
+<h4 id="tempname">Temp Details</h4>
+
+<br/>
+<div id="pempimage" align="center">
+	<img src="" alt="" height="200px" />
+</div> 
+
+<div id="DeptQuest">[deptpubquest;block=div]</div>
+
+<div>[candpubquest;block=div]</div>
+
+<p id="timeofday" align="right"></p>
+
+</div>
+
+<div class="usertext">[onload;file=txt_cliprevempdets_printable_bottom.html;noerr]</div>
+
+</div>
+
+<div id="divCliPrevEmpDetsHidden" class="ui-helper-hidden">
+	<table title="[cand.Name;block=table;noerr]" border="[cand.hasPhoto;noerr]">
+		<tbody>
+			<tr class="qquestrow">[onload_DOB;block=tr;when [var.x_local.Switches.ShowDOB;noerr]==1]
+	   			<td class="qquestion ui-widget-header">Date of Birth</td>
+	   			<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.DOB;noerr]" /></td>
+			</tr>
+			<tr class="qquestrow">[onload_App;block=tr;when [var.x_local.Switches.ShowApp;noerr]==1]
+	   			<td class="qquestion ui-widget-header">Registration</td>
+	   			<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.AppNumber;noerr]" /></td>
+			</tr>	
+	   </tbody>
+	</table>
+</div>

@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+
+<script type="text/javascript">
+	if('[var.x_global.general.IncludeIP;noerr]'==1){
+		window.IPAddr='[var.x_IPString;noerr]';
+	}
+</script>
+
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+
+        <title>[var.x_title;noerr]</title>
+		
+		[onload;file=HeaderIncludes.html]
+		
+    </head>
+
+    <body> <!-- pick up showdivheading in iqxnet.php -->
+    	<div id="divheading">[onload_divheading;block=div;when [var.x_showdivheading;noerr]=2]
+			<div style="float:left;overflow:auto;" >
+				<div class="floatdivlogo">
+					[var.x_userlogo;htmlconv=no;noerr;]
+				</div>
+				<div class="floatdivlogo"> 
+					<h1>[var.x_title;noerr]</h1>
+					<h2>[var.x_subtitle;noerr]</h2>
+					<h3>[var.x_usertitle;noerr]</h3>
+				</div>
+			</div>
+        </div>
+        <div>[onload_divheading;block=div;when [var.x_showdivheading;noerr]=1]
+		    <div class="header-wrapper">		
+				<div class="login-info">
+						[var.x_logoutlink;htmlconv=no;noerr]
+				</div>
+				<span class="login-title">[var.x_usertitle;htmlconv=no;noerr]</span>
+				<a class="home-link" href="/IQXNet/iqxnet.php" title="Barker Ross" rel="home">
+					<img src="./Images/barker-ross-logo.png" alt="Barker Ross">
+				</a>
+		    </div>
+        </div>
+		<div id="divheadingSmall" class="divheadingSmall" >
+			<span id="divheadingSmallSpanLeft" >[var.x_title;noerr]</span>
+			<span id="divheadingSmallSpanCentre">[var.x_usertitle;htmlconv=no;noerr]</span>
+			<span id="divheadingSmallSpanRight" >[var.x_logoutlink;htmlconv=no;noerr]</span>		
+        </div>
+		<div class="content-wrapper">
+			<div id="divcontent">
+				[onload;file=[var.x_divcontentfilename];noerr]
+			</div>
+		</div>
+		<p class="localerrormessage">[var.x_errormessage]</p>
+		<span id="FF" style="position:fixed;top:5px; float:left"></span>
+    </body>
+</html>

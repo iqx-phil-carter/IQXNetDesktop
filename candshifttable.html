@@ -1,0 +1,31 @@
+<!--[onload;tplvars;shifts='NetPersonShifts']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	$("#tblcandshifts").tablesorter({sortList:[[2,0],[3,0]],dateFormat:'uk'});
+	});
+</script>
+
+<table class="tablesorter" id="tblcandshifts">
+	<thead>
+		<tr>
+		<th>Company</th>
+		<th>Position</th>
+		<th>Date</th>
+		<th>From</th>
+		<th>To</th>
+		<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[shifts.TempShiftID]">
+		<td>[shifts.Company;block=tr]</td>
+	    <td>[shifts.Position;noerr]</td>
+	    <td>[shifts.ShiftDate]</td>
+	    <td>[shifts.TimeFrom]</td>
+	    <td>[shifts.TimeTo]</td>
+	    <td>[shifts.Description;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<label class="errormessage">[var.x_errormessage]</label>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Job>
+	<Library>
+		<Setup>
+			<SQLExec>insert into department (departmentid,name) values ('~','Test Department')</SQLExec>
+			
+			<SQLExec>insert into company (companyid, name, keyname) values ('TESTX1','Test Company 1','TESTCO1')</SQLExec>
+			<SQLExec>insert into company (companyid, name, keyname) values ('TESTX2','Test Company 2','TESTCO2')</SQLExec>
+			<SQLExec>insert into company (companyid, name, keyname) values ('TESTX3','Test Company 3','TESTCO3')</SQLExec>
+			
+			<SQLExec>insert into companyaccount (companyid) values ('TESTX1')</SQLExec>
+			<SQLExec>insert into companyaccount (companyid) values ('TESTX2')</SQLExec>
+			<SQLExec>insert into companyaccount (companyid) values ('TESTX3')</SQLExec>
+			
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTX1','Test Emp 1','TESTEMP1')</SQLExec>
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTX2','Test Emp 2','TESTEMP2')</SQLExec>
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTX3','Test Emp 3','TESTEMP3')</SQLExec>
+			
+			<SQLExec>insert into employment (employmentid,companyid,personid) values ('TESTX1','TESTX1','TESTX1')</SQLExec>			
+			<SQLExec>insert into employment (employmentid,companyid,personid) values ('TESTX2','TESTX2','TESTX2')</SQLExec>			
+			<SQLExec>insert into employment (employmentid,companyid,personid) values ('TESTX3','TESTX3','TESTX3')</SQLExec>	
+					
+			<SQLExec>insert into vacancy (vacancyid,employmentid,departmentid) values ('TESTX1','TESTX1','~')</SQLExec>
+			<SQLExec>insert into vacancy (vacancyid,employmentid,departmentid) values ('TESTX2','TESTX2','~')</SQLExec>
+			<SQLExec>insert into vacancy (vacancyid,employmentid,departmentid) values ('TESTX3','TESTX3','~')</SQLExec>
+			
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTXCAND1','Test Cand 1','TESTCAND1')</SQLExec>
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTXCAND2','Test Cand 2','TESTCAND2')</SQLExec>
+			<SQLExec>insert into person (personid, name, keyname) values ('TESTXCAND3','Test Cand 3','TESTCAND3')</SQLExec>
+			
+			<SQLExec>insert into pay_employee (personid) values ('TESTXCAND1')</SQLExec>
+			<SQLExec>insert into pay_employee (personid) values ('TESTXCAND2')</SQLExec>
+			<SQLExec>insert into pay_employee (personid) values ('TESTXCAND3')</SQLExec>
+			
+		</Setup>
+		<TearDown>
+			<SQLExec>delete from vacancy where vacancyid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from companyaccount where companyid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from pay_employee where personid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from employment where employmentid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from company where companyid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from person where personid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from department where departmentid = '~'</SQLExec>
+
+		</TearDown>
+	</Library>
+	<Call>TearDown</Call>
+	<Call>Setup</Call>
+	<Call>TearDown</Call>
+	
+	
+/Job>

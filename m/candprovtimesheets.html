@@ -1,0 +1,60 @@
+<!--[onload;tplvars;PTS='MobileNetCandProvTimesheets']-->
+
+<script type="text/javascript">
+	
+function zoomtimesheet(row,tstype,tsid,completed,serialnumber,placementid){
+
+	if (tstype=='C'){
+		var NewPage='provtimesheettimes&ptempprovtimesheetid=' + encodeURIComponent(tsid)+'&ViewOnly='+completed;
+		LoadPage(NewPage);
+	} else {
+		var shiftpage;
+		if (tstype == 'S') {
+			shiftpage = 'provtimesheetshifts';
+		}
+		else {
+			shiftpage = 'provtimesheettimes';
+		} 
+		LoadPage(shiftpage + '&ptempprovtimesheetid=' + encodeURIComponent(tsid)+'&ViewOnly='+completed);
+	}
+}
+
+function LoadPage(NewPage){
+	var DestPage='iqxnet.php?P='+NewPage;
+	if(NewPage=='Refresh'){DestPage=window.location.href;}
+	jQuery.mobile.changePage(DestPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+	
+</script>
+
+<!--div style="float:left;overflow:auto;width:100%;">
+	<a data-role="button" class="ui-btn ui-btn-e ui-corner-all" style="float:left;padding:5px;" href="" onClick="LoadPage('Refresh')">Reload</a>
+</div-->
+
+<div style="float:left;overflow:none;">
+	<div id="divtimesheets">
+		<table id="tbltimesheets" data-role="table" data-mode="reflow" class="tablesorter">
+			<thead>
+				<tr>
+					<th>TS No</th>
+					<th>Position</th>
+					<th>End Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr id="[PTS.tempprovtimesheetid;block=tr;]"  onclick="zoomtimesheet(this.parentNode.parentNode,'[PTS.timesheettype]','[PTS.tempprovtimesheetid]','[PTS.completed]','[PTS.serialnumber;noerr]','[PTS.placementid;noerr]')" >
+	    			<td class="TimesheetRow[PTS.completed;noerr]">[PTS.serialnumber;noerr]</td>
+	    			<td>[PTS.position;noerr]</td>
+	    			<td>[PTS.weekenddate;noerr]</td>
+				</tr>
+			</tbody>
+		</table>  
+	</div>
+    <a data-role="button" class="btnMenu" onclick="LoadPage('candidate_tabs')">Back to Menu</a>
+</div>
+
+<form id="frmProvTimesheet" method="post" data-ajax="false"></form> 

@@ -1,0 +1,115 @@
+	<!-- 20120116 Search Again button moved to top centre -->
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			IQXInitSection($("#divParamsForm,#divReport"));
+			$.get('IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_html__JobSearchParams.xsl',function(data){
+				$('#divParamsFields').html(data);
+				IQXInitSection($("#divParamsFields"));
+				enableParamsForm(true);
+			});
+		});
+		
+		function prepareReportJSON(data){
+			data.bAutoWidth=false;
+			data.sDom= 'lfrtip';  
+			var lastCol=data.aoColumns.length - 1;
+			if (lastCol >= 0) {
+				var col=data.aoColumns[lastCol];
+				$.each(data.aaData, function(rowi, row){
+					var tx = row[lastCol];
+					row[lastCol] = '<img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="tblExpansion(this,' + '\'' + tx + '\')" />';
+				});
+				col.bSortable = false;
+				col.bSearchable = false;
+				col.sClass = 'center dataTableExpand';
+			}
+		}
+		
+
+		function enableParamsForm(bOn){
+			if (bOn) {
+				$('#divReport').hide();
+				$('#divReport').empty();
+				$('#divReportButtons').hide();
+				$('#divParamsForm').show();
+				IQXEnableForm('#frmJobSearchParams',{successhandler:resultJSONloaded,loadmessagetarget:'#divLoadMessage',responsetype:'json'});
+				$IQXFormContext.blocktabswitch=false;
+				}
+			else {
+				IQXDisableForm();
+				$('#divParamsForm').hide();
+				$('#divReport').html('<table id="tblReport" class="display" cellspacing="0" cellpadding="0" border="0" > </table>');
+				$('#divReport').show();
+				$('#divReportButtons').show();
+			}
+		}
+		
+		function resultJSONloaded(data, textStatus) {
+			if (textStatus=='success'){
+				if (data.aoColumns == undefined) {
+					$('#labError').text('No jobs match your search criteria');
+					enableParamsForm(true);
+				}
+				else {
+					$('#labError').text('');
+					prepareReportJSON(data);
+					enableParamsForm(false); 
+					var dt = $("#tblReport").dataTable(data);
+					$("#tblReport").data('iqDataTable', dt);
+				}
+			} else {
+				$('#labError').text('Error: '+textStatus);	
+				}
+			$('#divLoadMessage').text('');
+
+			// Place Search Again button in between show and search, after table has loaded
+			var SearchButtonString='<div id="divReportButtons" align="center" class="ButtonGroup" >';
+			SearchButtonString+='<button type="button" id="report_research" class="fixed" onclick="enableParamsForm(true)">Search Again</button>';
+			SearchButtonString+='</div>';
+			$('#tblReport_filter').after(SearchButtonString);
+		}
+		
+		function tblExpansion(img,txt){
+			var dtbl=$("#tblReport").data('iqDataTable');
+			if (dtbl) {
+				var bOpen=img.src.match(/details_open/);
+				var row=$(img).closest('tr').get(0);
+				dtbl.fnClose(row);  // In case it's already open with different details
+				$('img.dataTableExpand',row).each(function() {
+					this.title = this.title.replace(/^Hide/, 'Show');
+					this.src = 'css/images/details_open.png';
+				});
+				if (bOpen) {
+					$.get('IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_html__JobSearchDetail.xsl&xpath_@id='+txt, 
+						function(data,textStatus){
+							if (textStatus=='success'){
+								img.title = img.title.replace(/^Show/, 'Hide');
+								img.src = 'css/images/details_close.png';
+								dtbl.fnOpen(row, data, '');
+							}
+						});
+					}
+				}
+			}
+		
+	</script>
+	
+	<span class="errormessage" id="labError" ></span>
+		
+	<div id="divParamsForm">
+		<form id="frmJobSearchParams" class="centreform" action="IQXRawData.php?page=L_WebVacancies.xml&noauth=YES&render=text_plain__JobSearchData.xsl" method="get" accept-charset="utf-8">
+			<fieldset>
+				<div id="divParamsFields"> </div>
+				<p><button type="submit" id="paramformfield_submit" class="fixed formbutton" >Search</button></p>
+			</fieldset>
+		</form>			
+	</div>
+	
+	<div id="divLoadMessage"></div>
+
+	<div id="divReport" class="reportBody"></div>
+	
+	<div class="cleardiv" ></div>
+	
+

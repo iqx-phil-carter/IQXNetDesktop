@@ -1,0 +1,337 @@
+<Job title="SynNet Database Procedure Import">
+ <IfYesDialog text="This job will update the SynNet database procedures. Ok to proceed?">
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetCalendarShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetCalendarShifts(in pWebUserID char(20),in pstart double,in pend double)
+result(shiftdate char(20),role char(1),shiftcount integer,title char(50),tipArray long varchar)
+begin
+  declare dStart date;
+  declare dEnd date;
+  set dstart=dateadd(second,pstart,'1970-01-01');
+  set dend=dateadd(second,pend,'1970-01-01');
+  select dateformat(subby.shiftdate,'yyyy-mm-dd') as caldate,
+    subby.role,
+    subby.cnt as shiftcount,
+    --string(subby.role,' ',subby.cnt) as title,
+    string(if subby.role = 'T' then 'Teachers' else 'Support Staff' endif,': ',subby.cnt) as title,
+    string('[',
+    (select list(string('{{"name":',netjsstring(person.name),',"id":',netjsstring(person.personid),',"descrip":',
+      netjsstring(string(v.position,' ',
+      isnull(st.description,string(dateformat(s.timefrom,'hh:nn'),'-',dateformat(s.timeto,'hh:nn'))))),'}'),',') from
+      tempshift as s key join(tempshiftplan as p,person),
+      tempshiftplan as p key join vacancy as v key join employment,
+      tempshiftplan as p key left outer join tempshifttype as st where
+      s.state in( 'B','W') and
+      s.shiftdate = subby.shiftdate and SynNetVacancyRole(v.vacancyid) = subby.role and
+      p.description <> 'Added Time' and
+      employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)),']') as tipArray from
+    (select SynNetVacancyRole(v.vacancyid) as role,s.shiftdate,count(*) as cnt from
+      tempshift as s key join tempshiftplan as p key join vacancy as v key join employment where
+      s.state in( 'B','W') and
+      s.shiftdate between dstart and dend and
+      p.description <> 'Added Time' and
+      employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)
+      group by role,s.shiftdate) as subby union all
+  select dateformat(subby.shiftdate,'yyyy-mm-dd'),'U',
+    subby.cnt,
+    --string('U ',subby.cnt),
+    string('Unfilled: ',subby.cnt),
+    string('[',
+    (select list(string('{{"descrip":',
+      netjsstring(string(v.position,' ',isnull(st.description,string(dateformat(p.timefrom,'hh:nn'),'-',dateformat(p.timeto,'hh:nn'))))),'}'),',') from
+      tempshiftplan as p key join vacancy as v key join employment,
+      tempshiftplan as p key left outer join tempshifttype as st where
+      not exists(select * from tempshift where tempshiftplanid = p.tempshiftplanid and not(state = 'P' or(state = 'C' and crefill = 1))) and
+      p.shiftdate = subby.shiftdate and
+      employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)),']') from
+    (select p.shiftdate,count(*) as cnt from
+      tempshiftplan as p key join vacancy key join employment where
+      not exists(select * from tempshift where tempshiftplanid = p.tempshiftplanid and not(state = 'P' or(state = 'C' and crefill = 1))) and
+      p.shiftdate between dstart and dend and
+      employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)
+      group by p.shiftdate) as subby order by
+    1 asc,2 desc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetCalendarShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetClientAddOneShift]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetClientAddOneShift(in pWebUserID char(20),in pID char(50),in pdate date,in pTheirRef char(50),in pNote char(50),inout pvacids char(200))
+begin
+  declare vacid char(20);
+  declare testvacid char(22);
+  declare templateid char(20);
+  declare swebusername char(50);
+  declare i integer;
+  set i=isnull(charindex('|',pID),0);
+  if i < 2 then
+    return
+  end if;
+  set vacid="left"(pID,i-1);
+  set templateid=substring(pID,i+1);
+  if not vacid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    return
+  end if;
+  set swebusername=(select name from iqxnetuser where iqxnetuserid = pwebuserid);
+  insert into tempshiftplan( TempShiftPlanID,VacancyID,TimeFrom,TimeTo,BreakMinutes,ShiftDate,Moveable,Description,ClientNote,EssentialSkill,EssentialSkillGradeID,ReferenceCode,ReferenceRequired,
+    ClientMustConfirm,TempMustConfirm,OrderedBy,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+    select uniquekey(''),vacid,timefrom,timeto,breakminutes,pdate,Moveable,Description,pNote,string(taglocation,';',tagid,';',tagchoiceid,';',gradetagid),
+      EssentialSkillGradeID,ucase(pTheirRef),ReferenceRequired,ClientMustConfirm,TempMustConfirm,sWebUserName,TempShiftTypeID,AnalysisCode,RecoveryHours from
+      tempshifttemplate where tempshifttemplateid = templateid;
+  if @@rowcount = 0 then
+    return
+  end if;
+  set testvacid=string('|',vacid,'|');
+  if locate(pvacids,testvacid) = 0 then
+    call IQXNetPopup(pWebUserID,null,null,vacid,null,null,null,'New shift requirement(s) added',null);
+    set pvacids=pvacids || testvacid
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetClientAddOneShift to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetClientAddShiftsWeek]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetClientAddShiftsWeek(in pWebUserID char(20),in pstartdate char(25),in pTheirRef char(50) default null,in pNote char(50) default null,in pMonday char(50) default
+null,in pTuesday char(50) default null,in pWednesday char(50) default null,in pThursday char(50) default null,in pFriday char(50) default
+null,in pSaturday char(50) default null,in pSunday char(50) default null)
+result(pResult char(250))
+begin
+  declare svacids char(200);
+  declare dstart date;
+  if IQXNetHasPermission(pWebUserID,'ORDERJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set dstart=iqxnetstringtodate(pstartdate);
+  if dstart is null or dow(dstart) <> 2 then
+    select '500:~Invalid start date';
+    return
+  end if;
+  set svacids='';
+  call SynNetClientAddOneShift(pWebUserID,pMonday,dstart,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pTuesday,dstart+1,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pWednesday,dstart+2,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pThursday,dstart+3,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pFriday,dstart+4,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pSaturday,dstart+5,pTheirRef,pNote,svacids);
+  call SynNetClientAddOneShift(pWebUserID,pSunday,dstart+6,pTheirRef,pNote,svacids);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetClientAddShiftsWeek to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetClientRequirementTemplates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetClientRequirementTemplates(in pWebUserID char(20),in pType char(2),in pVacancyID char(20) default null)
+result(ID char(20),ExtraInfo char(250),Descript char(100),ExtraDescrip char(250))
+begin
+  declare @companycount integer;
+  set @companycount=(select count(*) from iqxnetuserlink where iqxnetuserid = pWebUserID);
+  if pType = 'DV' then //Shift vacancies containing Daily shift templates
+    select v.VacancyID as ID,'' as ExtraInfo,
+      v.Position as Descrip,
+      (if @companycount > 1 then string(Company.Name,', ',GetCompanyAddressOnLine(company.companyid))
+      //Shift vacancies containing Hourly shift templates
+      //Daily Shift templates
+      //Hourly Shift templates
+      else '' endif) as ExtraDescrip from Vacancy as v key join Employment key join Company where
+      Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+      v.temp = 1 and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') = 'S' and
+      v.vacancyid = any(select a.vacancyid from TempShiftTemplateAllowed as a key join tempshifttemplate as p where p.timefrom is not null and p.timeto is not null and isnull(p.tempshifttypeid,'') in( 'DY','AM','PM','3Q') ) order by
+      2 asc
+  else if pType = 'HV' then
+      select v.VacancyID as ID,'' as ExtraInfo,
+        v.Position as Descrip,
+        (if @companycount > 1 then string(Company.Name,', ',GetCompanyAddressOnLine(company.companyid))
+        else '' endif) as ExtraDescrip from Vacancy as v key join Employment key join Company where
+        Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+        v.temp = 1 and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') = 'S' and
+        v.vacancyid = any(select a.vacancyid from TempShiftTemplateAllowed as a key join tempshifttemplate as p where not(p.timefrom is not null and p.timeto is not null and isnull(p.tempshifttypeid,'') in( 'DY','AM','PM','3Q') )) order by
+        2 asc
+    else if pType = 'DS' then
+        select p.TempShiftTemplateID as ID,
+          string(p.timefrom,'|',p.timeto,'|',p.breakminutes,'|',p.moveable) as ExtraInfo,
+          p.Description as Descrip,'' as ExtraDescrip from
+          TempShiftTemplate as p key join TempShiftTemplateAllowed key join Vacancy as v key join Employment key join Company where
+          v.vacancyid = pvacancyid and
+          Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+          p.timefrom is not null and p.timeto is not null and isnull(p.tempshifttypeid,'') in( 'DY','AM','PM','3Q') order by
+          2 asc
+      else if pType = 'HS' then
+          select p.TempShiftTemplateID as ID,
+            string(p.timefrom,'|',p.timeto,'|',p.breakminutes,'|',p.moveable) as ExtraInfo,
+            p.Description as Descrip,'' as ExtraDescrip from
+            TempShiftTemplate as p key join TempShiftTemplateAllowed key join Vacancy as v key join Employment key join Company where
+            v.vacancyid = pvacancyid and
+            Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+            not(p.timefrom is not null and p.timeto is not null and isnull(p.tempshifttypeid,'') in( 'DY','AM','PM','3Q') ) order by
+            2 asc
+        end if
+      end if
+    end if
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetClientRequirementTemplates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetClientShiftTemplates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetClientShiftTemplates(in pWebUserID char(20))
+result(TemplateList long varchar)
+begin
+  select list(string(v.vacancyid,'|',p.TempShiftTemplateID,']~[',v.position,' ',p.description),']~[' order by v.position asc,p.description asc) from
+    TempShiftTemplate as p key join TempShiftTemplateAllowed key join Vacancy as v key join Employment as e where
+    e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    p.timefrom is not null and p.timeto is not null and p.tempshifttypeid is not null
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetClientShiftTemplates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.SynNetProvTimesheetShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.SynNetProvTimesheetShifts(in pWebUserID char(20),in pTempProvTimesheetID char(20))
+result(tempshiftid char(20),shiftdate date,timefrom time,timeto time,breakminutes smallint,tick smallint,description char(50),weekenddate date,daily smallint)
+begin
+  select s.tempshiftid,s.shiftdate,s.timefrom,s.timeto,s.breakminutes,
+    (if t.extnumber = 2 then(select first 1 from tempprovtimesheetshift where tempprovtimesheetid = t.tempprovtimesheetid and tempshiftid = s.tempshiftid) else 1 endif) as tick,
+    p.description,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+    (if isnull(s.tempshifttypeid,'') in( 'DY','AM','PM','3Q') then 1 else 0 endif) as daily from
+    tempshift as s join tempprovtimesheet as t on s.personid = t.personid and s.vacancyid = t.vacancyid,
+    tempshift as s key left outer join tempshiftplan as p,
+    tempprovtimesheet as t key join person where
+    t.tempprovtimesheetid = pTempProvTimesheetID and
+    t.extnumber > 0 and s.state in( 'P','B') and tick = 1 and
+    s.shiftdate between weekenddate-6 and weekenddate order by
+    s.shiftdate asc,s.timefrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetProvTimesheetShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.synNetProvTimesheetShiftSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.synNetProvTimesheetShiftSet(in pWebUserID char(20),in ptempshiftid char(250),in pshiftdate char(250) default 'NOT_SET',in ptimefrom char(250) default 'NOT_SET',in ptimeto char(250) default 'NOT_SET',in pbreakminutes char(250) default 'NOT_SET')
+result(pResult char(250))
+begin
+  declare i smallint;
+  declare isnewshift smallint;
+  declare isextratime smallint;
+  declare newshiftid char(20);
+  if trim(pbreakminutes) = '' then
+    set pbreakminutes='0'
+  end if;
+  if ptempshiftid like 'Copy%' then
+    set isnewshift=1
+  else
+    set isnewshift=0
+  end if;
+  if ptempshiftid like 'CopyExtra%' then
+    set isextratime=1;
+    set pbreakminutes='0' -- Break minutes not edited so we DO NOT want it defaulting to same as copied shift
+  else
+    set isextratime=0
+  end if;
+  set i=charindex('_',ptempshiftid);
+  if i > 0 then
+    set ptempshiftid="right"(ptempshiftid,length(ptempshiftid)-i)
+  end if;
+  if not pTempShiftID = any(
+    select t.TempShiftID from tempshift as t key join person key join iqxnetuserlink where iqxnetuserid = pwebuserid union
+    select t.TempShiftID from tempshift as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.TempShiftID from tempshift as t key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnewshift = 1 then
+    set newshiftid=uniquekey(ptempshiftid);
+    insert into tempshiftplan( TempShiftPlanID,VacancyID,ShiftDate,TimeFrom,TimeTo,BreakMinutes,Description,EssentialSkill,EssentialSkillGradeID,ReferenceCode,
+      EssentialSkillChoiceList,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select newshiftid,VacancyID,isnull(iqxnetstringtodate(pshiftdate),shiftdate),isnull(iqxnetstringtotime(ptimefrom),timefrom),
+        isnull(iqxnetstringtotime(ptimeto),timeto),isnull(iqxnetstringtointeger(pbreakminutes),breakminutes),(if isextratime = 1 then 'Added Time' else Description
+        endif),EssentialSkill,EssentialSkillGradeID,'Self-booked',
+        EssentialSkillChoiceList,(if isextratime = 1 then null else TempShiftTypeID endif),AnalysisCode,RecoveryHours from tempshiftplan where
+        tempshiftplanid = (select tempshiftplanid from tempshift where tempshiftid = ptempshiftid);
+    insert into tempshift( TempShiftID,VacancyID,PersonID,PlacementID,ShiftDate,TimeFrom,TimeTo,BreakMinutes,State,TempShiftPlanID,EssentialSkillGradeID,ReferenceCode,
+      ClientConfirmed,TempConfirmed,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select NewShiftID,VacancyID,PersonID,PlacementID,isnull(iqxnetstringtodate(pshiftdate),shiftdate),isnull(iqxnetstringtotime(ptimefrom),timefrom),
+        isnull(iqxnetstringtotime(ptimeto),timeto),isnull(iqxnetstringtointeger(pbreakminutes),breakminutes),'B',NewShiftID,EssentialSkillGradeID,'Self-booked',
+        1,1,(if isextratime = 1 then null else TempShiftTypeID endif),AnalysisCode,RecoveryHours from tempshift where
+        tempshiftid = ptempshiftid
+  else
+    update tempshift set shiftdate = isnull(iqxnetstringtodate(pshiftdate),shiftdate),timefrom = isnull(iqxnetstringtotime(ptimefrom),timefrom),
+      timeto = isnull(iqxnetstringtotime(ptimeto),timeto),breakminutes = isnull(iqxnetstringtointeger(pbreakminutes),breakminutes) where
+      tempshiftid = ptempshiftid
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.synNetProvTimesheetShiftSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.synNetTimesheetShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.synNetTimesheetShifts(in pWebUserID char(20),in pTempTimesheetID char(20))
+result(tempshiftid char(20),shifttype char(20),shiftdate date,timefrom time,timeto time,breakminutes smallint,description char(50),weekenddate date)
+begin
+  select s.tempshiftid,isnull(s.tempshifttypeid,'') as shifttype,
+    s.shiftdate,
+    if shifttype in( 'DY','AM','PM','3Q') then null else s.timefrom endif as timefrom,
+    if shifttype in( 'DY','AM','PM','3Q') then null else s.timeto endif as timeto,
+    if shifttype in( 'DY','AM','PM','3Q') then null else s.breakminutes endif as breakminutes,
+    p.description,weekmonthenddate(t.period,t.periodlength) as weekenddate from
+    tempshift as s key join temptimesheet as t,
+    tempshift as s key left outer join tempshiftplan as p,
+    temptimesheet as t key join person where
+    t.temptimesheetid = pTempTimesheetID and
+    s.shiftdate between weekenddate-6 and weekenddate order by
+    s.shiftdate asc,s.timefrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.synNetTimesheetShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop function pears.SynNetVacancyRole]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create function pears.SynNetVacancyRole(in vacid char(20))
+returns char(1)
+begin
+  if exists(select * from tagvalue where taglocation = 'V' and tagid = 'ROL' and id = vacid) then
+    return 'S'
+  else
+    return 'T'
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.SynNetVacancyRole to IQXNet]]>
+  </SQLExec>
+ </IfYesDialog>
+</Job>

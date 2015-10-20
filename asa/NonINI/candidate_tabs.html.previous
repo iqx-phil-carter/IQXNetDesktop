@@ -1,0 +1,56 @@
+<!-- 20121024 change Profile tab to Me -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#candtabs");
+	$('#FirstName').html($('#FirstName').html().substring(0,$('#FirstName').html().indexOf(' '))); //grab full name and shorten to first name only. Then put it back.
+});
+
+function IQXLogout(){
+	// override standard Logout, to divert to standard site.
+	$.get('IQXLogout.php',null,function(data, textStatus){
+			if (data=='Ok') {
+				window.location="http://www.asarecruitment.co.uk";
+			} else {
+				$(".errormessage").html(data);
+			}
+	}, "text");	
+}
+
+</script>
+    
+<div id="candtabs" >
+    <ul>
+        <li><a href="#tabcontent-1"><span>Welcome</span></a></li>
+        <li><a href="IQXPage.php?page=candprofile"><span>Me</span></a></li>
+		<li><a href="IQXPage.php?page=candAdmin"><span>Payroll[onload_CANDBANKDETAILS;block=li;when [var.x_rights.CANDBANKDETAILS;noerr]=1]</span></a></li>
+        <!--li><a href="IQXPage.php?page=candregistration"><span>Registration</span></a></li--> <!-- hide for the moment -->
+		<li><a href="IQXPage.php?page=candidatedocuments"><span>Documents[onload_DOCCANDDOWNLOAD;block=li;when [var.x_rights.DOCCANDDOWNLOAD;noerr]=1]</span></a></li>
+		<li id="D"><a href="IQXPage.php?page=candidatecalendar"><span>Calendar</span></a></li>
+        <li id="P"><a href="IQXPage.php?page=candprovtimesheets"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheets"><span>Historic Timesheets</span></a></li>
+        <li><a href="IQXPage.php?page=reports"><span>Reports[onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+		<li><a href="IQXPage.php?page=test"><span>Test[onload_TESTONLY;block=li;when [var.x_rights.TESTONLY;noerr]=1]
+</span></a></li>
+    </ul>
+    <div id="tabcontent-1">
+    	<div class="usertext">[onload;file=txt_candidate_welcome_top.html;noerr]</div>
+        <p>Hello <span id='FirstName'>[var.x_username]</span>, welcome to the eCruit Candidate Portal.</p>
+		<p>Here you can </p>
+		<ul>
+			<li>Update your details and password</li>
+			<li>Upload your CV and other documents</li>
+			<li>Notify your availability</li>
+			<li>View your bookings</li>
+			<li>View your timesheets</li>
+		</ul>
+    	<div class="usertext">[onload;file=txt_candidate_welcome_bottom.html;noerr]</div>
+    </div>
+ </div>
+
+<p>
+<button type="button" id="button_logout" class="fixed" onclick="IQXLogout()">
+   	Logout
+</button>
+</p>

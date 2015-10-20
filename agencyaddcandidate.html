@@ -1,0 +1,42 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("frmagaddcand");
+		IQXEnableForm("#frmagaddcand");
+		});
+	
+</script>
+
+<form id="frmagaddcand" name="addcand" action="IQXPost.php?proc=NetAgencyCandidateAdd" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+    	<h3>New Candidate:</h3>
+        <p>
+            <label for="cand_forenames">
+                Forename(s)
+            </label>
+            <input type="text" id="cand_forenames" name="pforenames" class="required" />
+        </p>
+        <p>
+            <label for="cand_surname">
+                Surname
+            </label>
+            <input type="text" id="cand_surname" name="psurname" class="required"  />
+        </p>
+        <p>
+            <label for="cand_ref">
+                Reference Code
+            </label>
+            <input type="text" id="cand_ref" name="preference" class="uppercase" />
+        </p>
+        <p>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="unaddcand()" >
+                Undo
+            </button>
+        </p>
+    </fieldset>
+    <p>
+        <span class="errormessage">[var.x_errormessage]</span>
+    </p>
+</form>

@@ -1,0 +1,172 @@
+<!--    <form method="post" action="contact.php" id="contact-form">        <ul>                <li class="clearfix">                        <label for="forename">Forename(s): <em> *</em></label>                        <input size="25" name="forename" id="forename" />                </li>                <li class="clearfix">                        <label for="surname">Surname: <em> *</em></label>                        <input size="25" name="surname" id="surname" />                </li>                <li class="clearfix">                        <label for="gender">Gender:</label>                        <input size="25" name="gender" id="gender" />                </li>                <li class="clearfix">                        <label for="home_phone">Home Tel:</label>                        <input size="13" type="tel" name="home_phone" id="home_phone" />                </li>                <li class="clearfix">                        <label for="day_phone">Day Tel:</label>                        <input size="13" type="tel" name="day_phone" id="day_phone" />                </li>                <li class="clearfix">                        <label for="mobile">Mobile:</label>                        <input size="13" type="tel" name="mobile" id="mobile" />                </li>                <li class="clearfix">                        <label for="email">Email: <em> *</em></label>                        <input type="email" size="50" name="email" id="email" />                </li>                <li class="adr clearfix">                        <label>Address: <em> *</em></label>                        <input size="50" name="adr_1" id="adr_1" />                        <input size="50" name="adr_2" id="adr_2" />                        <input size="50" name="adr_2" id="adr_2" />                </li>                <li class="clearfix">                        <label for="town">Town / City: <em> *</em></label>                        <input size="50" name="town" id="town" />                </li>                <li class="clearfix">                        <label for="state">State / Province: <em> *</em></label>                        <input size="50" name="state" id="state" />                </li>                <li class="clearfix">                        <label for="country">Country: <em> *</em></label>                        <input size="50" name="country" id="county" />                </li>                <li class="clearfix">                        <label for="postcode">Postcode: <em> *</em></label>                        <input size="8" name="postcode" id="postcode" />                </li>                <li class="contact-btn clearfix">                    <button class="btn">Register with UKL</button>                </li>        </ul>    </form>  -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        var subtitle='Candidate Registration';
+        $('#divheading h3').text(subtitle);
+        document.title=document.title+' - '+subtitle;
+        IQXInitSection("form");
+        IQXEnableForm('#contact-form',{successhandler:IQXRefreshBrowser});
+        $("#cand_password","#contact-form").pstrength();
+        IQXChain("#questholderdiv",{action:'load',page:'newcandidatequestionnaire&noauth=yes'});
+    });
+    function ResetForm(){
+        IQXDisableForm();
+        IQXEnableForm('#contact-form');
+    }
+    function EmailToUsername(){
+        if(!$("#cand_username").val()){
+            $("#cand_username").val($("#cand_email").val())
+        }
+    }
+</script>
+<div id="left" class="register-form">
+    <h2>Register with UKL</h2>
+    <p class="reg-desc">Once registered, we will regularly update you with the best jobs in the market, jobs that match the profile you record with us, as they become available. Subscription to this alert service is free.</p>
+    <div class="usertext">[onload;file=txt_new_candidate_top.html;noerr]</div>
+
+    <form id="contact-form" name="newcand" action="IQXNewUser.php?proc=NetCandidateRegister" method="POST" accept-charset="utf-8">
+            <input type="hidden" id="cand_class" name="puserclass" value="CANDIDATE" />
+            <p><span class="errormessage">[var.x_errormessage]</span></p>
+
+            <div class="questionnaire">
+                <fieldset class="gr-account">
+                    <legend>Your Account</legend>
+                    <ul class="clearfix">
+                        <li class="clearfix split qquestrow">
+                            <label for="">Email Address</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_email" name="pemail" class="required email qpseudoquestanswer"  />
+                            </div>
+                        </li>
+                        <li class="clearfix split qquestrow">
+                            <label for="qquestion">Username</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_username" name="pusername" class="required qpseudoquestanswer" onfocus="EmailToUsername()" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Password</label>
+                            <div class="qanswer">
+                                <input type="password" id="cand_password" name="ppassword" class="required qpseudoquestanswer safepassword" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Repeat Password</label>
+                            <div class="qanswer">
+                                <input type="password" id="cand_passwordcheck" name="ppasswordcheck" equalto="#cand_password" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                    </ul>
+                </fieldset>
+                <fieldset class="gr-about">
+                    <legend>About You</legend>
+                    <ul class="clearfix">
+                        <li class="clearfix qquestrow">
+                            <label for="">Forename(s)</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_forenames" name="pforenames" class="required qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Surname</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_surname" name="psurname" class="required qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Gender</label>
+                            <div class="qanswer">
+                                <select id="cand_gender" name="pgender" class="required qpseudoquestanswer noncheckbox" >
+                                    <option value="" ></option>
+                                    <option value="F" >Female</option>
+                                    <option value="M" >Male</option>
+                                </select>
+                            </div>
+                        </li>
+						<li class="clearfix qquestrow">
+							<label for="">Date of Birth</label>
+                			<div class="qanswer">
+            					<input type="text" id="cand_dob" name="pDOB" class="required dateofbirth valid qpseudoquestanswer"  />
+            				</div>
+						</li>
+						<li class="clearfix qquestrow">
+                            <label for="">National Insurance Number</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_NI" name="pNINumber" class="validNiNumber uppercase qpseudoquestanswer" />
+                            </div>
+                        </li>
+                    </ul>
+                </fieldset>
+                <fieldset class="gr-details">
+                    <legend>Contact Details</legend>
+                    <ul>
+                        <li class="clearfix qquestrow">
+                            <label for="">Home Telephone</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_home_phone" name="phomephone" class="validPhoneNumber qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Day Telephone</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_day_phone" name="pdayphone" class="validPhoneNumber qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Mobile</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_mobile" name="pmobile" class="validPhoneNumber qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix address ad_top qquestrow">
+                            <label for="">Address</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_addr1" name="paddr1" class="required qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix address ad_mid qquestrow">
+                            <label for="">&nbsp;</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_addr2" name="paddr2" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix address ad_last qquestrow">
+                            <label for="">&nbsp;</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_addr3" name="paddr3" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Town</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_town" name="ptown" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">County</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_county" name="pcounty" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Country</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_country" name="pcountry" class="qpseudoquestanswer" />
+                            </div>
+                        </li>
+                        <li class="clearfix qquestrow">
+                            <label for="">Postcode</label>
+                            <div class="qanswer">
+                                <input type="text" id="cand_postcode" name="ppostcode" class="required validPostCode uppercase qpseudoquestanswer" />
+                            </div>
+                        </li>
+                    </ul>
+                </fieldset>
+                <button type="submit" class="btn">Register with UKL</button>
+                </div>
+                    <div id="questholderdiv"></div>
+                <p><span class="errormessage">[var.x_errormessage]</span></p>
+</form>
+<div class="usertext">[onload;file=txt_new_candidate_bottom.html;noerr]</div>
+</div>
+</div>

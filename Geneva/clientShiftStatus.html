@@ -1,0 +1,334 @@
+<!--[onload;tplvars;vacancies='GenevaNetClientVacanciesLineStatus']-->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+	IQXInitSection("#divclivacs");
+	
+	IQXInitSection("#divShiftStat");
+	$('#tblShiftStat').data('IQXdtDateFilter',{dateColumn:1,dateColumn2:3,clearButtonText:"Clear"});
+	var oTbl=$('#divShiftStat').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"sDom": 'lDf<"clear">rtip',
+		"aaSorting": [ [2,'asc'], [0,'asc'] ],
+		"aoColumnDefs": [{aTargets:[0],fnRender: function(oObj){
+			 {
+				return oObj.aData[0];
+			}
+		
+		}}]
+	});
+	
+	if (!IQXDeepLink("R",oTbl)){
+		setThisWeek(oTbl);
+		}
+	$("#divclivacs").delegate("tbody tr button", "click", function(e){
+		var nRow=oTbl.fnGetPosition($(this).closest('tr').get(0));
+		var sBtn=this.innerHTML; //Button text
+		var aRow=oTbl.fnGetData(nRow);
+		var sVacID=aRow[11];
+		var sPlanID=aRow[12];
+		var sCaption=aRow[0];
+		
+		doVacancyAction(sBtn,sVacID,sPlanID,oTbl,nRow,sCaption);
+		});
+	
+	
+	});
+		
+function setThisWeek(oTbl){
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divShiftStat').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divShiftStat').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+	
+function showShiftActions(img,Rowid,CancelButton,ConfirmButton,RejectButton,FillButton,Note) {
+	// Create subform for notes
+	
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#tblcliprevtemp").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	var TargetDiv;
+	
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		$(img).closest('tr').next('tr').remove();
+		return;
+	}
+		
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).rowafter({dataTable:dt,divs:[{divclass:"zoomeddivCurrent"}]});
+	TargetDiv=$(row).next('tr').find("div.zoomeddivCurrent");
+	var FormString='<form id="F'+Rowid+'" method="post" >';
+	if (CancelButton=='1') {FormString=FormString+ "<span><button class='fixed' type='button' onClick='CancelLine(this,\""+Rowid+"\")'>Cancel</button></span><span style='float:right'><select id='ComboCancel' name='pCancelReason' ></select></span><hr />";}
+	if (RejectButton=='1') {FormString=FormString+ "<span><button class='fixed' type='button' onClick='RejectLine(this,\""+Rowid+"\")'>Reject</button></span><span style='float:right'><select id='ComboCancel' name='pCancelReason' ></select></span><hr />";}
+	if (ConfirmButton=='1') {FormString=FormString+ "<span><button class='fixed' type='button' onClick='ConfirmLine(this,\""+Rowid+"\")'>Confirm</button></span><hr />";}
+	if (FillButton=='1') {FormString=FormString+ "<span><button class='fixed' type='button' onClick='FillLine(this,\""+Rowid+"\")'>Fill</button></span><hr />";}
+	FormString=FormString+'<span><button  class="fixed" type="button" onClick="SubmitComment(this,\''+Rowid+'\')" >Comment</button></span><span style="float:right"><textarea id="N'+Rowid+'" name="pNote" rows="3" cols="35" /></span>';
+	FormString=FormString+'<input type="hidden" id="pLineNo" name="pLineNo" value= "'+Rowid+'" />';
+	FormString=FormString+'<input type="hidden" id="pTransactionType" name="pTransactionType" />';
+	FormString=FormString+'<input type="hidden" id="pOurRef" name="pOurRef" />';
+	FormString=FormString+'</form>';
+	FormString=FormString+'<span id="SFormError" class="errormessage"></span>';
+	TargetDiv.html(TargetDiv.html() + FormString);
+	GetCancelList(Rowid);	// load contents afterwards, to give ajax a chance to retreive data
+	}
+
+
+function GetCancelList(RowID){
+	var ResultString;
+	var FilterString=0;
+	
+if ($('#FilledBy'+RowID).html() != ''){FilterString='1';}
+	$.get('IQXRawData.php?page=GenevaNetClientShiftCancelReasonsOuter&NeedsRefill='+FilterString, function(data,textStatus){
+			ResultString = data;		// below: lose xml headers and add option tags
+			var StartPoint = ResultString.indexOf('![CDATA[');
+			var Endpoint = ResultString.indexOf(']]><');
+			ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+			ResultString = "<option value=''></option>" + ResultString + "</option>";
+			$('#ComboCancel').html(ResultString);
+		});
+
+	}
+
+function SubmitComment(btn,RowID){
+	$('#pOurRef','#F'+RowID).val($('#OurRef'+RowID).html());
+	$('#pTransactionType','#F'+RowID).val('M');
+	DiaryAddSave(RowID,btn);
+	}
+	
+function CancelLine(btn,RowID){
+	$('#pTransactionType','#F'+RowID).val('N');
+	DiaryAddSave(RowID,btn);
+	}
+
+function CancelTemp(btn,RowID){
+	$('#pTransactionType','#F'+RowID).val('N');
+	DiaryAddSave(RowID,btn);
+	}
+	
+function ConfirmLine(btn,RowID){
+	$('#pTransactionType','#F'+RowID).val('F');
+	DiaryAddSave(RowID,btn);
+	}
+	
+function FillLine(btn,RowID){
+	$IQXFormContext={blocktabswitch:true, switchmessage:"Please close any dialog before switching."};
+
+	var actionCleanup=function(){
+		$IQXFormContext = null;
+		if (!$('#divclivacs').data('selectedvacancy')) return; // Already cleaned up
+		$("#divclivacs").removeData("selectedvacancy");
+		
+	};
+
+	if ($('#divclivacs').data('dlgIsLoaded')) {
+		$('#cliPlacDlg').dialog('option','title','Request a candidate');
+		$('#cliPlacDlg').dialog('open');
+	} else {
+			$('body').delegate('#cliPlacDlg','PlacementEvent',function(e,sType,sID,sName){
+			if (sType=='DialogCreate'){
+				$('#divclivacs').data('dlgIsLoaded',true);
+				$('#cliPlacDlg').dialog('option','title',$('#divclivacs').data('selectedvacancy').caption);
+			} else if (sType=='DialogClose'){
+				actionCleanup();
+			} else if (sType=='Request'){
+				doFillVacancy(sID,sName);
+			}
+		});
+		IQXChain('#divclivacFillerDlg', {action: 'load', page: 'clientemployeestoplacedialog'});
+	}
+}
+
+
+function DiaryAddSave(RowID,btn){
+		
+	$('#F'+RowID).attr('action','IQXPost.php?proc=GenevaNetClientVacanciesLineStatusUpdate');
+	$('#F'+RowID).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var HashPos=data.indexOf('#');
+			var StatusString='';
+			var ReturnMessage='';
+			if (HashPos > 0) {
+				StatusString=data.substr(0,HashPos);
+				ReturnMessage=data.substr(HashPos+1);
+			}else{
+				StatusString=data};
+			if (textStatus == 'success') {
+				RemoveForm(btn,RowID,ReturnMessage);
+				}else{
+				$('#SFormError').html(data);
+				}
+			},
+		dataType: "text"
+		});
+	};
+			
+function RemoveForm(btn,RowID,State){
+	// Update cell and remove subform once submitted and return img to original
+
+	if (State != '') {
+		$('#Info' + RowID).attr('class', 'Status' + State.substr(0, 1));
+		$('#Info' + RowID).html( State.substr(1));
+	}
+	
+	$('#I'+RowID).attr('src','css/images/details_open.png');
+	$('#I'+RowID).attr('title','Show Details'); 
+	$(btn).parent().parent().parent().parent().parent().remove();
+}
+
+function OpenCandidateDetails(CandLink){
+	// open candidate details popup
+	if (CandLink.id) {
+		hideAnyCluetips();
+		IQXChain('#DetailsPopups', {
+			action: 'load',
+			page: 'clientpreviousemployeedetails&pPersonID=' + encodeURIComponent(CandLink.id) + '&pid=' + encodeURIComponent(CandLink.id) + '&pname=' + encodeURIComponent(CandLink.innerHTML)
+		});
+	}
+}
+
+function doFillVacancy(personid,personname) {
+	
+	$('#cliPlacDlg').dialog('close');
+/*
+	var filldata=$("#divclivacs").data('selectedvacancy');
+	var postdata={pvacancyid:filldata.vacancyid,pshiftplanid:filldata.shiftplanid,ppersonid:personid};
+	var nxt={action:'func',func:function(){
+		filldata.table.fnUpdate('1',filldata.tablerow,9,false,false);  // Filled
+		filldata.table.fnUpdate(personname,filldata.tablerow,7,false,false);
+		filldata.table.fnUpdate('',filldata.tablerow,8,false,true);  // Force fnRender. Avoiding redraw because filtering not affected (although sorting could be if currently sorted on candidate)
+		$('#cliPlacDlg').dialog('close');
+	}};
+	IQXChain('',{action:'send',proc:'NetVacancyFill',postdata:postdata,nextlink:nxt});
+*/
+}
+
+function doVacancyAction(sBtn,sVacID,sPlanID,oTbl,nRow,sCaption){
+if ($("#divclivacs").data("selectedvacancy") || $IQXFormContext) return;
+
+$("#divclivacs").data("selectedvacancy",{
+	vacancyid: sVacID,
+	shiftplanid: sPlanID,
+	table: oTbl,
+	tablerow:nRow,
+	caption:sCaption
+});
+$IQXFormContext={blocktabswitch:true, switchmessage:"Please close any dialog before switching."};
+var actionCleanup=function(){
+	$IQXFormContext = null;
+	if (!$('#divclivacs').data('selectedvacancy')) return; // Already cleaned up
+	doVacancyHighlight(oTbl, $('#divclivacs').data('selectedvacancy').tablerow, false);
+	$("#divclivacs").removeData("selectedvacancy");
+};
+
+if (sBtn=='Fill'){
+	doVacancyHighlight(oTbl, nRow, true);
+	if ($('#divclivacs').data('dlgIsLoaded')) {
+		$('#cliPlacDlg').dialog('option','title',sCaption);
+		$('#cliPlacDlg').dialog('open');
+	} else {
+		$('body').delegate('#cliPlacDlg','PlacementEvent',function(e,sType,sID,sName){
+			if (sType=='DialogCreate'){
+				$('#divclivacs').data('dlgIsLoaded',true);
+				$('#cliPlacDlg').dialog('option','title',$('#divclivacs').data('selectedvacancy').caption);
+			} else if (sType=='DialogClose'){
+				actionCleanup();
+			} else if (sType=='Request'){
+				doFillVacancy(sID,sName);
+			}
+		});
+		IQXChain('#divclivacFillerDlg', {action: 'load', page: 'clientemployeestoplacedialog'});
+	}
+} else if (sBtn=='Confirm'){
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};
+	var nxt={action:'func',func:function(){
+		oTbl.fnUpdate('0',nRow,10,false,false);  // Unconfirmed
+		oTbl.fnUpdate('',nRow,8,false,true);  // Force fnRender on button column. Redraw not necessary since filtering not affected
+		actionCleanup();
+	}};
+	IQXChain('',{action:'send',proc:'NetVacancyConfirm',postdata:postdata,nextlink:nxt,failFunc:actionCleanup});
+} else if (sBtn=='Cancel'){
+	
+	doVacancyHighlight(oTbl,nRow,true);
+	if ($('#C' + sPlanID).attr('id')!=null) {	// if not null then cancel. If null then not authorise 
+		var Headline;
+		Headline='Cancel this requirement?<br /><select id="ComboCancel" name="pCancelReason" onchange=StoreResponse($(this).val()) ></select>';
+		IQXUIDialog(Headline,{xDlgType:'YesNo',modal:false,title:sCaption},function(){
+			LineSaveCancel('C'+sPlanID); 
+		},actionCleanup);
+		GetCancelList();
+		return;
+	}
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};	
+	var nxt={action:'func',func:function(){
+		oTbl.fnDeleteRow(nRow,null,true);  // true param seems important here
+		actionCleanup();  
+	}};
+	var Headline='Cancel this requirement?';
+	IQXUIDialog(Headline,{xDlgType:'YesNo',modal:false,title:sCaption},function(){
+		IQXChain('',{action:'send',proc:'NetVacancyCancel',postdata:postdata,nextlink:nxt,failFunc:actionCleanup});
+		},actionCleanup);
+	} else {
+		actionCleanup();
+	}
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divShiftStat">
+<table class="Xtablesorter" id="tblShiftStat">
+	<thead>
+		<tr>
+			<th>Position</th>
+			<th>Job Ref</th>
+			<th>Start Date</th>
+			<th>Time</th>
+			<th>Finish Time</th>
+			<th>Shift Ref</th>
+			<th>Filled By</th>
+			<th>Status</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]" >
+		    <td>[vacancies.Position;noerr]<br />[vacancies.CompanyAddress;noerr]</td>
+			<td>[vacancies.VacRef;noerr]</td>
+	    	<td class="longdate">[vacancies.ShiftDate;noerr]</td>
+	    	<td class="time">[vacancies.StartTime;noerr]</td>
+	    	<td class="time">[vacancies.FinishTime;noerr]</td>
+	    	<td id="OurRef[vacancies.RowID]">[vacancies.ShiftRef;noerr]</td>
+			<td id="FilledBy[vacancies.RowID]"><span id="[vacancies.PersonID;noerr]" class="TooltipLink" onclick="OpenCandidateDetails(this);">[vacancies.FilledBy;noerr]</span></td>
+			<td id="Info[vacancies.RowID]" class='Status[vacancies.BlockColour;noerr]'>[vacancies.TextStatus;noerr]</td>
+			<td class="center"><img id="I[vacancies.RowID]" class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="showShiftActions(this,'[vacancies.RowID;]','[vacancies.CancelButton;]','[vacancies.ConfirmButton;]','[vacancies.RejectButton;]','[vacancies.FillButton;]')" /></td>
+		</tr>
+	</tbody>
+</table>
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="DetailsPopups" class="ui-helper-hidden"></div>
+

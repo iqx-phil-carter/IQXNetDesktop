@@ -1,0 +1,2602 @@
+<Job title="Net Database Procedure Import">
+ <IfYesDialog text="This job will update the Net database procedures. Ok to proceed?">
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyCandidateAdd]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyCandidateAdd(in pWebUserID char(20),in pForeNames char(50),in pSurname char(50),in pReference char(50))
+result(pResult char(250))
+begin
+  declare @PersID char(20);
+  declare @SecAgID char(20);
+  if IQXNetHasPermission(pWebUserID,'ADDCANDIDATES') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set @SecAgID=(select first employment.companyid from employment key join iqxnetuserlink where iqxnetuserlink.iqxnetuserid = pwebuserid);
+  set @PersID=uniquekey(pforenames+psurname);
+  insert into person( personid,staffid,name,keyname,forenames,surname,salutation,status) values( @persid,userstaffid,string(pforenames,' ',psurname),
+    makekeyname(string(psurname,' ',pforenames)),pforenames,psurname,pforenames,'A') ;
+  insert into pay_employee( personid,secondaryagencyid,secondaryagencyref) values( @persid,@secagid,ucase(pReference)) ;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyCandidateAdd to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyCandidateProgress]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyCandidateProgress(in pWebUserID char(20),in pPersonID char(20))
+result(dFromDate date,tFromTime time,CompanyName char(100),JobDescription char(100),sFrom char(20),sTo char(20),State char(50))
+begin
+  select vacancy.startdate as d1,cast('00:00' as time) as t1,company.name,vacancy.position,dateformat(vacancy.startdate,'dd/mm/yyyy'),dateformat(vacancy.finishdate,'dd/mm/yyyy'),status.name from
+    company key join employment key join vacancy key join progress join status on status.type = 'R' and status.status = progress.status where
+    progress.personid = pPersonID union all
+  select p.shiftdate as d1,p.timefrom as t1,company.name,string(vacancy.position,' - ',p.description),
+    string(dateformat(p.shiftdate,'dd/mm/yyyy'),' ',dateformat(p.timefrom,'hh:nn')),
+    string(dateformat((if p.TimeFrom < p.TimeTo then p.ShiftDate else p.ShiftDate+1 endif),'dd/mm/yyyy'),' ',dateformat(p.timeto,'hh:nn')),
+    status.name from
+    company key join employment key join vacancy key join tempshiftplan as p key join tempshiftprogress join status on status.type = 'S' and status.status = tempshiftprogress.status where
+    tempshiftprogress.personid = pPersonID order by
+    1 asc,2 asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyCandidateProgress to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyCandidates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyCandidates(in pWebUserID char(20))
+result(PersonID char(20),CandidateName char(100),CandidateReference char(100))
+begin
+  declare @SecAgID char(20);
+  set @SecAgID=(select first employment.companyid from employment key join iqxnetuserlink where iqxnetuserlink.iqxnetuserid = pwebuserid);
+  select person.personid,
+    person.name,
+    pay_employee.secondaryagencyref from
+    person key join pay_employee where
+    pay_employee.secondaryagencyid = @secagid order by
+    person.keyname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyCandidates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyCandidateSubmit]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyCandidateSubmit(in pWebUserID char(20),in pPersonID char(20),in pVacancyID char(20) default null,in pShiftPlanID char(20) default null)
+result(pResult char(250))
+begin
+  declare @SecAgID char(20);
+  declare @sname char(100);
+  if IQXNetHasPermission(pWebUserID,'SUBMITCANDIDATES') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set @SecAgID=(select first employment.companyid from employment key join iqxnetuserlink where iqxnetuserlink.iqxnetuserid = pwebuserid);
+  if trim(isnull(pShiftPlanID,'')) <> '' then
+    if not pshiftplanid = any(select tempshiftplanid from cascadedshift where secondaryagencyid = @secagid) then
+      select '99:~Permission denied';
+      return
+    end if;
+    insert into tempshiftprogress( tempshiftprogressid,tempshiftplanid,personid,staffid,status) values( uniquekey(ppersonid+pshiftplanid),pshiftplanid,ppersonid,userstaffid,'A') 
+  else
+    if not pvacancyid = any(select vacancyid from cascadedvacancy where secondaryagencyid = @secagid) then
+      select '99:~Permission denied';
+      return
+    end if;
+    insert into progress( progressid,vacancyid,personid,staffid,status,actiondate) values( uniquekey(ppersonid+pvacancyid),pvacancyid,ppersonid,userstaffid,'A',current date) 
+  end if;
+  set @sname=(select first name from person where personid = ppersonid);
+  call IQXNetPopup(pWebUserID,null,null,pvacancyid,null,null,null,'Secondary Agency candidate submitted',@sname);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyCandidateSubmit to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyContact]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyContact(in pWebUserID char(20))
+result(employmentid char(20),directphone char(250),mobile char(250),email char(250),directfax char(250),cascademethod char(1),cascadeaddress char(250))
+begin
+  select first employment.employmentid,
+    getphone('CP','Direct Telephone',employment.employmentid),
+    getphone('CP','Mobile',employment.employmentid),
+    getphone('CP','E-mail',employment.employmentid),
+    getphone('CP','Direct Fax',employment.employmentid),
+    cascadedeliveryaddress.deliverymethod,
+    cascadedeliveryaddress.address from
+    employment key join iqxnetuserlink,
+    employment left outer join cascadedeliveryaddress on employment.companyid = cascadedeliveryaddress.companyid where
+    iqxnetuserlink.iqxnetuserid = pwebuserid
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyContact to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyContactSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyContactSet(in pWebUserID char(20),in pemploymentid char(20),in pdirectphone char(250) default 'NOT_SET',in pmobile char(250) default 'NOT_SET',in pemail char(250) default 'NOT_SET',in pdirectfax char(250) default 'NOT_SET',in pcascademethod char(1) default '$',in pcascadeaddress char(250) default 'NOT_SET',in pOLDdirectphone char(250) default 'NOT_SET',in pOLDmobile char(250) default 'NOT_SET',in pOLDemail char(250) default 'NOT_SET',in pOLDdirectfax char(250) default 'NOT_SET',in pOLDcascademethod char(1) default '$',in pOLDcascadeaddress char(250) default 'NOT_SET')
+result(pResult char(250))
+begin
+  if not pemploymentid = any(select employmentid from iqxnetuserlink where iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnull(pcascademethod,'') <> isnull(pOLDcascademethod,'') or isnull(pcascadeaddress,'') <> isnull(pOLDcascadeaddress,'') then
+    if isnull(pcascademethod,'') = '$' or isnull(pCascadeAddress,'') = 'NOT_SET' then
+      select '3:~Cascade method and Cascade address must BOTH be given values (or neither)';
+      return
+    end if;
+    if isnull(pcascademethod,'') not in( 'E','F','W','N') then
+      select '1:~Invalid cascade method';
+      return
+    end if;
+    if pcascademethod in( 'E','F') and trim(isnull(pcascadeaddress,'')) = '' then
+      select '2:~Cascade address must be specified';
+      return
+    end if;
+    insert into cascadedeliveryaddress( companyid,deliverymethod) select distinct employment.companyid,'E' from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID and
+        not employment.companyid = any(select companyid from cascadedeliveryaddress);
+    update cascadedeliveryaddress set deliverymethod = ucase(pcascademethod),address = pcascadeaddress where companyid = 
+      any(select employment.companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)
+  end if;
+  if isnull(pdirectphone,'') <> isnull(pOLDdirectphone,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Direct Telephone',pdirectphone)
+  end if;
+  if isnull(pmobile,'') <> isnull(pOLDmobile,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Mobile',pmobile)
+  end if;
+  if isnull(pemail,'') <> isnull(pOLDemail,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','E-mail',pemail);
+    update iqxnetuserlink key join iqxnetuser set iqxnetuser.emailaddress = pemail where iqxnetuserlink.employmentid = pemploymentid
+  end if;
+  if isnull(pdirectfax,'') <> isnull(pOLDdirectfax,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Direct Fax',pdirectfax)
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyContactSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyProvTimesheets]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyProvTimesheets(in pWebUserID char(20))
+result(tempprovtimesheetid char(20),serialnumber char(20),tempname char(60),position char(60),companyname char(60),weekenddate date,timesheettype char(1),completed smallint)
+begin
+  select t.tempprovtimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+    if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+      exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+        (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+        isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+    endif as timesheettype,if t.extnumber = 2 then 1 else 0 endif as completed from
+    tempprovtimesheet as t key join vacancy key join employment key join company,
+    tempprovtimesheet as t key join tempdesk,
+    tempprovtimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+    iqxnetuserlink.iqxnetuserid = pwebuserid and t.extnumber > 0 and
+    weekenddate > current date-60 order by
+    weekenddate asc,tempname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyProvTimesheets to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetAgencyVacancies]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetAgencyVacancies(in pWebUserID char(20))
+result(RowID char(30),StartDate date,StartTime time,FinishDate date,FinishTime time,IsShift smallint,VacancyID char(20),TempShiftPlanID char(20),Position char(50),ShiftDescription char(50),CompanyName char(60),ContactName char(30),Status char(40),Department char(30),Consultant char(60),OurRef char(20),TheirRef char(50),ContractRef char(20),CascadeDateTime timestamp,CascadeLevel smallint,WhenEntered timestamp,SubmittedCandidates long varchar,IsCurrent smallint,LongDescription long varchar)
+begin
+  declare @DateRangeStart date;
+  declare @DateRangeEnd date;
+  declare @SecAgID char(20);
+  set @DateRangeStart=dateadd(week,-4,current date);
+  set @DateRangeEnd=dateadd(week,4,current date);
+  set @SecAgID=(select first employment.companyid from employment key join iqxnetuserlink where iqxnetuserlink.iqxnetuserid = pwebuserid);
+  select 'V'+v.VacancyID as RowID,
+    v.StartDate,
+    cast(null as time) as StartTime,
+    v.FinishDate,
+    cast(null as time) as FinishTime,
+    0 as IsShift,
+    v.VacancyID,
+    cast(null as char(20)) as TempShiftPlanID,
+    v.Position as Position,
+    cast(null as char(50)) as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Status where Status.Status = v.Status and Status.Type = 'V') as Status,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    (select Name from Staff where Staff.StaffID = v.StaffID) as Consultant,
+    v.RefCode as OurRef,
+    v.TheirRef,
+    v.ContractRef,
+    v.CascadeDateTime,
+    v.CascadeLevel,
+    v.WhenEntered,
+    (select list(person.name,', ') from vacancy key join progress key join person key join pay_employee where vacancy.vacancyid = v.vacancyid and pay_employee.secondaryagencyid = @secagid) as SubmittedCandidates,
+    (if v.status = 'C' then 1 else 0 endif) as IsCurrent,
+    v.OtherNotes as LongDescription from
+    Vacancy as v key join Employment key join(Company,Person),
+    Vacancy as v key join CascadedVacancy as cv where
+    cv.secondaryagencyid = @secagid and
+    v.StartDate <= @DateRangeEnd and isnull(v.FinishDate,@DateRangeEnd) >= @DateRangeStart and v.temp = 1 and
+    isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') <> 'S' union all
+  select 'P'+p.TempShiftPlanID as RowID,
+    p.ShiftDate as StartDate,
+    p.TimeFrom as StartTime,
+    (if p.TimeFrom < p.TimeTo then p.ShiftDate else p.ShiftDate+1 endif) as FinishDate,
+    p.TimeTo as FinishTime,
+    1 as IsShift,
+    v.VacancyID,
+    p.TempShiftPlanID,
+    v.Position,
+    p.Description as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Status where Status.Status = v.Status and Status.Type = 'V') as Status,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    (select Name from Staff where Staff.StaffID = v.StaffID) as Consultant,
+    cast(p.ShiftSerialNumber as char(20)) as OurRef,
+    p.ReferenceCode as TheirRef,
+    v.ContractRef,
+    p.CascadeDateTime,
+    p.CascadeLevel,
+    p.WhenEntered,
+    (select list(person.name,', ') from tempshiftprogress key join person key join pay_employee where tempshiftprogress.tempshiftplanid = p.tempshiftplanid and pay_employee.secondaryagencyid = @secagid) as SubmittedCandidates,
+    (if exists(select * from tempshift where tempshiftplanid = p.tempshiftplanid and not(state = 'C' and isnull(crefill,0) = 1)) then 0 else 1 endif) as IsCurrent,
+    cast(null as long varchar) as LongDescription from
+    TempShiftPlan as p key join Vacancy as v key join Employment key join(Company,Person),
+    TempShiftPlan as p key join CascadedShift as cs where
+    cs.secondaryagencyid = @secagid and
+    p.ShiftDate between @DateRangeStart and @DateRangeEnd order by
+    1 asc,2 asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetAgencyVacancies to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateDepartmentRegister]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateDepartmentRegister(in pWebUserID char(20),in pdepartmentid char(10),in ppersonid char(20) default null,in ptemp smallint default
+null,in pperm smallint default null,in qanswers long varchar default null)
+result(pResult char(250))
+begin
+  if trim(isnull(ppersonid,'')) = '' then
+    set ppersonid=(select first personid from iqxnetuserlink where iqxnetuserid = pwebuserid)
+  end if;
+  if not ppersonid = any(select personid from iqxnetuserlink where iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  set ptemp=isnull(ptemp,0);
+  set pperm=isnull(pperm,0);
+  if ptemp = 0 and pperm = 0 then
+    delete from search where personid = ppersonid and departmentid = pdepartmentid
+  else
+    update search set temp = ptemp,permanent = pperm where personid = ppersonid and departmentid = pdepartmentid;
+    if @@rowcount = 0 then
+      insert into search( searchid,personid,departmentid,temp,permanent) values( uniquekey(''),ppersonid,pdepartmentid,ptemp,pperm) 
+    end if
+  end if;
+  call IQXNetSaveQuestionnaire(ppersonid,qanswers);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateDepartmentRegister to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateDiary]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateDiary(in pWebUserID char(20))
+result(DiaryID char(50),DiaryClass char(50),ActionType char(50),Description char(100),DiaryStatus char(50),DateFrom date,DateTo date,TimeFrom time,TimeTo time)
+begin
+  declare pstart date;
+  set pstart=current date;
+  while dow(pstart) <> 2 loop
+    set pstart=pstart-1
+  end loop;
+  select string('Shift_',s.tempshiftid) as DiaryID,
+    (case s.state when 'H' then 'Holiday' when 'U' then 'Unavailable' when 'A' then 'Available' when 'C' then 'Cancelled' else 'Working' end) as DiaryClass,
+    (if s.state in( 'H','A','U') then 'deleteable_shift' else if s.state in( 'P','C') and isnull(s.tempconfirmed,0) = 0 then 'confirmable_shift'
+      endif
+    endif) as ActionType,isnull(company.name,tempshiftunavailablereason.name) as Description,
+    (if s.state = 'P' then 'Provisional' else '' endif) as DiaryStatus,
+    s.shiftdate as DateFrom,
+    isnull((if s.timeto <= s.timefrom then s.shiftdate+1 else s.shiftdate endif),s.shiftdate) as DateTo,
+    s.TimeFrom,
+    s.TimeTo from
+    tempshift as s key join person key join iqxnetuserlink,
+    tempshift as s key left outer join tempshiftunavailablereason,
+    tempshift as s key left outer join(vacancy key join employment key join company) where
+    iqxnetuserlink.iqxnetuserid = pwebuserid and
+    s.shiftdate >= pstart-1 and not(s.state = 'C' and isnull(s.tempconfirmed,0) = 1) union all
+  select string('Employment_',e.employmentid) as DiaryID,'Working' as DiaryClass,'' as ActionType,
+    company.name as Description,'' as DiaryStatus,
+    e.startdate as DateFrom,
+    e.leavedate as DateTo,
+    cast(null as time) as TimeFrom,
+    cast(null as time) as TimeTo from
+    employment as e key join(person,company),
+    person key join iqxnetuserlink where
+    iqxnetuserlink.iqxnetuserid = pwebuserid and
+    (e.leavedate is null or e.leavedate >= pstart) and
+    isnull(e.concurrent,0) = 0 order by
+    DateFrom asc,TimeFrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateDiary to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateDiaryActionSave]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateDiaryActionSave(in pWebUserID char(20),in pActions long varchar)
+result(pResult char(250))
+begin
+  declare persid char(20);
+  declare i smallint;
+  declare s char(100);
+  declare sAction char(20);
+  set persid=(select first personid from iqxnetuserlink where iqxnetuserid = pwebuserid);
+  if persid is null then
+    select '99:~Permission denied';
+    return
+  end if;
+  set pActions=trim(isnull(pActions,''));
+  looplabel: loop
+    if pActions = '' then
+      leave looplabel
+    end if;
+    set i=charindex(',',pActions);
+    if i = 0 then
+      set s=pActions;
+      set pActions=''
+    else
+      set s=trim("left"(pActions,i-1));
+      set pActions=trim("right"(pActions,length(pActions)-i))
+    end if;
+    if s like 'Shift%' then
+      set s="right"(s,length(s)-6);
+      set i=charindex('=',s);
+      set sAction="right"(s,length(s)-i);
+      set s="left"(s,i-1);
+      if saction = 'Delete' then
+        delete from tempshift where tempshiftid = s and personid = persid and state in( 'A','U','H') 
+      else if saction = 'Confirm' then
+          update tempshift set tempconfirmed = 1 where tempshiftid = s and personid = persid and state in( 'P','C') ;
+          call IQXNetRequestAction(pWebUserID,'CandidateConfirm','SHIFT',s)
+        else if saction = 'Reject' then
+            update tempshift set state = 'C',whencancelled = current timestamp,whocancelled = userstaffid,crefill = 1,clientconfirmed = 0,tempconfirmed = 1,cancelreason = 'T' where
+              tempshiftid = s and personid = persid and state = 'P';
+            call IQXNetRequestAction(pWebUserID,'CandidateReject','SHIFT',s)
+          end if
+        end if
+      end if
+    end if
+  end loop looplabel;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateDiaryActionSave to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateDiaryAdd]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateDiaryAdd(in pWebUserID char(20),in pshifttype char(10),in pdatefrom char(50) default null,in pdateto char(50) default null,in ptimefrom char(50) default
+null,in ptimeto char(50) default null)
+result(pResult char(250))
+begin
+  declare persid char(20);
+  declare dfrom date;
+  declare dto date;
+  declare tfrom time;
+  declare tto time;
+  set persid=(select first personid from iqxnetuserlink where iqxnetuserid = pwebuserid);
+  if persid is null then
+    select '99:~Permission denied';
+    return
+  end if;
+  set pshifttype=trim(isnull(pshifttype,''));
+  if substring(pshifttype,2,1) = 'W' then -- Whole days
+    set ptimefrom='';
+    set ptimeto=''
+  end if;
+  set pshifttype="left"(pshifttype,1);
+  if pshifttype not in( 'H','A','U') then
+    select '101:~Invalid type';
+    return
+  end if;
+  set dfrom=iqxnetstringtodate(pdatefrom);
+  set dto=iqxnetstringtodate(pdateto);
+  set tfrom=iqxnetstringtotime(ptimefrom);
+  set tto=iqxnetstringtotime(ptimeto);
+  if(trim(isnull(pdatefrom,'')) <> '' and dfrom is null) or
+    (trim(isnull(pdateto,'')) <> '' and dto is null) or
+    (trim(isnull(ptimefrom,'')) <> '' and tfrom is null) or
+    (trim(isnull(ptimeto,'')) <> '' and tto is null) then
+    select '102:~Invalid date or time';
+    return
+  end if;
+  if dfrom is null then
+    select '103:~Invalid date';
+    return
+  end if;
+  set dto=isnull(dto,dfrom);
+  if tfrom is null then
+    set tto=null
+  end if;
+  if tto is null then
+    set tfrom=null
+  end if;
+  while dfrom <= dto loop
+    insert into tempshift( tempshiftid,personid,shiftdate,timefrom,timeto,state) values( uniquekey(dfrom),persid,dfrom,tfrom,tto,pshifttype) ;
+    set dfrom=dfrom+1
+  end loop;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateDiaryAdd to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateDocuments]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateDocuments(in pWebUserID char(20),in pPersonID char(20) default null)
+result(DocType char(50),DocDescription char(50),LastUpdate timestamp,SpecialType char(50),DocumentID char(20),PersonID char(20),SortOrder integer)
+begin
+  declare userClass char(20);
+  declare isCandorAgency smallint;
+  if iqxnethaspermission(pwebuserid,'DOCCANDDOWNLOAD') = 0 then
+    set pPersonID=null
+  else
+    set userClass=(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID);
+    if userClass = 'CANDIDATE' then
+      set isCandorAgency=1;
+      set pPersonID=(select first personid from iqxnetuserlink where personid = isnull(pPersonID,personid) and iqxnetuserid = pwebuserid)
+    else if userClass = 'AGENCY' then
+        set isCandorAgency=1;
+        set pPersonID=(select first pay_employee.personid from
+            pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+            pay_employee.personid = ppersonid and iqxnetuserlink.iqxnetuserid = pwebuserid)
+      else
+        set isCandorAgency=0
+      end if
+    end if
+  end if;
+  select documenttype.description,oledocument.description,isnull(blobstore.changedat,blobstore.createdat),'',oledocument.oledocumentid,oledocument.ownerid,100+isnull(documenttype.sortorder,0) as ord from
+    oledocument join blobstore on blobstore.id = oledocument.oledocumentid and blobstore.class = 'O',
+    oledocument key join documenttype where
+    oledocument.ownertype = 'P' and oledocument.ownerid = ppersonid and(oledocument.rawfile = 1 or blobstore.zipped = 2) and
+    (isCandorAgency = 1 or blobstore.publishtoweb = 1) union all
+  select 'Primary','CV',isnull(blobstore.changedat,blobstore.createdat),'PRIMARY_CV',null,blobstore.id,1 as ord from
+    blobstore where blobstore.class = 'V' and blobstore.id = pPersonID and blobstore.zipped = 2 and(isCandorAgency = 1 or blobstore.publishtoweb = 1) union all
+  select 'Primary','Photo',isnull(blobstore.changedat,blobstore.createdat),'PRIMARY_PHOTO',null,blobstore.id,2 as ord from
+    blobstore where blobstore.class = 'J' and blobstore.id = pPersonID and(isCandorAgency = 1 or blobstore.publishtoweb = 1) order by
+    ord asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateDocuments to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateProfile]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateProfile(in pWebUserID char(20))
+result(PersonID char(20),Forenames char(50),Surname char(50),Gender char(1),DOB date,HomePhone char(250),DayPhone char(250),Mobile char(250),Email char(250),Addr1 char(50),Addr2 char(50),Addr3 char(50),Town char(50),County char(50),Country char(50),Postcode char(50))
+begin
+  select first person.personid,person.forenames,person.surname,person.sex,person.dob,
+    getphone('P','Home Telephone',person.personid) as HomePhone,getphone('P','Day Telephone',person.personid) as DayPhone,
+    getphone('P','Mobile',person.personid) as Mobile,getphone('P','E-mail',person.personid) as Email,
+    person.addr1,person.addr2,person.addr3,person.town,person.county,person.country,person.postcode from
+    person key join iqxnetuserlink key join iqxnetuser where iqxnetuser.iqxnetuserid = pwebuserid
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateProfile to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateProfileSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateProfileSet(in pWebUserID char(20),in ppersonid char(20),in pForenames char(50) default 'NOT-SET',in pSurname char(50) default 'NOT-SET',in pGender char(20) default 'NOT-SET',in pdob char(20) default 'NOT-SET',in phomephone char(250) default 'NOT-SET',in pDayPhone char(250) default 'NOT-SET',in pMobile char(250) default 'NOT-SET',in pemail char(250) default 'NOT-SET',in pAddr1 char(50) default 'NOT-SET',in pAddr2 char(50) default 'NOT-SET',in pAddr3 char(50) default 'NOT-SET',in pTown char(50) default 'NOT-SET',in pCounty char(50) default 'NOT-SET',in pCountry char(50) default 'NOT-SET',in pPostcode char(50) default 'NOT-SET',in pOLDForenames char(50) default 'NOT-SET',in pOLDSurname char(50) default 'NOT-SET',in pOLDGender char(20) default 'NOT-SET',in pOLDdob char(20) default 'NOT-SET',in pOLDhomephone char(250) default 'NOT-SET',in pOLDDayPhone char(250) default 'NOT-SET',in pOLDMobile char(250) default 'NOT-SET',in pOLDemail char(250) default 'NOT-SET',in pOLDAddr1 char(50) default 'NOT-SET',in pOLDAddr2 char(50) default 'NOT-SET',in pOLDAddr3 char(50) default 'NOT-SET',in pOLDTown char(50) default 'NOT-SET',in pOLDCounty char(50) default 'NOT-SET',in pOLDCountry char(50) default 'NOT-SET',in pOLDPostcode char(50) default 'NOT-SET',in qanswers long varchar default
+null)
+result(pResult char(250))
+begin
+  declare dateofbirth date;
+  declare bnamechanged smallint;
+  declare ssql char(255);
+  set bnamechanged=0;
+  set ssql='';
+  if not ppersonid = any(select personid from iqxnetuserlink where iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnull(pforenames,'') <> isnull(poldforenames,'') then
+    set ssql=ssql+',forenames=pforenames';
+    set ssql=ssql+',salutation=getword(pforenames,1)';
+    set bnamechanged=1
+  end if;
+  if isnull(psurname,'') <> isnull(poldsurname,'') then
+    set ssql=ssql+',surname=psurname';
+    set bnamechanged=1
+  end if;
+  if bnamechanged = 1 then
+    set ssql=ssql+',name=string(getword(pforenames,1),'' '',psurname)';
+    set ssql=ssql+',keyname=makekeyname(string(psurname,'' '',pforenames))'
+  end if;
+  if isnull(pgender,'') <> isnull(poldgender,'') then
+    set ssql=ssql+',sex=pgender'
+  end if;
+  if isnull(pdob,'') <> isnull(pOLDdob,'') then
+    set dateofbirth=IQXNetStringToDate(pdob);
+    if trim(isnull(pdob,'')) <> '' and dateofbirth is null then
+      select '1:~Invalid date of birth';
+      return
+    end if;
+    set ssql=ssql+',dob = dateofbirth'
+  end if;
+  if isnull(paddr1,'') <> isnull(poldaddr1,'') then
+    set ssql=ssql+',addr1=paddr1'
+  end if;
+  if isnull(paddr2,'') <> isnull(poldaddr2,'') then
+    set ssql=ssql+',addr2=paddr2'
+  end if;
+  if isnull(paddr3,'') <> isnull(poldaddr3,'') then
+    set ssql=ssql+',addr3=paddr3'
+  end if;
+  if isnull(ptown,'') <> isnull(poldtown,'') then
+    set ssql=ssql+',town=ptown'
+  end if;
+  if isnull(pcounty,'') <> isnull(poldcounty,'') then
+    set ssql=ssql+',county=pcounty'
+  end if;
+  if isnull(pcountry,'') <> isnull(poldcountry,'') then
+    set ssql=ssql+',country=pcountry'
+  end if;
+  if isnull(ppostcode,'') <> isnull(poldpostcode,'') then
+    set ssql=ssql+',postcode=ucase(ppostcode)'
+  end if;
+  if ssql <> '' then
+    execute immediate 'update person set '+stuff(ssql,1,1,'')+' where personid=ppersonid'
+  end if;
+  if isnull(phomephone,'') <> isnull(pOLDhomephone,'') then
+    call setphone('P','Home Telephone',ppersonid,phomephone)
+  end if;
+  if isnull(pdayphone,'') <> isnull(pOLDdayphone,'') then
+    call setphone('P','Day Telephone',ppersonid,pdayphone)
+  end if;
+  if isnull(pmobile,'') <> isnull(pOLDmobile,'') then
+    call setphone('P','Mobile',ppersonid,pmobile)
+  end if;
+  if isnull(pemail,'') <> isnull(pOLDemail,'') then
+    call setphone('P','E-mail',ppersonid,pemail);
+    update iqxnetuserlink key join iqxnetuser set iqxnetuser.emailaddress = pemail where iqxnetuserlink.personid = ppersonid
+  end if;
+  call IQXNetSaveQuestionnaire(ppersonid,qanswers);
+  call personrecordupdated(ppersonid);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateProfileSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateRegister]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateRegister(in pWebUserID char(20),in pNewWebUserID char(20),in pForenames char(50),in pSurname char(50),in pemail char(250),in pGender char(20) default
+null,in pdob char(20) default null,in phomephone char(250) default null,in pDayPhone char(250) default null,in pMobile char(250) default null,in pAddr1 char(50) default
+null,in pAddr2 char(50) default null,in pAddr3 char(50) default null,in pTown char(50) default null,in pCounty char(50) default null,in pCountry char(50) default null,in pPostcode char(50) default null,in qanswers long varchar default
+null)
+result(pResult char(250))
+begin
+  declare dateofbirth date;
+  declare ppersonid char(20);
+  declare pfirstname char(50);
+  declare pnewappnumber integer;
+  declare pnewstatus char(1);
+  set dateofbirth=IQXNetStringToDate(pdob);
+  if trim(isnull(pdob,'')) <> '' and dateofbirth is null then
+    select '1:~Invalid date of birth';
+    return
+  end if;
+  set ppersonid=uniquekey(pNewWebUserID);
+  set pfirstname=getword(pforenames,1);
+  begin atomic
+    update params set nextappnumber = isnull(nextappnumber,0)+1 where autoappnumber = 1;
+    if @@rowcount > 0 then
+      set pnewappnumber=(select first nextappnumber from params)
+    else
+      set pnewappnumber=null
+    end if
+  end;
+  set pnewstatus=(select first initialapplicantstatus from params);
+  set pnewstatus=isnull(pnewstatus,'C');
+  insert into person( personid,forenames,surname,name,keyname,salutation,sex,dob,addr1,addr2,addr3,town,county,country,postcode,appnumber,staffid,status,registrationdate) values( 
+    ppersonid,pforenames,psurname,string(pfirstname,' ',psurname),makekeyname(string(psurname,' ',pforenames)),
+    pfirstname,pgender,dateofbirth,paddr1,paddr2,paddr3,ptown,pcounty,pcountry,ucase(ppostcode),pnewappnumber,userstaffid,pnewstatus,current date) ;
+  call personrecordupdated(ppersonid);
+  insert into iqxnetuserlink( iqxnetuserlinkid,iqxnetuserid,personid) values( ppersonid,pnewwebuserid,ppersonid) ;
+  if phomephone is not null then
+    call setphone('P','Home Telephone',ppersonid,phomephone)
+  end if;
+  if pdayphone is not null then
+    call setphone('P','Day Telephone',ppersonid,pdayphone)
+  end if;
+  if pmobile is not null then
+    call setphone('P','Mobile',ppersonid,pmobile)
+  end if;
+  if pemail is not null then
+    call setphone('P','E-mail',ppersonid,pemail)
+  end if;
+  call IQXNetSaveQuestionnaire(ppersonid,qanswers);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateRegister to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateRegisterPreCheck]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateRegisterPreCheck(in pWebUserID char(20),in pForenames char(50),in pSurname char(50),in pemail char(250),in pGender char(20) default
+null,in pdob char(20) default null,in phomephone char(250) default null,in pDayPhone char(250) default null,in pMobile char(250) default null,in pAddr1 char(50) default
+null,in pAddr2 char(50) default null,in pAddr3 char(50) default null,in pTown char(50) default null,in pCounty char(50) default null,in pCountry char(50) default null,in pPostcode char(50) default null,in qanswers long varchar default
+null)
+result(pResult char(250))
+begin
+  declare dateofbirth date;
+  set dateofbirth=IQXNetStringToDate(pdob);
+  if trim(isnull(pdob,'')) <> '' and dateofbirth is null then
+    select '1:~Invalid date of birth';
+    return
+  end if;
+  if dateofbirth is not null and ppostcode is not null then
+    if exists(select * from person where postcode = ppostcode and dob = dateofbirth and similar(string(pforenames,' ',psurname),string(forenames,' ',surname)) >= 90) then
+      select '9:~You may already be registered - please contact the agency'
+    end if
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateRegisterPreCheck to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandidateRegistrations]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandidateRegistrations(in pWebUserID char(20))
+result(DepartmentID char(10),PersonID char(20),DepartmentName char(100),TempJobs smallint,PermJobs smallint,Details char(100))
+begin
+  select department.departmentid,search.personid,department.name,isnull(search.temp,0) as TempJobs,isnull(search.permanent,0) as PermJobs,
+    (if TempJobs*PermJobs <> 0 then 'Temp and Permanent Jobs' else if TempJobs <> 0 then 'Temp Jobs' else
+        if PermJobs <> 0 then 'Permanent Jobs' else 'Not Registered' endif
+      endif
+    endif) as details from department left outer join search on department.departmentid = search.departmentid and search.personid = any(select personid from iqxnetuserlink where iqxnetuserid = pwebuserid) where
+    department.searchable = 1 and department.publishtoweb = 1 order by
+    department.sortorder asc,department.name asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandidateRegistrations to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetCandProvTimesheets]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetCandProvTimesheets(in pWebUserID char(20))
+result(tempprovtimesheetid char(20),serialnumber char(20),tempname char(60),position char(60),companyname char(60),weekenddate date,timesheettype char(1),completed smallint)
+begin
+  select t.tempprovtimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+    if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+      exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+        (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+        isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+    endif as timesheettype,if t.extnumber = 2 then 1 else 0 endif as completed from
+    tempprovtimesheet as t key join vacancy key join employment key join company,
+    tempprovtimesheet as t key join tempdesk,
+    tempprovtimesheet as t key join person key join iqxnetuserlink where
+    iqxnetuserlink.iqxnetuserid = pwebuserid and t.extnumber > 0 and
+    weekenddate > current date-60 order by
+    weekenddate asc,companyname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetCandProvTimesheets to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientAddShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientAddShifts(in pWebUserID char(20),in pvacancyid char(20),in pshifttemplateid char(20),in pshiftdate char(25),in ptimefrom char(25) default
+null,in ptimeto char(25) default null,in pBreak char(20) default null,in pTheirRef char(50) default null,in pDescription long varchar default
+null,in pSkills char(100) default null,in pGrade char(50) default null,in pNote char(50) default null,in pquantity char(25) default '1',in pTitle char(100) default
+null)
+result(pResult char(250))
+begin
+  declare swebusername char(50);
+  declare sid char(20);
+  declare cnt integer;
+  declare ddate date;
+  declare tfrom time;
+  declare tto time;
+  declare ibreak integer;
+  declare CanAuthorise smallint;
+  if not pvacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'ORDERJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set swebusername=(select name from iqxnetuser where iqxnetuserid = pwebuserid);
+  set cnt=iqxnetstringtointeger(pquantity);
+  if cnt is null or cnt = 0 then
+    select '450:~Invalid quantity';
+    return
+  end if;
+  set ddate=iqxnetstringtodate(pshiftdate);
+  if ddate is null then
+    select '500:~Invalid shift date';
+    return
+  end if;
+  set tfrom=iqxnetstringtotime(ptimefrom);
+  if tfrom is null then
+    select '500:~Invalid start time';
+    return
+  end if;
+  set tto=iqxnetstringtotime(ptimeto);
+  if tto is null then
+    select '500:~Invalid end time';
+    return
+  end if;
+  set ibreak=isnull(iqxnetstringtointeger(pbreak),0);
+  set CanAuthorise=IQXNetHasPermission(pWebUserID,'AUTHORISEJOBS');
+  while cnt > 0 loop
+    set sid=uniquekey(cnt);
+    insert into tempshiftplan( TempShiftPlanID,VacancyID,TimeFrom,TimeTo,BreakMinutes,ShiftDate,Moveable,Description,ClientNote,EssentialSkill,EssentialSkillChoiceList,EssentialSkillGradeID,ReferenceCode,ReferenceRequired,ClientMustConfirm,TempMustConfirm,OrderedBy,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select sid,pvacancyid,tfrom,tto,ibreak,ddate,Moveable,pDescription,pNote,string(taglocation,';',tagid,';',tagchoiceid,';',gradetagid),replace(pskills,"char"(9),';'),pgrade,ucase(pTheirRef),ReferenceRequired,ClientMustConfirm,TempMustConfirm,sWebUserName,TempShiftTypeID,AnalysisCode,RecoveryHours from
+        tempshifttemplate where tempshifttemplateid = pshifttemplateid;
+    if CanAuthorise = 0 then
+      insert into tempshift( tempshiftid,vacancyid,shiftdate,timefrom,timeto,state,tempshiftplanid,cancelreason) values( 
+        sid,pvacancyid,ddate,tfrom,tto,'C',sid,'~') 
+    end if;
+    set cnt=cnt-1
+  end loop;
+  if CanAuthorise = 1 then
+    call IQXNetPopup(pWebUserID,null,null,pvacancyid,null,null,null,'New shift requirement(s) added',null)
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientAddShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientAddShiftsWeek]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientAddShiftsWeek(in pWebUserID char(20),in pvacancyid char(20),in pshifttemplateid char(20),in pstartdate char(25),in penddate char(25),in ptimefrom char(25) default
+null,in ptimeto char(25) default null,in pBreak char(20) default null,in pTheirRef char(50) default null,in pDescription long varchar default
+null,in pSkills char(100) default null,in pGrade char(50) default null,in pNote char(50) default null,in pTitle char(100) default
+null,in pMonday char(10) default null,in pTuesday char(10) default null,in pWednesday char(10) default null,in pThursday char(10) default null,in pFriday char(10) default
+null,in pSaturday char(10) default null,in pSunday char(10) default null)
+result(pResult char(250))
+begin
+  declare swebusername char(50);
+  declare sid char(20);
+  declare cnt integer;
+  declare idow integer;
+  declare ddate date;
+  declare dstart date;
+  declare dend date;
+  declare tfrom time;
+  declare tto time;
+  declare ibreak integer;
+  declare CanAuthorise smallint;
+  if not pvacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'ORDERJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set swebusername=(select name from iqxnetuser where iqxnetuserid = pwebuserid);
+  set dstart=iqxnetstringtodate(pstartdate);
+  if dstart is null then
+    select '500:~Invalid start date';
+    return
+  end if;
+  set dend=iqxnetstringtodate(penddate);
+  if dend is null then
+    select '500:~Invalid end date';
+    return
+  end if;
+  set tfrom=iqxnetstringtotime(ptimefrom);
+  if tfrom is null then
+    select '500:~Invalid start time';
+    return
+  end if;
+  set tto=iqxnetstringtotime(ptimeto);
+  if tto is null then
+    select '500:~Invalid end time';
+    return
+  end if;
+  set ibreak=isnull(iqxnetstringtointeger(pbreak),0);
+  set CanAuthorise=IQXNetHasPermission(pWebUserID,'AUTHORISEJOBS');
+  set ddate=dstart;
+  while ddate <= dend loop
+    set idow=dow(ddate);
+    case idow
+    when 1 then set cnt=isnull(iqxnetstringtointeger(psunday),0)
+    when 2 then set cnt=isnull(iqxnetstringtointeger(pmonday),0)
+    when 3 then set cnt=isnull(iqxnetstringtointeger(ptuesday),0)
+    when 4 then set cnt=isnull(iqxnetstringtointeger(pwednesday),0)
+    when 5 then set cnt=isnull(iqxnetstringtointeger(pthursday),0)
+    when 6 then set cnt=isnull(iqxnetstringtointeger(pfriday),0)
+    when 7 then set cnt=isnull(iqxnetstringtointeger(psaturday),0)
+    end case
+    ;
+    while cnt > 0 loop
+      set sid=uniquekey(cnt);
+      insert into tempshiftplan( TempShiftPlanID,VacancyID,TimeFrom,TimeTo,BreakMinutes,ShiftDate,Moveable,Description,ClientNote,EssentialSkill,EssentialSkillChoiceList,EssentialSkillGradeID,ReferenceCode,ReferenceRequired,ClientMustConfirm,TempMustConfirm,OrderedBy,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+        select sid,pvacancyid,tfrom,tto,ibreak,ddate,Moveable,pDescription,pNote,string(taglocation,';',tagid,';',tagchoiceid,';',gradetagid),replace(pskills,"char"(9),';'),pgrade,ucase(pTheirRef),ReferenceRequired,ClientMustConfirm,TempMustConfirm,sWebUserName,TempShiftTypeID,AnalysisCode,RecoveryHours from
+          tempshifttemplate where tempshifttemplateid = pshifttemplateid;
+      if CanAuthorise = 0 then
+        insert into tempshift( tempshiftid,vacancyid,shiftdate,timefrom,timeto,state,tempshiftplanid,cancelreason) values( 
+          sid,pvacancyid,ddate,tfrom,tto,'C',sid,'~') 
+      end if;
+      set cnt=cnt-1
+    end loop;
+    set ddate=dateadd(day,1,ddate)
+  end loop;
+  if CanAuthorise = 1 then
+    call IQXNetPopup(pWebUserID,null,null,pvacancyid,null,null,null,'New shift requirement(s) added',null)
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientAddShiftsWeek to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientAddVacancies]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientAddVacancies(in pWebUserID char(20),in ptemplatevacancyid char(50),in pdatefrom char(25),in pdateto char(25) default
+null,in pTheirRef char(50) default null,in pTitle char(100) default null,in pDescription long varchar default null,in pquantity char(25) default '1')
+result(pResult char(250))
+begin
+  declare swebusername char(50);
+  declare sid char(20);
+  declare cnt integer;
+  declare dfrom date;
+  declare dto date;
+  declare CanAuthorise smallint;
+  declare NewVacancyState char(1);
+  if not ptemplatevacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'ORDERJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set swebusername=(select name from iqxnetuser where iqxnetuserid = pwebuserid);
+  set cnt=iqxnetstringtointeger(pquantity);
+  if cnt is null or cnt = 0 then
+    select '450:~Invalid quantity';
+    return
+  end if;
+  set dfrom=iqxnetstringtodate(pdatefrom);
+  if dfrom is null then
+    select '500:~Invalid start date';
+    return
+  end if;
+  set pdateto=nullif(trim(pdateto),'');
+  set dto=iqxnetstringtodate(pdateto);
+  if pdateto is not null and dto is null then
+    select '500:~Invalid end date';
+    return
+  end if;
+  set CanAuthorise=IQXNetHasPermission(pWebUserID,'AUTHORISEJOBS');
+  if CanAuthorise = 1 then
+    set NewVacancyState='C'
+  else
+    set NewVacancyState=']'
+  end if;
+  while cnt > 0 loop
+    set sid=uniquekey(cnt);
+    insert into vacancy( vacancyid,departmentid,employmentid,staffid,entrydate,status,startdate,FinishDate,temp,position,notes,othernotes,classcode,ErNI,HolidayAllowance,Discount,
+      TempDeskID,PayrollIdentifier,AnalysisCode,clientdepartment,Currency,RecipientID,Role,SiteName,SiteContact,addr1,addr2,addr3,town,county,country,postcode,TempJobTypeID,
+      SitePhoneNumbers,Invaddr1,Invaddr2,Invaddr3,Invtown,Invcounty,Invcountry,Invpostcode,SiteFax,SiteEmail,TheirRef,
+      PriceListID,SendShiftsToPayroll,WorkMonday,WorkTuesday,WorkWednesday,WorkThursday,WorkFriday,WorkSaturday,WorkSunday,WorkNormalHours,WorkStartTime,noofposts) 
+      select sid,departmentid,employmentid,staffid,current date,NewVacancyState,dfrom,dto,temp,isnull(pTitle,position),notes,isnull(pDescription,othernotes),classcode,ErNI,HolidayAllowance,Discount,
+        TempDeskID,PayrollIdentifier,AnalysisCode,clientdepartment,Currency,RecipientID,Role,SiteName,SiteContact,addr1,addr2,addr3,town,county,country,postcode,TempJobTypeID,
+        SitePhoneNumbers,Invaddr1,Invaddr2,Invaddr3,Invtown,Invcounty,Invcountry,Invpostcode,SiteFax,SiteEmail,ucase(pTheirRef),
+        PriceListID,SendShiftsToPayroll,WorkMonday,WorkTuesday,WorkWednesday,WorkThursday,WorkFriday,WorkSaturday,WorkSunday,WorkNormalHours,WorkStartTime,1 from
+        vacancy where vacancyid = ptemplatevacancyid;
+    insert into tempjobrate( TempJobRateID,VacancyID,TempPayBandID,PayRate,ChargeRate,StartDate,EndDate,Grade) 
+      select uniquekey(TempJobRateID),sid,TempPayBandID,PayRate,ChargeRate,StartDate,EndDate,Grade from
+        tempjobrate where vacancyid = ptemplatevacancyid;
+    insert into criterion( searchlocation,id,critid,sourcelocation,dictionaryid,tagid,tagchoiceid,notflag,matchtype,textvalue,value,uppervalue,taganytotal,extravalue,extrauppervalue,extramatchtype) 
+      select searchlocation,sid,critid,sourcelocation,dictionaryid,tagid,tagchoiceid,notflag,matchtype,textvalue,value,uppervalue,taganytotal,extravalue,extrauppervalue,extramatchtype from
+        criterion where searchlocation like 'V%' and id = ptemplatevacancyid;
+    set cnt=cnt-1
+  end loop;
+  if CanAuthorise = 1 then
+    call IQXNetPopup(pWebUserID,null,null,sid,null,null,null,'New vacancy requirement(s) added',null)
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientAddVacancies to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientContact]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientContact(in pWebUserID char(20))
+result(employmentid char(20),directphone char(250),mobile char(250),email char(250),directfax char(250),position char(100),department char(100))
+begin
+  select first employment.employmentid,
+    getphone('CP','Direct Telephone',employment.employmentid),
+    getphone('CP','Mobile',employment.employmentid),
+    getphone('CP','E-mail',employment.employmentid),
+    getphone('CP','Direct Fax',employment.employmentid),
+    employment.position,
+    employment.department from
+    employment key join iqxnetuserlink where
+    iqxnetuserlink.iqxnetuserid = pwebuserid
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientContact to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientContactSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientContactSet(in pWebUserID char(20),in pemploymentid char(20),in pdirectphone char(250) default 'NOT_SET',in pmobile char(250) default 'NOT_SET',in pemail char(250) default 'NOT_SET',in pdirectfax char(250) default 'NOT_SET',in pposition char(250) default 'NOT_SET',in pdepartment char(250) default 'NOT_SET',in pOLDdirectphone char(250) default 'NOT_SET',in pOLDmobile char(250) default 'NOT_SET',in pOLDemail char(250) default 'NOT_SET',in pOLDdirectfax char(250) default 'NOT_SET',in pOLDposition char(250) default 'NOT_SET',in pOLDdepartment char(250) default 'NOT_SET')
+result(pResult char(250))
+begin
+  declare cid char(20);
+  declare ssql char(250);
+  declare scomma char(1);
+  if not pemploymentid = any(select employmentid from iqxnetuserlink where iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnull(pdirectphone,'') <> isnull(pOLDdirectphone,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Direct Telephone',pdirectphone)
+  end if;
+  if isnull(pmobile,'') <> isnull(pOLDmobile,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Mobile',pmobile)
+  end if;
+  if isnull(pemail,'') <> isnull(pOLDemail,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','E-mail',pemail);
+    update iqxnetuserlink key join iqxnetuser set iqxnetuser.emailaddress = pemail where iqxnetuserlink.employmentid = pemploymentid
+  end if;
+  if isnull(pdirectfax,'') <> isnull(pOLDdirectfax,'') then
+    call IQXNetSetPhones(pWebUserID,'CP','Direct Fax',pdirectfax)
+  end if;
+  set ssql='';
+  set scomma='';
+  if isnull(pposition,'') <> isnull(pOLDposition,'') then
+    set ssql=string(ssql,scomma,'position=pposition');
+    set scomma=','
+  end if;
+  if isnull(pdepartment,'') <> isnull(pOLDdepartment,'') then
+    set ssql=string(ssql,scomma,'department=pdepartment');
+    set scomma=','
+  end if;
+  if ssql <> '' then
+    execute immediate string('update employment set ',ssql,' where employmentid in (select employmentid from iqxnetuserlink where iqxnetuserid=''',pWebUserID,''')')
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientContactSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientDatedPreviousEmployees]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientDatedPreviousEmployees(in pWebUserID char(20))
+result(Name char(100),PersonID char(20),KeyName char(100),FirstDate date,LatestDate date)
+begin
+  declare local temporary table Cos(
+    CompanyID char(20) null,
+    ) not transactional;
+  declare local temporary table Pes(
+    PersonID char(20) null,
+    FirstDate date null,
+    LatestDate date null,
+    ) not transactional;insert into Cos( CompanyID) 
+    select distinct companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID;
+  -- Get all the People who have worked in the period for those Companies
+  insert into Pes( PersonID) 
+    select distinct e.personid from
+      employment as e key join placement,
+      employment as e join Cos on e.CompanyID = Cos.CompanyID where
+      not e.personid = any(select personid from employment where companyid = e.companyid and noreemploy = 1) and
+      e.startdate >= IQXNetCompanyStartDate(e.companyid);
+  -- Add the dates
+  update pes set firstdate = (select min(e.startdate) from employment as e join cos on e.companyid = cos.companyid where personid = pes.personid and e.startdate is not null);
+  update pes set latestdate = (select max(isnull(e.leavedate,current date)) from employment as e join cos on e.companyid = cos.companyid where personid = pes.personid);
+  -- Get the Peoples details
+  select person.name,person.personid,person.keyname,pes.FirstDate,pes.LatestDate from
+    person join PES on Pes.PersonID = Person.PersonID order by person.keyname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientDatedPreviousEmployees to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientPreviousEmployeeJobs]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientPreviousEmployeeJobs(in pWebUserID char(20),in pPersonID char(20))
+result(Position char(250),StartDate date,FinishDate date)
+begin
+  select employment.position,employment.startdate,employment.leavedate as finishdate from
+    employment where employment.personid = ppersonid and employment.startdate >= IQXNetCompanyStartDate(employment.companyid) and
+    employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) order by
+    employment.startdate asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientPreviousEmployeeJobs to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientPreviousEmployees]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientPreviousEmployees(in pWebUserID char(20))
+result(Name char(100),PersonID char(20),KeyName char(100))
+begin
+  declare local temporary table Cos(
+    CompanyID char(20) null,
+    ) not transactional;
+  -- Get all the Companies the WebUser is Associated with
+  declare local temporary table Pes(
+    PersonID char(20) null,
+    ) not transactional;insert into Cos( CompanyID) 
+    select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID;
+  -- Get all the People who have worked in the period for those Companies
+  insert into Pes( PersonID) 
+    select distinct e.personid from
+      employment as e key join placement,
+      employment as e join Cos on e.CompanyID = Cos.CompanyID where
+      not e.personid = any(select personid from employment where companyid = e.companyid and noreemploy = 1) and
+      e.startdate >= IQXNetCompanyStartDate(e.companyid);
+  -- Get the Peoples details
+  select person.name,person.personid,person.keyname from person join PES on Pes.PersonID = Person.PersonID order by
+    person.keyname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientPreviousEmployees to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientProvTimesheets]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientProvTimesheets(in pWebUserID char(20))
+result(tempprovtimesheetid char(20),serialnumber char(20),tempname char(60),position char(60),companyname char(60),weekenddate date,timesheettype char(1),completed smallint)
+begin
+  select t.tempprovtimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+    if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+      exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+        (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+        isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+    endif as timesheettype,if t.extnumber = 2 then 1 else 0 endif as completed from
+    tempprovtimesheet as t key join vacancy key join employment key join company key join employment as allemps key join iqxnetuserlink,
+    tempprovtimesheet as t key join tempdesk,
+    tempprovtimesheet as t key join person where
+    iqxnetuserlink.iqxnetuserid = pwebuserid and t.extnumber > 0 and
+    weekenddate > current date-60 order by
+    weekenddate asc,tempname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientProvTimesheets to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientShiftTemplate]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientShiftTemplate(in pWebUserID char(20),in pVacancyID char(20),in pShiftTemplateID char(20))
+result(VacancyID char(20),TempShiftTemplateID char(20),Position char(50),ShiftDescription char(50),CompanyName char(60),ContactName char(30),Department char(30),TimeFrom time,TimeTo time,BreakMinutes smallint,Moveable smallint,RefRequired smallint,ChoiceList long varchar,GradeList long varchar)
+begin
+  select v.VacancyID,
+    p.TempShiftTemplateID,
+    v.Position,
+    p.Description as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    p.TimeFrom,
+    p.TimeTo,
+    p.BreakMinutes,
+    isnull(p.Moveable,0) as Moveable,
+    (if p.ReferenceRequired = 'E' then 1 else 0 endif) as RefRequired,
+    IQXNetTemplateChoiceList(p.TempShiftTemplateID,v.DepartmentID) as ChoiceList,
+    IQXNetTemplateGradeList(p.TempShiftTemplateID,v.DepartmentID) as GradeList from
+    TempShiftTemplate as p key join TempShiftTemplateAllowed key join Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    v.VacancyID = pVacancyID and p.TempShiftTemplateID = pShiftTemplateID
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientShiftTemplate to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientVacancies]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientVacancies(in pWebUserID char(20))
+result(RowID char(30),StartDate date,StartTime time,FinishDate date,FinishTime time,IsShift smallint,VacancyID char(20),TempShiftPlanID char(20),Position char(50),ShiftDescription char(50),CompanyName char(60),ContactName char(30),Status char(40),Department char(30),Consultant char(60),OurRef char(20),TheirRef char(50),ContractRef char(20),CascadeDateTime timestamp,CascadeLevel smallint,WhenEntered timestamp,FilledBy char(250),Filled smallint,Unconfirmed smallint,LongDescription long varchar)
+begin
+  declare @DateRangeStart date;
+  declare @DateRangeEnd date;
+  set @DateRangeStart=dateadd(week,-1,current date);
+  set @DateRangeEnd=dateadd(week,4,current date);
+  select 'V'+v.VacancyID as RowID,
+    v.StartDate,
+    cast(null as time) as StartTime,
+    v.FinishDate,
+    cast(null as time) as FinishTime,
+    0 as IsShift,
+    v.VacancyID,
+    cast(null as char(20)) as TempShiftPlanID,
+    v.Position as Position,
+    cast(null as char(50)) as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Status where Status.Status = v.Status and Status.Type = 'V') as Status,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    (select Name from Staff where Staff.StaffID = v.StaffID) as Consultant,
+    v.RefCode as OurRef,
+    v.TheirRef,
+    v.ContractRef,
+    v.CascadeDateTime,
+    v.CascadeLevel,
+    v.WhenEntered,
+    (select list(person.name) from vacancy key join placement key join employment key join person where vacancy.vacancyid = v.vacancyid) as FilledBy,
+    ifnull(nullif(FilledBy,''),0,1) as Filled,
+    (if v.status = ']' then 1 else 0 endif) as UnConfirmed,
+    v.OtherNotes as LongDescription from
+    Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    v.StartDate <= @DateRangeEnd and isnull(v.FinishDate,@DateRangeEnd) >= @DateRangeStart and v.temp = 1 and
+    v.Status in( 'C','F',']') and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') <> 'S' and
+    v.StartDate >= IQXNetCompanyStartDate(Company.companyid) union all
+  select 'P'+p.TempShiftPlanID as RowID,
+    p.ShiftDate as StartDate,
+    p.TimeFrom as StartTime,
+    (if p.TimeFrom < p.TimeTo then p.ShiftDate else p.ShiftDate+1 endif) as FinishDate,
+    p.TimeTo as FinishTime,
+    1 as IsShift,
+    v.VacancyID,
+    p.TempShiftPlanID,
+    v.Position,
+    p.Description as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Status where Status.Status = v.Status and Status.Type = 'V') as Status,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    (select Name from Staff where Staff.StaffID = v.StaffID) as Consultant,
+    cast(p.ShiftSerialNumber as char(20)) as OurRef,
+    p.ReferenceCode as TheirRef,
+    v.ContractRef,
+    p.CascadeDateTime,
+    p.CascadeLevel,
+    p.WhenEntered,
+    (select first person.name from person key join tempshift where tempshift.tempshiftplanid = p.tempshiftplanid and tempshift.state <> 'C') as FilledBy,
+    ifnull(FilledBy,0,1) as Filled,
+    isnull((select first 1 from tempshift where tempshiftplanid = p.tempshiftplanid and state = 'C' and cancelreason = '~'),0) as UnConfirmed,
+    cast(null as long varchar) as LongDescription from
+    TempShiftPlan as p key join Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    p.ShiftDate between @DateRangeStart and @DateRangeEnd and
+    not exists(select * from tempshift where tempshiftplanid = p.tempshiftplanid and state = 'C' and cancelreason <> '~' and isnull(crefill,0) = 0) and
+    StartDate >= IQXNetCompanyStartDate(Company.companyid) order by
+    2 asc,3 asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientVacancies to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientVacancies2]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientVacancies2(in pWebUserID char(20))
+result(RowID__H char(30),Position char(200),Start_Date__D date,Start_Time time,Finish_Date__D date,Finish_Time time,VacancyID__H char(20),TempShiftPlanID__H char(20),Our_Ref char(20),Their_Ref char(50),Contract_Ref char(20),Filled_By char(250),IsShift__H smallint,Filled__H smallint,Unconfirmed__H smallint,GroupID__H smallint)
+begin
+  declare @DateRangeStart date;
+  declare @DateRangeEnd date;
+  set @DateRangeStart=dateadd(week,-1,current date);
+  set @DateRangeEnd=dateadd(week,4,current date);
+  select 'V'+v.VacancyID as RowID,
+    v.Position as Position,
+    v.StartDate,
+    cast(null as time) as StartTime,
+    v.FinishDate,
+    cast(null as time) as FinishTime,
+    v.VacancyID,
+    cast(null as char(20)) as TempShiftPlanID,
+    v.RefCode as OurRef,
+    v.TheirRef,
+    v.ContractRef,
+    (select list(person.name) from vacancy key join placement key join employment key join person where vacancy.vacancyid = v.vacancyid) as FilledBy,
+    0 as IsShift,
+    ifnull(nullif(FilledBy,''),0,1) as Filled,
+    (if v.status = ']' then 1 else 0 endif) as UnConfirmed,0 as GroupID from
+    Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    v.StartDate <= @DateRangeEnd and isnull(v.FinishDate,@DateRangeEnd) >= @DateRangeStart and v.temp = 1 and
+    v.Status in( 'C','F',']') and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') <> 'S' and
+    v.StartDate >= IQXNetCompanyStartDate(Company.companyid) union all
+  select 'P'+p.TempShiftPlanID as RowID,
+    string(v.Position,' ',p.Description) as Position,
+    p.ShiftDate as StartDate,
+    p.TimeFrom as StartTime,
+    (if p.TimeFrom < p.TimeTo then p.ShiftDate else p.ShiftDate+1 endif) as FinishDate,
+    p.TimeTo as FinishTime,
+    v.VacancyID,
+    p.TempShiftPlanID,
+    cast(p.ShiftSerialNumber as char(20)) as OurRef,
+    p.ReferenceCode as TheirRef,
+    v.ContractRef,
+    (select first person.name from person key join tempshift where tempshift.tempshiftplanid = p.tempshiftplanid and tempshift.state <> 'C') as FilledBy,
+    1 as IsShift,
+    ifnull(FilledBy,0,1) as Filled,
+    isnull((select first 1 from tempshift where tempshiftplanid = p.tempshiftplanid and state = 'C' and cancelreason = '~'),0) as UnConfirmed,0 as GroupID from
+    TempShiftPlan as p key join Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    p.ShiftDate between @DateRangeStart and @DateRangeEnd and
+    not exists(select * from tempshift where tempshiftplanid = p.tempshiftplanid and state = 'C' and cancelreason <> '~' and isnull(crefill,0) = 0) and
+    StartDate >= IQXNetCompanyStartDate(Company.companyid)
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientVacancies2 to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientVacancyTemplate]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientVacancyTemplate(in pWebUserID char(20),in pTemplateVacancyID char(20))
+result(VacancyID char(20),Position char(50),CompanyName char(60),ContactName char(30),Department char(30),VacDescription long varchar)
+begin
+  select v.VacancyID,
+    v.Position as Position,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department,
+    v.othernotes as VacDescription from
+    Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    v.vacancyid = pTemplateVacancyID and v.temp = 1 and v.Status = '[' and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') <> 'S'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientVacancyTemplate to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetClientVacancyTemplates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetClientVacancyTemplates(in pWebUserID char(20))
+result(IsShift smallint,VacancyID char(20),TempShiftTemplateID char(20),Position char(50),ShiftDescription char(100),CompanyName char(60),ContactName char(30),Department char(30))
+begin
+  select 0 as IsShift,
+    v.VacancyID,
+    cast(null as char(20)) as TempShiftTemplateID,
+    v.Position as Position,
+    cast(null as char(50)) as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department from
+    Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) and
+    v.temp = 1 and v.Status = '[' and isnull((select desktype from tempdesk where tempdeskid = v.tempdeskid),'') <> 'S' union all
+  select 1 as IsShift,
+    v.VacancyID,
+    p.TempShiftTemplateID,
+    v.Position,
+    p.Description as ShiftDescription,
+    Company.Name as CompanyName,
+    Person.Name as ContactName,
+    (select Name from Department where Department.DepartmentID = v.DepartmentID) as Department from
+    TempShiftTemplate as p key join TempShiftTemplateAllowed key join Vacancy as v key join Employment key join(Company,Person) where
+    Company.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) order by
+    4 asc,5 asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetClientVacancyTemplates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetContactList]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetContactList(in pWebUserID char(20))
+result(EmploymentID char(20),CompanyName char(100),PersonName char(100),DirectPhone char(250),Mobile char(250),Email char(250),DirectFax char(250),Position char(100),Department char(100),LoginID char(100))
+begin
+  select employment.employmentid,
+    company.name as companyname,
+    person.name as personname,
+    getphone('CP','Direct Telephone',employment.employmentid),
+    getphone('CP','Mobile',employment.employmentid),
+    getphone('CP','E-mail',employment.employmentid),
+    getphone('CP','Direct Fax',employment.employmentid),
+    employment.position,
+    employment.department,
+    iqxnetuser.loginid from
+    employment key join(company,person),
+    employment key join iqxnetuserlink key join iqxnetuser where
+    employment.companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) order by
+    person.keyname asc,company.keyname asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetContactList to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetContactRights]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetContactRights(in pWebUserID char(20),in pEmploymentID char(20))
+result(RightID char(20),RightDescription char(100),RightDefault char(100),RightAssigned integer,RightAssignedLabel char(100))
+begin
+  declare cid char(20);
+  declare pRequestedWebUserID char(20);
+  declare pUserClassID char(20);
+  set cid=(select companyid from employment where employmentid = pEmploymentID);
+  if not cid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) then
+    select IQXNetRightID,Description,'' as RightDefault,0 as RightAssigned,'' as RightAssignedLabel from IQXNetRight where IQXNetRightID is null
+  else
+    set pRequestedWebUserID=(select first IQXNetUserID from IQXNetUserLink where employmentid = pEmploymentID);
+    set pUserClassID=(select first IQXNetUserClassID from IQXNetUser where IQXNetUserID = pRequestedWebUserID);
+    select IQXNetRight.IQXNetRightID as RightID,
+      IQXNetRight.Description as RightDescription,
+      if exists(select * from IQXNetRightDefault where IQXNetRightID = IQXNetRight.IQXNetRightID and IQXNetUserClassID = pUserClassID and ID = '*') then 'Allowed' else 'Denied' endif as RightDefault,
+      isnull(IQXNetRightAssigned.Assigned,0) as RightAssigned,
+      (case RightAssigned when-1 then 'Deny' when 0 then '' when 1 then 'Allow'
+      end) as RightAssignedLabel from IQXNetRightAllowed left outer join IQXNetRightAssigned on IQXNetRightAllowed.IQXNetRightID = IQXNetRightAssigned.IQXNetRightID and IQXNetRightAssigned.IQXNetUserID = pRequestedWebUserID,
+      IQXNetRightAllowed key join IQXNetRight where
+      IQXNetRightAllowed.IQXNetUserClassID = pUserClassID and IQXNetRightAllowed.ID = '*' and IQXNetRightAllowed.MaintainOnWeb = 1 order by
+      IQXNetRight.sortorder asc,IQXNetRight.IQXNetRightID asc
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetContactRights to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetContactRightsSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetContactRightsSet(in pWebUserID char(20),in pEmploymentID char(20),in pRightsList long varchar)
+result(pResult char(250))
+begin
+  declare cid char(20);
+  declare pRequestedWebUserID char(20);
+  declare i smallint;
+  declare j smallint;
+  declare q smallint;
+  declare dummy smallint;
+  declare s char(30);
+  declare t char(30);
+  set cid=(select companyid from employment where employmentid = pEmploymentID);
+  if not cid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'MAINTAINCONTACTS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set pRequestedWebUserID=(select first IQXNetUserID from IQXNetUserLink where employmentid = pEmploymentID);
+  delete from iqxnetrightassigned where iqxnetuserid = pRequestedWebUserID and iqxnetrightid = 
+    any(select a.iqxnetrightid from iqxnetrightallowed as a key join iqxnetuserclass key join iqxnetuser as u where a.maintainonweb = 1 and u.iqxnetuserid = prequestedwebuserid);
+  set pRightsList=replace(pRightsList,'Right_','');
+  looplabel: loop
+    set i=charindex(',',pRightsList);
+    if i = 0 then
+      set s=prightslist
+    else
+      set s="left"(prightslist,i-1);
+      set prightslist="right"(prightslist,length(prightslist)-i)
+    end if;
+    set s=trim(s);
+    set q=0;
+    set j=charindex('=',s);
+    if j > 0 then
+      set t=trim("right"(s,length(s)-j));
+      set s=trim("left"(s,j-1));
+      case t when 'Allow' then
+        set q=1 when 'Deny' then
+        set q=-1 when '1' then
+        set q=1 when '-1' then
+        set q=-1
+      end case
+    end if;
+    if s <> '' and q <> 0 then
+      begin
+        insert into iqxnetrightassigned( iqxnetuserid,iqxnetrightid,assigned) values( pRequestedWebUserID,s,q) 
+      exception
+        when others then
+          set dummy=0
+      end
+    end if;
+    if i = 0 then
+      leave looplabel
+    end if
+  end loop looplabel;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetContactRightsSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetContactSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetContactSet(in pWebUserID char(20),in pemploymentid char(20),in pdirectphone char(250) default 'NOT_SET',in pmobile char(250) default 'NOT_SET',in pemail char(250) default 'NOT_SET',in pdirectfax char(250) default 'NOT_SET',in pposition char(250) default 'NOT_SET',in pdepartment char(250) default 'NOT_SET',in pOLDdirectphone char(250) default 'NOT_SET',in pOLDmobile char(250) default 'NOT_SET',in pOLDemail char(250) default 'NOT_SET',in pOLDdirectfax char(250) default 'NOT_SET',in pOLDposition char(250) default 'NOT_SET',in pOLDdepartment char(250) default 'NOT_SET')
+result(pResult char(250))
+begin
+  -- This proc is for maintenance updates of any company contact by master contacts with suitable rights
+  declare cid char(20);
+  declare ssql char(250);
+  declare scomma char(1);
+  if not pemploymentid = any(select employmentid from employment where
+      companyid = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnull(pdirectphone,'') <> isnull(pOLDdirectphone,'') then
+    call setphone('CP','Direct Telephone',pemploymentid,pdirectphone)
+  end if;
+  if isnull(pmobile,'') <> isnull(pOLDmobile,'') then
+    call setphone('CP','Mobile',pemploymentid,pmobile)
+  end if;
+  if isnull(pemail,'') <> isnull(pOLDemail,'') then
+    call setphone('CP','E-mail',pemploymentid,pemail);
+    update iqxnetuserlink key join iqxnetuser set iqxnetuser.emailaddress = pemail where iqxnetuserlink.employmentid = pemploymentid
+  end if;
+  if isnull(pdirectfax,'') <> isnull(pOLDdirectfax,'') then
+    call setphone('CP','Direct Fax',pemploymentid,pdirectfax)
+  end if;
+  set ssql='';
+  set scomma='';
+  if isnull(pposition,'') <> isnull(pOLDposition,'') then
+    set ssql=string(ssql,scomma,'position=pposition');
+    set scomma=','
+  end if;
+  if isnull(pdepartment,'') <> isnull(pOLDdepartment,'') then
+    set ssql=string(ssql,scomma,'department=pdepartment');
+    set scomma=','
+  end if;
+  if ssql <> '' then
+    execute immediate string('update employment set ',ssql,' where employmentid=''',pemploymentid,'''')
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetContactSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetMessage]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetMessage(in pWebUserID char(20),in ptype char(20),in ptitle char(100),in pdescription long varchar,in pvacancyid char(20) default
+null,in pplacementid char(20) default null,in pprogressid char(20) default null,in pprovtimesheetid char(20) default
+null,in ptimesheetid char(20) default null)
+result(pResult char(250))
+begin
+  declare persid char(20);
+  declare empid char(20);
+  set persid=null;
+  set empid=(select first employmentid from iqxnetuserlink where iqxnetuserid = pwebuserid);
+  if empid is null then
+    set persid=(select first personid from iqxnetuserlink where iqxnetuserid = pwebuserid);
+    if persid is null then
+      select '99:~Permission denied';
+      return
+    end if
+  end if;
+  set pprovtimesheetid=nullif(trim(pprovtimesheetid),'');
+  set ptimesheetid=nullif(trim(ptimesheetid),'');
+  if pprovtimesheetid is not null then
+    set pvacancyid=(select first vacancyid from tempprovtimesheet where tempprovtimesheetid = pprovtimesheetid)
+  end if;
+  if ptimesheetid is not null then
+    set pplacementid=(select first placementid from temptimesheet where temptimesheetid = ptimesheetid);
+    set pvacancyid=(select first vacancyid from placement where placementid = pplacementid)
+  end if;
+  if trim(isnull(ptype,'')) = '' then
+    select '101:~Invalid message type';
+    return
+  end if;
+  if trim(isnull(ptitle,'')) = '' then
+    select '102:~Incomplete message';
+    return
+  end if;
+  call IQXNetPopup(pWebUserID,persid,empid,pvacancyid,pplacementid,pprogressid,ptype,ptitle,pdescription);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetMessage to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetPersonProfile]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetPersonProfile(in pWebUserID char(20))
+result(personid char(20),dob date,homephone char(250),email char(250))
+begin
+  select first person.personid,person.dob,getphone('P','Home Telephone',person.personid),getphone('P','E-mail',person.personid) from
+    person key join iqxnetuserlink key join iqxnetuser where iqxnetuser.iqxnetuserid = pwebuserid
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetPersonProfile to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetPersonProfileSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetPersonProfileSet(in pWebUserID char(20),in ppersonid char(20),in pdob char(20) default 'NOT-SET',in phomephone char(250) default 'NOT-SET',in pemail char(250) default 'NOT-SET',in pOLDdob char(20) default 'NOT-SET',in pOLDhomephone char(250) default 'NOT-SET',in pOLDemail char(250) default 'NOT-SET')
+result(pResult char(250))
+begin
+  declare dateofbirth date;
+  if not ppersonid = any(select personid from iqxnetuserlink where iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnull(pdob,'') <> isnull(pOLDdob,'') then
+    set dateofbirth=IQXNetStringToDate(pdob);
+    if trim(isnull(pdob,'')) <> '' and dateofbirth is null then
+      select '1:~Invalid date of birth';
+      return
+    end if;
+    update person set dob = dateofbirth where personid = ppersonid
+  end if;
+  if isnull(phomephone,'') <> isnull(pOLDhomephone,'') then
+    call setphone('P','Home Telephone',ppersonid,phomephone)
+  end if;
+  if isnull(pemail,'') <> isnull(pOLDemail,'') then
+    call setphone('P','E-mail',ppersonid,pemail);
+    update iqxnetuserlink key join iqxnetuser set iqxnetuser.emailaddress = pemail where iqxnetuserlink.personid = ppersonid
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetPersonProfileSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetPersonShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetPersonShifts(in pWebUserID char(20))
+result(Position char(50),Company char(60),ShiftDate date,TimeFrom time,TimeTo time,BreakMinutes smallint,State char(1),Description char(50),TheirRef char(20),TempShiftID char(20),Note char(20),OrderedBy char(20),ConfirmedWith char(20))
+begin
+  select vacancy.Position,
+    company.name as Company,
+    TempShift.ShiftDate,
+    TempShift.TimeFrom,
+    TempShift.TimeTo,
+    TempShift.BreakMinutes,
+    TempShift.State,
+    tempshiftplan.Description,
+    isnull(tempshift.referencecode,tempshiftplan.referencecode) as TheirRef,
+    tempshift.tempshiftid,
+    TempShift.Note,
+    tempshiftplan.OrderedBy,
+    tempshift.ConfirmedWith from
+    tempshift key left outer join tempshiftplan,
+    tempshift key join person,
+    tempshift key join vacancy key join employment key join company where
+    person.personid = any(select personid from iqxnetuserlink where iqxnetuserid = pWebUserID) order by
+    --and tempshift.shiftdate >= current date 
+    TempShift.ShiftDate asc,TempShift.TimeFrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetPersonShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetComplete]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetComplete(in pWebUserID char(20),in ptempprovtimesheetid char(20),in pInstruction char(20) default null)
+result(pResult char(250))
+begin
+  declare oldstat smallint;
+  declare newstat smallint;
+  declare statdesc char(30);
+  if not ptempprovtimesheetid = any(select t.tempprovtimesheetid from
+      tempprovtimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.tempprovtimesheetid from
+      tempprovtimesheet as t key join person key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.tempprovtimesheetid from tempprovtimesheet as t key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if ucase(isnull(pInstruction,'')) = 'REVERSE' then
+    set newstat=1;
+    set oldstat=2;
+    set statdesc='Timesheet Un-filled'
+  else
+    set newstat=2;
+    set oldstat=1;
+    set statdesc='Timesheet Filled'
+  end if;
+  update tempprovtimesheet set extnumber = newstat where tempprovtimesheetid = ptempprovtimesheetid;
+  if @@rowcount = 1 then
+    insert into tempprovtimesheethistory( tempprovtimesheethistoryid,tempprovtimesheetid,serialnumber,description,oldstatus,newstatus,staffid,whenentered,externaluserid) 
+      select uniquekey(ptempprovtimesheetid),ptempprovtimesheetid,serialnumber,statdesc,oldstat,newstat,userstaffid,current timestamp,pwebuserid from tempprovtimesheet where tempprovtimesheetid = ptempprovtimesheetid;
+    select '0:~Success'
+  else
+    select '98:~Timesheet already finalised or deleted'
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetComplete to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetRates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetRates(in pWebUserID char(20),in pTempProvTimesheetID char(20))
+result(TempProvTimesheetLineID char(20),IsExpenses smallint,BandDescription char(50),UnitDescription char(100),Units decimal(12,2),Rate decimal(12,2),Total decimal(12,2),CanEditUnits smallint,CanEdit smallint)
+begin
+  if(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID) = 'CLIENT' then
+    select TempProvTimesheetLine.TempProvTimesheetLineID,
+      (if isnull(temppayband.payrollflag,'') = 'EXPENSES' or isnull(temppayband.isexpenses,0) = 1 then 1 else 0 endif) as IsExpenses,
+      temppayband.description,
+      (if IsExpenses = 1 then tempprovtimesheetline.description else temppayband.unit endif),
+      nullif(tempprovtimesheetline.unitscharged,0.0) as units,nullif(tempprovtimesheetline.chargerate,0.0) as rate,isnull(units*rate,0.0) as total,
+      (if units is null or isnull(tempprovtimesheetline.description,'') = 'Units Edited' then 1 else 0 endif) as CanEditUnits,
+      (if IsExpenses = 1 or CanEditUnits = 1 then 1 else 0 endif) as CanEdit from
+      tempprovtimesheetline key join temppayband where tempprovtimesheetline.tempprovtimesheetid = pTempProvTimesheetID order by
+      tempprovtimesheetline.linenumber asc
+  else
+    select TempProvTimesheetLine.TempProvTimesheetLineID,
+      (if isnull(temppayband.payrollflag,'') = 'EXPENSES' or isnull(temppayband.isexpenses,0) = 1 then 1 else 0 endif) as IsExpenses,
+      temppayband.description,
+      (if IsExpenses = 1 then tempprovtimesheetline.description else temppayband.unit endif),
+      nullif(tempprovtimesheetline.unitspaid,0.0) as units,nullif(tempprovtimesheetline.payrate,0.0) as rate,isnull(units*rate,0.0) as total,
+      (if units is null or isnull(tempprovtimesheetline.description,'') = 'Units Edited' then 1 else 0 endif) as CanEditUnits,
+      (if IsExpenses = 1 or CanEditUnits = 1 then 1 else 0 endif) as CanEdit from
+      tempprovtimesheetline key join temppayband where tempprovtimesheetline.tempprovtimesheetid = pTempProvTimesheetID order by
+      tempprovtimesheetline.linenumber asc
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetRates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetRateSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetRateSet(in pWebUserID char(20),in pTempProvTimesheetLineID char(250),in pUnitDescription char(250) default null,in pUnits char(250) default null,in pRate char(250) default null)
+result(pResult char(250))
+begin
+  declare i smallint;
+  declare isnewline smallint;
+  declare newlineid char(20);
+  declare ptempprovtimesheetid char(20);
+  if pTempProvTimesheetLineID like 'Copy%' then
+    set isnewline=1
+  else
+    set isnewline=0
+  end if;
+  set i=charindex('_',pTempProvTimesheetLineID);
+  if i > 0 then
+    set pTempProvTimesheetLineID="right"(pTempProvTimesheetLineID,length(pTempProvTimesheetLineID)-i)
+  end if;
+  set ptempprovtimesheetid=(select first tempprovtimesheetid from tempprovtimesheetline where tempprovtimesheetlineid = pTempProvTimesheetLineID);
+  if not ptempprovtimesheetid = any(select t.tempprovtimesheetid from
+      tempprovtimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.tempprovtimesheetid from
+      tempprovtimesheet as t key join person key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.tempprovtimesheetid from tempprovtimesheet as t key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnewline = 1 then
+    set newlineid=uniquekey(pTempProvTimesheetLineID);
+    insert into tempprovtimesheetline( tempprovtimesheetlineid,tempprovtimesheetid,temppaybandid,linenumber,unitspaid,unitscharged,payrate,chargerate,
+      description) select newlineid,ptempprovtimesheetid,temppaybandid,
+        isnull((select 1+max(linenumber) from tempprovtimesheetline where tempprovtimesheetid = ptempprovtimesheetid),1),
+        isnull(punits,unitspaid),isnull(punits,unitscharged),isnull(prate,payrate),isnull(prate,chargerate),
+        isnull(punitdescription,nullif(trim(description),''),'Units Edited') from tempprovtimesheetline where tempprovtimesheetlineid = ptempprovtimesheetlineid
+  else
+    update tempprovtimesheetline set unitspaid = isnull(punits,unitspaid),unitscharged = isnull(punits,unitscharged),payrate = isnull(prate,payrate),chargerate = isnull(prate,chargerate),
+      description = isnull(punitdescription,nullif(trim(description),''),'Units Edited') where tempprovtimesheetlineid = pTempProvTimesheetLineID
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetRateSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetShifts(in pWebUserID char(20),in pTempProvTimesheetID char(20))
+result(tempshiftid char(20),shiftdate date,timefrom time,timeto time,breakminutes smallint,tick smallint,description char(50),weekenddate date)
+begin
+  select s.tempshiftid,s.shiftdate,s.timefrom,s.timeto,s.breakminutes,
+    (if t.extnumber = 2 then(select first 1 from tempprovtimesheetshift where tempprovtimesheetid = t.tempprovtimesheetid and tempshiftid = s.tempshiftid) else 1 endif) as tick,
+    p.description,weekmonthenddate(t.period,t.periodlength) as weekenddate from
+    tempshift as s join tempprovtimesheet as t on s.personid = t.personid and s.vacancyid = t.vacancyid,
+    tempshift as s key left outer join tempshiftplan as p,
+    tempprovtimesheet as t key join person where
+    t.tempprovtimesheetid = pTempProvTimesheetID and
+    t.extnumber > 0 and s.state in( 'P','B') and tick = 1 and
+    s.shiftdate between weekenddate-6 and weekenddate order by
+    s.shiftdate asc,s.timefrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetShiftSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetShiftSet(in pWebUserID char(20),in ptempshiftid char(250),in pshiftdate char(250) default 'NOT_SET',in ptimefrom char(250) default 'NOT_SET',in ptimeto char(250) default 'NOT_SET',in pbreakminutes char(250) default 'NOT_SET')
+result(pResult char(250))
+begin
+  declare i smallint;
+  declare isnewshift smallint;
+  declare newshiftid char(20);
+  if trim(pbreakminutes) = '' then
+    set pbreakminutes='0'
+  end if;
+  if ptempshiftid like 'Copy%' then
+    set isnewshift=1
+  else
+    set isnewshift=0
+  end if;
+  set i=charindex('_',ptempshiftid);
+  if i > 0 then
+    set ptempshiftid="right"(ptempshiftid,length(ptempshiftid)-i)
+  end if;
+  if not pTempShiftID = any(
+    select t.TempShiftID from tempshift as t key join person key join iqxnetuserlink where iqxnetuserid = pwebuserid union
+    select t.TempShiftID from tempshift as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.TempShiftID from tempshift as t key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if isnewshift = 1 then
+    set newshiftid=uniquekey(ptempshiftid);
+    insert into tempshiftplan( TempShiftPlanID,VacancyID,ShiftDate,TimeFrom,TimeTo,BreakMinutes,Description,EssentialSkill,EssentialSkillGradeID,ReferenceCode,
+      EssentialSkillChoiceList,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select newshiftid,VacancyID,isnull(iqxnetstringtodate(pshiftdate),shiftdate),isnull(iqxnetstringtotime(ptimefrom),timefrom),
+        isnull(iqxnetstringtotime(ptimeto),timeto),isnull(iqxnetstringtointeger(pbreakminutes),breakminutes),Description,EssentialSkill,EssentialSkillGradeID,'Self-booked',
+        EssentialSkillChoiceList,TempShiftTypeID,AnalysisCode,RecoveryHours from tempshiftplan where
+        tempshiftplanid = (select tempshiftplanid from tempshift where tempshiftid = ptempshiftid);
+    insert into tempshift( TempShiftID,VacancyID,PersonID,PlacementID,ShiftDate,TimeFrom,TimeTo,BreakMinutes,State,TempShiftPlanID,EssentialSkillGradeID,ReferenceCode,
+      ClientConfirmed,TempConfirmed,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select NewShiftID,VacancyID,PersonID,PlacementID,isnull(iqxnetstringtodate(pshiftdate),shiftdate),isnull(iqxnetstringtotime(ptimefrom),timefrom),
+        isnull(iqxnetstringtotime(ptimeto),timeto),isnull(iqxnetstringtointeger(pbreakminutes),breakminutes),'B',NewShiftID,EssentialSkillGradeID,'Self-booked',
+        1,1,TempShiftTypeID,AnalysisCode,RecoveryHours from tempshift where
+        tempshiftid = ptempshiftid
+  else
+    update tempshift set shiftdate = isnull(iqxnetstringtodate(pshiftdate),shiftdate),timefrom = isnull(iqxnetstringtotime(ptimefrom),timefrom),
+      timeto = isnull(iqxnetstringtotime(ptimeto),timeto),breakminutes = isnull(iqxnetstringtointeger(pbreakminutes),breakminutes) where
+      tempshiftid = ptempshiftid
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetShiftSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetShiftsSelect]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetShiftsSelect(in pWebUserID char(20),in pTempProvTimesheetID char(20),in pShiftList long varchar)
+result(pResult char(250))
+begin
+  declare i smallint;
+  declare dummy smallint;
+  declare s char(30);
+  if not pTempProvTimesheetID = any(
+    select t.TempProvTimesheetID from tempprovtimesheet as t key join person key join iqxnetuserlink where iqxnetuserid = pwebuserid union
+    select t.TempProvTimesheetID from tempprovtimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select t.TempProvTimesheetID from tempprovtimesheet as t key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  delete from tempprovtimesheetshift where tempprovtimesheetid = pTempprovtimesheetid;
+  set pShiftList=replace(pShiftList,'Shift_','');
+  looplabel: loop
+    set i=charindex(',',pShiftList);
+    if i = 0 then
+      set s=pshiftlist
+    else
+      set s="left"(pshiftlist,i-1);
+      set pshiftlist="right"(pshiftlist,length(pshiftlist)-i)
+    end if;
+    set s=trim(s);
+    if s <> '' then
+      begin
+        insert into tempprovtimesheetshift( tempprovtimesheetid,tempshiftid) values( ptempprovtimesheetid,s) 
+      exception
+        when others then
+          set dummy=0
+      end
+    end if;
+    if i = 0 then
+      leave looplabel
+    end if
+  end loop looplabel;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetShiftsSelect to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetTimes]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetTimes(in pWebUserID char(20),in pTempProvTimesheetID char(20))
+result(placementid char(20),weekstartdate date,shiftdate date,dayticked smallint,tickednormalhours double,hours double,timefrom time)
+begin
+  select p.placementid,
+    weekmonthenddate(t.period,t.periodlength)-6 as weekstartdate,
+    "date"(dateadd(day,r.row_num-1,weekstartdate)) as shiftdate,
+    (case dow(shiftdate)-1 when 0 then p.worksunday when 1 then p.workmonday when 2 then p.worktuesday when 3 then p.workwednesday
+    when 4 then p.workthursday when 5 then p.workfriday when 6 then p.worksaturday
+    end) as dayticked,(if isnull(dayticked,0) = 1 then p.worknormalhours else null endif) as tickednormalhours,
+    (if isnull(v.workcancelled,0) = 0 then isnull(v.workhours,tickednormalhours) else null endif) as hours,
+    isnull(v.workstarttime,p.workstarttime) as timefrom from(
+    placement as p left outer join placementdayvariation as v on
+    p.placementid = v.placementid and v.variationdate = shiftdate),
+    placement as p join dbo.rowgenerator as r on r.row_num between 1 and 7,
+    placement as p key join tempprovtimesheet as t,
+    placement as p key join employment as e where
+    t.tempprovtimesheetid = pTempProvTimesheetID and
+    shiftdate between isnull(e.startdate,shiftdate) and isnull(e.leavedate,shiftdate)
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetTimes to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetProvTimesheetTimeSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetProvTimesheetTimeSet(in pWebUserID char(20),in pplacementid_date char(250),in phours char(250) default null,in ptimefrom char(250) default null)
+result(pResult char(250))
+begin
+  declare i smallint;
+  declare pplacementid char(20);
+  declare pdate date;
+  declare pptime time;
+  declare pphours double;
+  declare pcancelled tinyint;
+  set i=locate(pplacementid_date,'_',-1);
+  if i > 0 then
+    set pdate=iqxnetstringtodate("right"(pplacementid_date,length(pplacementid_date)-i));
+    set pplacementid="left"(pplacementid_date,i-1)
+  else
+    select '101:~Invalid data';
+    return
+  end if;
+  set pphours=nullif(iqxnetstringtodouble(phours),0.0);
+  if pphours is null then
+    set pptime=null;
+    set pcancelled=1
+  else
+    set pptime=iqxnetstringtotime(ptimefrom);
+    set pcancelled=0
+  end if;
+  if not pplacementid = any(
+    select p.placementid from placement as p key join employment key join person key join iqxnetuserlink where iqxnetuserid = pwebuserid union
+    select p.placementid from placement as p key join employment key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid union
+    select p.placementid from placement as p key join vacancy key join employment as vacemp key join company key join employment key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid) then
+    select '99:~Permission denied';
+    return
+  end if;
+  delete from placementdayvariation where placementid = pplacementid and variationdate = pdate;
+  insert into placementdayvariation( placementid,variationdate,workstarttime,workhours,workcancelled) values( pplacementid,pdate,pptime,pphours,pcancelled) ;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetProvTimesheetTimeSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetQuestionnaire]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetQuestionnaire(in pWebUserID char(20),in ptaglocation char(3),in pid char(20) default null,in pgroup smallint default null)
+result(tagsortorder smallint,tagid char(3),sortX smallint,choicesortorder smallint,tagchoiceid char(4),rectype smallint,description char(100),tagtype char(1),minstep double,units char(10),required smallint,displaygroup smallint,value double,textvalue long varchar,taglocation char(3))
+begin
+  // sortX=0 for tags, 1 for subchoices, 2 for choices and values
+  // rectype=0 for tags, 1 for choices, 2 for subchoices, 3 for values
+  declare ispublic smallint;
+  if pid is null then
+    set ispublic=0;
+    if ptaglocation like '[PA]%' then
+      set pid=(select first personid from iqxnetuserlink where iqxnetuserid = pwebuserid)
+    else if ptaglocation = 'E' then
+        set pid=(select first employmentid from iqxnetuserlink where iqxnetuserid = pwebuserid)
+      else if ptaglocation = 'C' then
+          set pid=(select first employment.companyid from iqxnetuserlink key join employment where iqxnetuserlink.iqxnetuserid = pwebuserid)
+        end if
+      end if
+    end if
+  else
+    set ispublic=1
+  end if;
+  select tag.sortorder,tag.tagid,0 as sortX,cast(null as smallint),cast(null as char(4)),0 as rectype,tag.description,tag.tagtype,tag.minstep,tag.units,
+    tag.required,isnull(tag.displaygroup,0) as displaygroup,cast(null as double),cast(null as long varchar),tag.taglocation from
+    tag where tag.taglocation = ptaglocation and(if ispublic = 1 then tag.publiconweb else tag.publishtoweb endif) = 1 and
+    ((isnull(pgroup,0) = 0 and displaygroup >= 0) or displaygroup = pgroup) union all
+  select tag.sortorder,tag.tagid,3-(isnull(tagchoice.subchoice,0)+1) as sortX,tagchoice.sortorder,tagchoice.tagchoiceid,isnull(tagchoice.subchoice,0)+1 as rectype,
+    tagchoice.description,null,null,null,null,isnull(tag.displaygroup,0) as displaygroup,tagchoice.value,cast(null as long varchar),null from
+    tagchoice key join tag where tag.taglocation = ptaglocation and(if ispublic = 1 then tag.publiconweb else tag.publishtoweb endif) = 1 and
+    isnull(tagchoice.donotpublishtoweb,0) = 0 and
+    ((isnull(pgroup,0) = 0 and displaygroup >= 0) or displaygroup = pgroup) union all
+  select tag.sortorder,tag.tagid,2 as sortX,tagchoice.sortorder,tagchoice.tagchoiceid,3 as rectype,null,null,null,null,null,
+    isnull(tag.displaygroup,0) as displaygroup,tagvalue.value,tagvalue.textvalue,null from
+    tagvalue key join tag,tagvalue key left outer join tagchoice where
+    tagvalue.id = pid and tag.taglocation = ptaglocation and(if ispublic = 1 then tag.publiconweb else tag.publishtoweb endif) = 1 and
+    isnull(tagchoice.donotpublishtoweb,0) = 0 and
+    ((isnull(pgroup,0) = 0 and displaygroup >= 0) or displaygroup = pgroup) order by
+    1 asc,2 asc,3 asc,4 asc,5 asc,6 asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetQuestionnaire to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetQuestSet]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetQuestSet(in pWebUserID char(20),in qanswers long varchar default null)
+result(pResult char(250))
+begin
+  declare cid char(20);
+  set cid=(select first employment.companyid from iqxnetuserlink key join employment where iqxnetuserlink.iqxnetuserid = pwebuserid);
+  if cid is not null then
+    call IQXNetSaveQuestionnaire(cid,qanswers);
+    select '0:~Success'
+  else
+    select '1:~Company not found'
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetQuestSet to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportClientStats]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportClientStats(in pWebUserID char(20),in Start_Date__d char(20) default null,in Weeks__i char(20) default null)
+result(Serial__H integer,Week_Start_Date__DX1Z date,Week_End_Date__DH date,New_Vacancies__GRT integer,New_Vacancies_Temp__RT integer,New_Vacancies_Perm__RT integer,New_Placements__GRT integer,New_Placements_Temp__RT integer,New_Placements_Perm__RT integer)
+begin
+  declare pWeeks integer;
+  declare pStartDate date;
+  declare local temporary table Cos(
+    CompanyID char(20) not null,
+    primary key( CompanyID) ,
+    ) not transactional;
+  set pWeeks=isnull(nullif(trim(Weeks__I),''),52);
+  set pStartDate=IQXNetStringToDate(Start_Date__D);
+  if pStartDate is null then
+    set pStartDate=dateadd(week,-52,current date)
+  end if;
+  insert into Cos( CompanyID) select distinct companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID;
+  select(a.row_num-1)*255+(b.row_num-1) as Serial,
+    dateadd(week,Serial,pStartDate) as WeekStartDate,
+    dateadd(day,6,WeekStartDate) as WeekEndDate,
+    (select count(vacancyid) from vacancy key join employment where EntryDate between WeekStartDate and WeekEndDate and employment.companyid = any(select companyid from Cos)) as NewVacanciesAll,
+    (select count(vacancyid) from vacancy key join employment where EntryDate between WeekStartDate and WeekEndDate and employment.companyid = any(select companyid from Cos) and vacancy.temp = 1) as NewVacanciesTemp,
+    NewVacanciesAll-NewVacanciesTemp as NewVacanciesPerm,
+    (select count(placementid) from placement key join employment where PlaceDate between WeekStartDate and WeekEndDate and employment.companyid = any(select companyid from Cos)) as NewPlacementsAll,
+    (select count(placementid) from placement key join employment where PlaceDate between WeekStartDate and WeekEndDate and employment.companyid = any(select companyid from Cos) and employment.temp = 1) as NewPlacementsTemp,
+    NewPlacementsAll-NewPlacementsTemp as NewPlacementsPerm from
+    rowgenerator as a cross join rowgenerator as b where
+    Serial < pWeeks order by
+    Serial asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportClientStats to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportCombo_department]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportCombo_department(in pWebUserID char(20))
+result(Description char(250),Value char(250))
+begin
+  select name,departmentid from department where searchable = 1 order by sortorder asc,departmentid asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportCombo_department to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportCombo_gender]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportCombo_gender(in pWebUserID char(20))
+result(Description char(250),Value char(250))
+begin
+  select 'Male','M' union all
+  select 'Female','F'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportCombo_gender to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReports]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReports(in pWebUserID char(20))
+result(ReportTitle char(200),ReportSource char(100),ReportParams long varchar)
+begin
+  select r.Description as ReportTitle,r.DBProcedure as ReportSource,
+    (select list(parm_name order by parm_id asc) from sysprocparm key join sysprocedure where
+      proc_name = r.DBProcedure and parm_mode_in = 'Y' and parm_name <> 'pWebUserID') as ReportParams from
+    iqxnetreport as r key join iqxnetuserclass key join iqxnetuser where
+    iqxnetuser.iqxnetuserid = pWebUserID and(r.IQXNetRightID is null or iqxnethaspermission(pWebUserID,r.IQXNetRightID) > 0) order by
+    r.sortorder asc,r.iqxnetreportid asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReports to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportSpend]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportSpend(in pWebUserID char(20),in From__D char(20),in To__D char(20))
+result(Title__H char(100),Company__1 char(100),Location__2 char(150),Job_Title__3 char(100),Timesheet_Count__RT integer,Hours__RMT double,Net_Charge__RMT double,Charge_Inc_VAT__RMT double)
+begin
+  declare pstart date;
+  declare pend date;
+  declare pStartPeriod integer;
+  declare pEndPeriod integer;
+  declare rTitle char(100);
+  declare local temporary table Cos(
+    CompanyID char(20) null,
+    ) not transactional;
+  set pstart=iqxnetstringtodate(From__D);
+  set pend=iqxnetstringtodate(To__D);
+  set rTitle=dateformat(pstart,'dd/mm/yyyy')+' - '+dateformat(pend,'dd/mm/yyyy');
+  set pStartPeriod=weekcontaining(pstart);
+  set pEndPeriod=weekcontaining(pend);
+  -- Get all the Companies the WebUser is Associated with
+  insert into Cos( CompanyID) 
+    select distinct companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID;
+  select rTitle,
+    Company.Name,
+    string(Company.Addr1,', ',Company.Town) as Location,
+    Vacancy.Position,
+    count(distinct TempTimeSheet.TempTimeSheetID) as NumTimeSheets,
+    sum(TempTimeSheetLine.UnitsCharged) as Hours,
+    sum(TempTimeSheetLine.UnitsCharged*TempTimeSheetLine.ChargeRate) as Charge,
+    (Charge*1.175) as ChargeWVAT from
+    TempTimeSheet key join(
+    TempTimeSheetLine,Placement key join(Employment as PEmp key join Person,
+    Vacancy key join(Employment key join(Company join cos on company.companyid = cos.companyid)))) where
+    TempTimeSheet.TransferBatch >= 1 and
+    TempTimeSheet.Period between pStartPeriod and pEndPeriod and
+    TempTimeSheet.PeriodLength = 'W' and
+    weekmonthenddate(TempTimeSheet.period,TempTimeSheet.periodlength) >= IQXNetCompanyStartDate(company.companyid)
+    group by Company.name,Company.Addr1,Company.Town,Vacancy.Position
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportSpend to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportTimesheetLines]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportTimesheetLines(in pWebUserID char(20),in pTimesheetID char(20))
+result(Pay_Type char(100),Unit char(100),Units__R double,Rate__MR double,Total__MR double)
+begin
+  declare userClass char(20);
+  set userClass=(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID);
+  select b.description,
+    b.unit,
+    (if userclass = 'CLIENT' then l.unitscharged else l.unitspaid endif),
+    (if userclass = 'CLIENT' then l.chargerate else l.payrate endif),
+    (if userclass = 'CLIENT' then l.unitscharged*l.chargerate else l.unitspaid*l.payrate endif) from
+    temptimesheetline as l key join temppayband as b where
+    l.temptimesheetid = pTimesheetID order by
+    b.sortorder asc,b.description asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportTimesheetLines to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportUniTimesheetLines]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportUniTimesheetLines(in pWebUserID char(20),in pTimesheetID char(20))
+result(Pay_Type char(100),Unit char(100),Units__R double,Pay_Rate__MR double,Charge_Rate__MR double,Total_Charge__MR double)
+begin
+  select b.description,
+    b.unit,
+    l.unitspaid,
+    l.payrate,
+    l.chargerate,
+    l.unitscharged*l.chargerate from
+    temptimesheetline as l key join temppayband as b where
+    l.temptimesheetid = pTimesheetID order by
+    b.sortorder asc,b.description asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportUniTimesheetLines to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetReportUniTimesheets]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetReportUniTimesheets(in pWebUserID char(20),in From__D char(20),in To__D char(20))
+result(Title__H char(100),Company__1 char(100),Address__2 char(100),Department__3 char(100),Candidate__4 char(100),Contact char(100),Job_Title char(100),Start_Date__D date,End_Date__D date,Hours__RMT double,Gross_Pay__RMT double,Net_Charge__RMT double,Charge_Inc_VAT__RMT double,Details__Eat char(100))
+begin
+  declare pstart date;
+  declare pend date;
+  declare pStartPeriod integer;
+  declare pEndPeriod integer;
+  declare rTitle char(100);
+  declare local temporary table Cos(
+    CompanyID char(20) null,
+    ) not transactional;
+  set pstart=iqxnetstringtodate(From__D);
+  set pend=iqxnetstringtodate(To__D);
+  set rTitle=dateformat(pstart,'dd/mm/yyyy')+' - '+dateformat(pend,'dd/mm/yyyy');
+  set pStartPeriod=weekcontaining(pstart);
+  set pEndPeriod=weekcontaining(pend);
+  -- Get all the Companies the WebUser is Associated with
+  insert into Cos( CompanyID) 
+    select distinct companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID;
+  select rTitle,
+    Company.Name as CompanyName,
+    company.addr1 as Address,
+    Employment.Department,
+    Person.Name as Candidate,
+    Contact.Name as ContactName,
+    PEmp.Position,
+    Pemp.startdate as EmpStartdate,
+    Pemp.leavedate as EmpLeavedate,
+    (select sum(UnitsCharged) from TempTimeSheetLine key join TempPayBand where TempTimeSheetID = TempTimeSheet.TempTimeSheetID and TempPayBand.Unit like 'Hour%') as TotHours,
+    (select sum(UnitsPaid*PayRate) from TempTimeSheetLine where TempTimeSheetID = TempTimeSheet.TempTimesheetID) as TotPaid,
+    (select sum(UnitsCharged*ChargeRate) from TempTimesheetLine where TempTimeSheetID = TempTimeSheet.TempTimeSheetID) as TotCharged,
+    (TotCharged*1.175) as ChargeWVAT,'NetReportUniTimesheetLines&pTimesheetID='+temptimesheet.temptimesheetid as Details from
+    TempTimeSheet key join(
+    Placement key join(Employment as PEmp key join Person,Vacancy key join(
+    Employment key join(Person as Contact,(Company join cos on company.companyid = cos.companyid))))) where
+    TempTimeSheet.TransferBatch >= 1 and
+    TempTimeSheet.Period between pStartPeriod and pEndPeriod and
+    TempTimeSheet.PeriodLength = 'W' and
+    weekmonthenddate(TempTimeSheet.period,TempTimeSheet.periodlength) >= IQXNetCompanyStartDate(company.companyid)
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetReportUniTimesheets to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetTimesheetRates]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetTimesheetRates(in pWebUserID char(20),in pTempTimesheetID char(20))
+result(TempTimesheetLineID char(20),IsExpenses smallint,BandDescription char(50),UnitDescription char(100),Units decimal(12,2),Rate decimal(12,2),Total decimal(12,2))
+begin
+  if(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID) = 'CLIENT' then
+    select TempTimesheetLine.TempTimesheetLineID,
+      (if isnull(temppayband.payrollflag,'') = 'EXPENSES' or isnull(temppayband.isexpenses,0) = 1 then 1 else 0 endif) as IsExpenses,
+      temppayband.description,
+      (if IsExpenses = 1 then temptimesheetline.description else temppayband.unit endif),
+      nullif(temptimesheetline.unitscharged,0.0) as units,nullif(temptimesheetline.chargerate,0.0) as rate,isnull(units*rate,0.0) as total from
+      temptimesheetline key join temppayband where temptimesheetline.temptimesheetid = pTempTimesheetID order by
+      temptimesheetline.linenumber asc
+  else
+    select TempTimesheetLine.TempTimesheetLineID,
+      (if isnull(temppayband.payrollflag,'') = 'EXPENSES' or isnull(temppayband.isexpenses,0) = 1 then 1 else 0 endif) as IsExpenses,
+      temppayband.description,
+      (if IsExpenses = 1 then temptimesheetline.description else temppayband.unit endif),
+      nullif(temptimesheetline.unitspaid,0.0) as units,nullif(temptimesheetline.payrate,0.0) as rate,isnull(units*rate,0.0) as total from
+      temptimesheetline key join temppayband where temptimesheetline.temptimesheetid = pTempTimesheetID order by
+      temptimesheetline.linenumber asc
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetTimesheetRates to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetTimesheets]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetTimesheets(in pWebUserID char(20),in pSlice integer default 0)
+result(temptimesheetid char(20),serialnumber char(20),tempname char(60),position char(60),companyname char(60),weekenddate date,timesheettype char(1),timesheettotal double)
+begin
+  declare userClass char(20);
+  declare x integer;
+  declare y integer;
+  set x=20;
+  set y=x*pSlice+1;
+  set userClass=(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID);
+  if userClass = 'CANDIDATE' then
+    select top x start at y t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+      if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+        exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+          (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+          isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+      endif as timesheettype,
+      (select sum(unitspaid*payrate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+      temptimesheet as t key join placement key join vacancy key join employment key join company,
+      temptimesheet as t key join tempdesk,
+      temptimesheet as t key join person key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid order by
+      t.serialnumber desc
+  else if userClass = 'AGENCY' then
+      select top x start at y t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+        if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+          exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+            (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+            isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+        endif as timesheettype,
+        (select sum(unitspaid*payrate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+        temptimesheet as t key join placement key join vacancy key join employment key join company,
+        temptimesheet as t key join tempdesk,
+        temptimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+        iqxnetuserlink.iqxnetuserid = pwebuserid and weekenddate >= IQXNetCompanyStartDate(agcomp.companyid) order by
+        t.serialnumber desc
+    else -- CLIENT
+      select top x start at y t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+        if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+          exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+            (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+            isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+        endif as timesheettype,
+        (select sum(unitscharged*chargerate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+        temptimesheet as t key join placement key join vacancy key join employment key join company key join employment as allemps key join iqxnetuserlink,
+        temptimesheet as t key join tempdesk,
+        temptimesheet as t key join person where
+        iqxnetuserlink.iqxnetuserid = pwebuserid and weekenddate >= IQXNetCompanyStartDate(company.companyid) order by
+        t.serialnumber desc
+    end if
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetTimesheets to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetTimesheetsAll]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetTimesheetsAll(in pWebUserID char(20))
+result(temptimesheetid char(20),serialnumber char(20),tempname char(60),position char(60),companyname char(60),weekenddate date,timesheettype char(1),timesheettotal double)
+begin
+  declare userClass char(20);
+  set userClass=(select first iqxnetuserclassid from iqxnetuser where iqxnetuserid = pWebUserID);
+  if userClass = 'CANDIDATE' then
+    select t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+      if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+        exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+          (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+          isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+      endif as timesheettype,
+      (select sum(unitspaid*payrate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+      temptimesheet as t key join placement key join vacancy key join employment key join company,
+      temptimesheet as t key join tempdesk,
+      temptimesheet as t key join person key join iqxnetuserlink where
+      iqxnetuserlink.iqxnetuserid = pwebuserid order by
+      t.serialnumber desc
+  else if userClass = 'AGENCY' then
+      select t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+        if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+          exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+            (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+            isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+        endif as timesheettype,
+        (select sum(unitspaid*payrate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+        temptimesheet as t key join placement key join vacancy key join employment key join company,
+        temptimesheet as t key join tempdesk,
+        temptimesheet as t key join person key join pay_employee key join company as agcomp key join employment as agemp key join iqxnetuserlink where
+        iqxnetuserlink.iqxnetuserid = pwebuserid and weekenddate >= IQXNetCompanyStartDate(agcomp.companyid) order by
+        t.serialnumber desc
+    else -- CLIENT
+      select t.temptimesheetid,t.serialnumber,string(person.surname,', ',person.forenames) as tempname,vacancy.position,company.name as companyname,weekmonthenddate(t.period,t.periodlength) as weekenddate,
+        if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W' and
+          exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null and
+            (isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1 or
+            isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T' else 'C' endif
+        endif as timesheettype,
+        (select sum(unitscharged*chargerate) from temptimesheetline where temptimesheetid = t.temptimesheetid) as timesheettotal from
+        temptimesheet as t key join placement key join vacancy key join employment key join company key join employment as allemps key join iqxnetuserlink,
+        temptimesheet as t key join tempdesk,
+        temptimesheet as t key join person where
+        iqxnetuserlink.iqxnetuserid = pwebuserid and weekenddate >= IQXNetCompanyStartDate(company.companyid) order by
+        t.serialnumber desc
+    end if
+  end if
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetTimesheetsAll to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetTimesheetShifts]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetTimesheetShifts(in pWebUserID char(20),in pTempTimesheetID char(20))
+result(tempshiftid char(20),shiftdate date,timefrom time,timeto time,breakminutes smallint,description char(50),weekenddate date)
+begin
+  select s.tempshiftid,s.shiftdate,s.timefrom,s.timeto,s.breakminutes,
+    p.description,weekmonthenddate(t.period,t.periodlength) as weekenddate from
+    tempshift as s key join temptimesheet as t,
+    tempshift as s key left outer join tempshiftplan as p,
+    temptimesheet as t key join person where
+    t.temptimesheetid = pTempTimesheetID and
+    s.shiftdate between weekenddate-6 and weekenddate order by
+    s.shiftdate asc,s.timefrom asc
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetTimesheetShifts to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetTimesheetTimes]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetTimesheetTimes(in pWebUserID char(20),in pTempTimesheetID char(20))
+result(placementid char(20),weekstartdate date,shiftdate date,dayticked smallint,tickednormalhours double,hours double,timefrom time)
+begin
+  select p.placementid,
+    weekmonthenddate(t.period,t.periodlength)-6 as weekstartdate,
+    "date"(dateadd(day,r.row_num-1,weekstartdate)) as shiftdate,
+    (case dow(shiftdate)-1 when 0 then p.worksunday when 1 then p.workmonday when 2 then p.worktuesday when 3 then p.workwednesday
+    when 4 then p.workthursday when 5 then p.workfriday when 6 then p.worksaturday
+    end) as dayticked,(if isnull(dayticked,0) = 1 then p.worknormalhours else null endif) as tickednormalhours,
+    (if isnull(v.workcancelled,0) = 0 then isnull(v.workhours,tickednormalhours) else null endif) as hours,
+    isnull(v.workstarttime,p.workstarttime) as timefrom from(
+    placement as p left outer join placementdayvariation as v on
+    p.placementid = v.placementid and v.variationdate = shiftdate),
+    placement as p join dbo.rowgenerator as r on r.row_num between 1 and 7,
+    placement as p key join temptimesheet as t,
+    placement as p key join employment as e where
+    t.temptimesheetid = pTempTimesheetID and
+    shiftdate between isnull(e.startdate,shiftdate) and isnull(e.leavedate,shiftdate)
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetTimesheetTimes to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetUploadTypes]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetUploadTypes(in pWebUserID char(20),in pOwnerType char(1))
+result(UploadTypes char(900))
+begin
+  declare rv char(900);
+  if pOwnerType = 'P' then
+    set rv='primary_cv]~[CV]~[primary_photo]~[Photo]~['
+  else
+    set rv=''
+  end if;
+  set rv=rv+isnull((select list(string(DocumentTypeID,']~[',Description),']~[' order by SortOrder asc,Description asc) from DocumentType where isnull(Class,pownertype) = pownertype and CanLoadFromWeb = 1),'');
+  select rv
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetUploadTypes to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetVacancyCancel]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetVacancyCancel(in pWebUserID char(20),in pvacancyid char(20),in pshiftplanid char(20))
+result(pResult char(250))
+begin
+  if not pvacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'AUTHORISEJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  if trim(isnull(pshiftplanid,'')) = '' then
+    update vacancy set status = 'X' where status = ']' and vacancyid = pvacancyid
+  else
+    update tempshift set cancelreason = 'C' where tempshiftplanid = pshiftplanid and vacancyid = pvacancyid and state = 'C' and cancelreason = '~'
+  end if;
+  if @@rowcount = 0 then
+    select '1:~Cancellation failed';
+    return
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetVacancyCancel to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetVacancyConfirm]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetVacancyConfirm(in pWebUserID char(20),in pvacancyid char(20),in pshiftplanid char(20))
+result(pResult char(250))
+begin
+  declare spopup char(100);
+  if not pvacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'AUTHORISEJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set pshiftplanid=nullif(trim(pshiftplanid),'');
+  if pshiftplanid is null then
+    update vacancy set status = 'C' where status = ']' and vacancyid = pvacancyid;
+    update vacancy key join employment join params on params.secondarycascade = 1 set
+      vacancy.CascadeDateTime = GetCascadeTime(employment.CompanyID,vacancy.VacancyID,current timestamp,vacancy.startdate,current timestamp,0) where
+      vacancy.vacancyid = pvacancyid
+  else
+    delete from tempshift where tempshiftplanid = pshiftplanid and vacancyid = pvacancyid and state = 'C' and cancelreason = '~';
+    update TempShiftPlan as p key join vacancy key join employment join params on params.secondarycascade = 1 set
+      p.CascadeDateTime = GetCascadeTime(employment.CompanyID,vacancy.VacancyID,current timestamp,p.ShiftDate+p.TimeFrom,current timestamp,0) where
+      p.TempShiftPlanID = pshiftplanid
+  end if;
+  if @@rowcount = 0 then
+    select '1:~Confirmation failed';
+    return
+  end if;
+  if pshiftplanid is not null then
+    set spopup='New shift requirement confirmed '+dateformat((select first shiftdate from tempshiftplan where tempshiftplanid = pshiftplanid),'Ddd dd/mm/yyyy')
+  else
+    set spopup='New vacancy requirement confirmed'
+  end if;
+  call IQXNetPopup(pWebUserID,null,null,pvacancyid,null,null,null,spopup,null);
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetVacancyConfirm to IQXNet]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[drop procedure pears.NetVacancyFill]]>
+  </SQLExec>
+  <SQLExec parameters="NO">
+<![CDATA[create procedure pears.NetVacancyFill(in pWebUserID char(20),in pvacancyid char(20),in pshiftplanid char(20),in ppersonid char(20))
+result(pResult char(250))
+begin
+  declare sid char(20);
+  declare swebusername char(50);
+  declare availability char(20);
+  declare spopup char(100);
+  if not pvacancyid = any(select v.vacancyid from vacancy as v key join employment as e where
+      e.CompanyID = any(select companyid from employment key join iqxnetuserlink where iqxnetuserid = pWebUserID)) then
+    select '99:~Permission denied';
+    return
+  end if;
+  if IQXNetHasPermission(pWebUserID,'FILLJOBS') = 0 then
+    select '99:~Permission denied';
+    return
+  end if;
+  set sid=uniquekey(ppersonid);
+  set swebusername=(select name from iqxnetuser where iqxnetuserid = pwebuserid);
+  if trim(isnull(pshiftplanid,'')) = '' then
+    insert into employment( temp,employmentid,personid,companyid,startdate,leavedate,position,department) 
+      select v.temp,sid,ppersonid,e.companyid,v.startdate,v.finishdate,v.position,v.clientdepartment from
+        vacancy as v key join employment as e where v.vacancyid = pvacancyid;
+    insert into placement( placementid,placedate,employmentid,vacancyid,departmentid,staffid,temp,daysperweek,salary,
+      TheirRef,ContractRef,Currency,WorkMonday,WorkTuesday,WorkWednesday,WorkThursday,WorkFriday,WorkSaturday,WorkSunday,
+      WorkNormalHours,WorkStartTime) 
+      select sid,current date,sid,pvacancyid,v.departmentid,userstaffid,v.temp,5,v.salary,v.theirref,v.contractref,v.currency,
+        v.WorkMonday,v.WorkTuesday,v.WorkWednesday,v.WorkThursday,v.WorkFriday,v.WorkSaturday,v.WorkSunday,
+        v.WorkNormalHours,v.WorkStartTime from
+        vacancy as v where v.vacancyid = pvacancyid;
+    call IQXNetPopup(pWebUserID,null,null,pvacancyid,sid,null,null,'Client made placement',null);
+    call IQXNetRequestAction(pWebUserID,'ClientFill','L',sid)
+  else
+    set availability=isnull((select personavailableforplan(ppersonid,p.ShiftDate,p.TimeFrom,p.TimeTo,p.RecoveryHours,0,0,null,null,null,null,null) from
+        tempshiftplan as p where p.tempshiftplanid = pshiftplanid),'');
+    if not(trim(availability) = '' or availability like '[AM]%') then
+      select '1:~Candidate not available';
+      return
+    end if;
+    insert into tempshift( TempShiftID,VacancyID,PersonID,ShiftDate,TimeFrom,TimeTo,State,TempShiftPlanID,
+      BreakMinutes,EssentialSkillGradeID,ReferenceCode,ClientConfirmed,TempConfirmed,StaffID,
+      ConfirmedWith,TempShiftTypeID,AnalysisCode,RecoveryHours) 
+      select sid,pVacancyID,pPersonID,p.ShiftDate,p.TimeFrom,p.TimeTo,'P',pShiftPlanID,
+        p.BreakMinutes,p.EssentialSkillGradeID,p.ReferenceCode,1,0,userStaffID,
+        swebusername,p.TempShiftTypeID,p.AnalysisCode,p.RecoveryHours from
+        tempshiftplan as p where p.tempshiftplanid = pshiftplanid;
+    set spopup=(select dateformat(p.shiftdate,'Ddd dd/mm/yyyy')+' '+dateformat(p.timefrom,'hh:nn')+' with '+person.name from tempshiftplan as p,person where
+        p.tempshiftplanid = pshiftplanid and person.personid = ppersonid);
+    call IQXNetPopup(pWebUserID,null,null,pvacancyid,null,null,null,'Client filled shift',spopup);
+    call IQXNetRequestAction(pWebUserID,'ClientFill','SHIFT',sid)
+  end if;
+  select '0:~Success'
+end]]>
+  </SQLExec>
+  <SQLExec ignoreerror="YES">
+<![CDATA[grant execute on pears.NetVacancyFill to IQXNet]]>
+  </SQLExec>
+ </IfYesDialog>
+</Job>

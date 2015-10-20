@@ -1,0 +1,293 @@
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+
+        <title>[var.x_title] Timesheet Entry</title>
+		[onload;file=HeaderIncludes.html]
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	$('#WeekStartDate').datepicker({dateFormat: 'D dd/mm/yy',firstDay:'[var.x_global.general.DatePickerStartday]'});
+	TimesheetComboChanged('Combo_0','0');	// seed values into first combo
+	});
+	
+function TimesheetOpenSearch(){
+	// ## open 'candidate select popup' using search criteria to give empty recordset
+	
+	IQXChain('#OwnerTimesheetTempPopupDiv', {action: 'load',page: 'OwnerTimesheetEmployeeSubScreen&SearchValue=NoResultSet'});
+	$('#OwnerTimesheetTempPopupDiv').dialog('open').css('display','inline');
+	}
+
+function TimesheetComboChanged(ComboID,ComboValue){
+	// ## populate next combo box
+	
+	var ComboType=ComboValue.substring(0,2);
+	if(ComboType=='CO'){ComboValue='CX'+ComboValue.substring(2);}	// intercept company, and gather all vacancies for all employees
+	if (ComboType != 'PA') {	// pay band is end of chain so no need to fetch next data set
+		var CurrentCombo =  (parseFloat(ComboID.substring(6)));
+		var NextCombo=CurrentCombo+1;
+		if(CurrentCombo==3){NextCombo=5};	// skip over candidate
+		$.get('IQXRawData.php?page=NetOwnerTimesheetListsOuter?ListType=' + ComboValue + '&render=text_plain', function(data){
+			var ResultString = data;		// below: lose xml headers and add option tags
+			var StartPoint = ResultString.indexOf('![CDATA[');
+			var Endpoint = ResultString.indexOf(']]><');
+			ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+			if(ResultString.substring(24,25)=='**'){ResultString = ResultString.substring(45)};	// lose "**New Account" tag
+			ResultString = "<option value=''></option>" + ResultString + "</option>";
+			$('#Combo_' + (NextCombo)).html(ResultString);
+		});  
+		$('#Input_'+(CurrentCombo)).val(ComboValue.substring(3));
+		
+		TimesheetClearSuccessiveFields(CurrentCombo);	// clear next fields in chain
+	}
+}
+
+function TimesheetClearSuccessiveFields(FieldNumber){
+	// ## clears subsequent combos and textboxes. higher numbers clear more, lower numbers clear less
+	
+	var EditCombo = 6-FieldNumber;	
+	if (EditCombo >= 5) { // Site
+		$('#Input_2').val('');
+		$('#Combo_2').val('');
+		}
+	if (EditCombo >= 4) { // Vacancy
+		$('#Input_3').val('');
+		$('#Combo_3').val('');
+		}
+	if (EditCombo >= 3) { // Candidate
+		// leave set to allow multiple sheets for same person
+		}
+	if (EditCombo >= 2) { // Pay Band
+		$('#Input_5').val('');
+		$('#Combo_5').val('');
+		}
+	if (EditCombo == 1) {$('#InputUnits').focus();}	// Move focus to InputUnits on Pay Band only
+	$('#InputUnits').val('');	// Units
+}
+
+function TimesheetAddRow(){
+	// ## Create new row for child timesheet by copying master row
+	
+	if(!TimesheetMasterCheck()){return;}	// check form and abort if error
+	var RowNo=parseFloat($('#RowCounter').val())+1;	// increment row counter
+	var RowSuffix="_"+RowNo;
+	var InputTag="<tr id='ChildRow"+RowNo+"' >";
+	InputTag+="<td width='15%' >"
+	InputTag+="<input id='Account"+RowSuffix+"' class='Medium Locked' disabled='disabled' value='"+$('#Combo_1 option:selected').text()+"' />";
+	InputTag+="<input id='pAccount"+RowSuffix+"' class='Medium hidden' value='"+$('#Input_1').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='15%' >";
+	InputTag+="<input id='Site"+RowSuffix+"' class='Medium Locked' disabled='disabled' value='"+$('#Combo_2 option:selected').text()+"' />";
+	InputTag+="<input id='pSite"+RowSuffix+"' class='Medium hidden' value='"+$('#Input_2').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='15%' >";
+	InputTag+="<input id='Vacancy"+RowSuffix+"' class='Medium Locked' disabled='disabled' value='"+$('#Combo_3 option:selected').text()+"' />";
+	InputTag+="<input id='pVacancy"+RowSuffix+"' class='Medium hidden' value='"+$('#Input_3').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='25%' >";
+	InputTag+="<input id='Candidate"+RowSuffix+"' class='Wide Locked' disabled='disabled' value='"+$('#InputCandidateName').val()+"' />";
+	InputTag+="<input id='pCandidate"+RowSuffix+"' class='Medium hidden' value='"+$('#InputCandidate').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='15%' >";
+	InputTag+="<input id='PayBand"+RowSuffix+"' class='Wide Locked' disabled='disabled' value='"+$('#Combo_5 option:selected').text()+"' />";
+	InputTag+="<input id='pPayBand"+RowSuffix+"' class='Medium hidden' value='"+$('#Input_5').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='10%' >";
+	InputTag+="<input id='Units"+RowSuffix+"' class='MedNarrow' onBlur='TimesheetCheckUnits(this.id)' value='"+$('#InputUnits').val()+"' />";
+	InputTag+="<input id='pUnits"+RowSuffix+"' class='Medium hidden' value='"+$('#InputUnits').val()+"' />";
+	InputTag+="</td>";
+	InputTag+="<td width='5%' >";
+	InputTag+="<button onClick='DeleteRow("+RowNo+")' >Cancel</button>"
+	InputTag+="</td>";
+	InputTag+="</tr>";
+	$('#OwnerTimesheetBuildListDiv').show();
+	$('#TimesheetBuildTable').html($('#TimesheetBuildTable').html()+InputTag);
+	$('#RowCounter').val(RowNo);	// save row counter
+	
+	$('#Combo_5').val('');			// clear master pay band and units
+	$('#Input_5').val('');
+	$('#InputUnits').val('');
+	$('#InputUnits').val('');
+	
+}
+
+function TimesheetMasterCheck(){
+	// ## Check Master form for missing values
+	
+	var ErrorString="";
+	
+	$('#ErrorMessage').html('');	// Check backwards so less significant messages are overwritten by more significant ones
+	ErrorString=TimesheetCheckUnits('InputUnits');
+	if(!ErrorString){ErrorString="";}	// if 'true' returned, then clear ErrorString back to empty, otherwise retain returned error message
+	if(!$('#Input_5').val()){ErrorString="Please select a Pay Band";}
+	if(!$('#InputCandidate').val()){ErrorString="Please select a Candidate";}
+	if(!$('#Input_3').val()){ErrorString="Please select a Vacancy";}
+	if(!$('#Input_2').val()){ErrorString="Please select a Site";}
+	if(!$('#Input_1').val()){ErrorString="Please select an Account";}
+	if(!$('#WeekStartDate').val()){ErrorString="Please select a 'Week Commencing' date";}
+	$('#ErrorMessage').html(ErrorString);
+	if(ErrorString==''){return true;}	// if no error message return ok, otherwise post error (below)
+	return false;
+}
+
+function TimesheetCheckUnits(UnitsBoxName){
+	// ## check validity of Units and post errormessage if required
+	
+	var IncomingUnits=$('#'+UnitsBoxName).val();
+	var ErrorString="";
+	var UnitsBoxTitle="";
+	if(UnitsBoxName=='InputUnits'){UnitsBoxTitle='Top row';}else{UnitsBoxTitle='row '+UnitsBoxName.substring(5);}
+	if(((IncomingUnits - 0) != IncomingUnits) || IncomingUnits.length == 0){ErrorString="Please check Units on "+UnitsBoxTitle;}
+	$('#ErrorMessage').html(ErrorString);
+	if(ErrorString==""){return false;}
+	return ErrorString;
+}
+
+function TimesheetSave(){
+	// ## set FormTimesheet and submit data
+	// ## on data return, split out success and timesheetID
+	// ## if success, call ProcessRow, otherwise post error and abort.
+	
+	var tab = String.fromCharCode(9);
+	var cr = String.fromCharCode(13);
+	var LoopCounter = 1;
+	var SubmitString = "";
+	for (LoopCounter = 1; LoopCounter <= $('#RowCounter').val(); LoopCounter++) {
+		if($('#pVacancy_' + LoopCounter).val()){SubmitString += $('#pVacancy_' + LoopCounter).val() + tab;}
+		if($('#pCandidate_' + LoopCounter).val()){SubmitString += $('#pCandidate_' + LoopCounter).val() + tab;}
+		if($('#pPayBand_' + LoopCounter).val()){SubmitString += $('#pPayBand_' + LoopCounter).val() + tab;}
+		if ($('#pUnits_' + LoopCounter).val()) {SubmitString += $('#pUnits_' + LoopCounter).val() + cr;}
+	}
+	
+	IQXChain('#ownertabs',{action:'load',page:'OwnerTimesheetReceivePost',
+		postdata:{pStartDate:$('#WeekStartDate').val(),pLineData:SubmitString}});
+		
+}
+
+function DeleteRow(RowNo){
+	// ## If RowNo==all then has come from ProcessRow, so just whip them all out. Otherwise from cancel button, so check delete
+	
+	if (RowNo == 'all') {
+		$('#TimesheetBuildTable').html('');
+	}else {
+		IQXUIDialog("Do you wish to delete row " + RowNo + "?", {title:'Confirm delete',xDlgType:'OkCancel'},function(){
+			$('#ChildRow' + RowNo).html('')}
+		);
+	}
+}
+		
+function calDateSelected(){ 
+	// ## default datePicker forward to next Sunday
+	
+	var dateText = $("#WeekStartDate").val();
+	if (dateText) {
+		var ddat = new Date(UKtoJSdate(dateText));
+		var day = 1000 * 60 * 60 * 24;
+		var dayIncrement;
+		var Suf;
+		while (ddat.getDay() != 1) {
+			ddat.setTime(ddat.getTime() - day);
+		}
+		 $("#WeekStartDate").val($.datepicker.formatDate('D dd/mm/yy', ddat));
+
+	}
+}
+
+function CloseTimesheetTab(){
+	// ## Check and close timesheet tab
+	
+	if ($('#RowCounter').val() > 0) {
+		IQXUIDialog('There appear to be unsubmitted rows. Are you sure you wish to close?', {title:'Confirm close',xDlgType:'OkCancel'},window.close());
+	}
+	else {
+		window.close();
+	}
+}
+
+</script>
+
+</head>
+	<body>
+		<div id="ownertabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all" >
+			<div class="usertext">[onload;file=txt_client_profile_top.html;noerr]</div>
+			<div id='OwnerTimesheetTempPopupDiv' class="ui-helper-hidden" ></div>
+			<div id="OwnerTimesheetSourceDiv" class="ui-tabs-panel ui-widget-content ui-corner-bottom" >
+				<center>
+					<fieldset class="wide ui-corner-all">
+						<div class="ButtonGroup" align="right"><button class="fixed" onClick="CloseTimesheetTab()" type="button" >Close</button></div>
+						<span class="DetailHeader" >Week commencing:&nbsp;&nbsp;</span><input id="WeekStartDate" class="medium longdate" onChange="calDateSelected()" />
+					</fieldset>
+					<fieldset class="wide ui-corner-all">
+						<table width="100%" >
+							<thead>
+								<tr>
+									<th class="DetailHeader" width="15%" >Account</th>
+									<th class="DetailHeader" width="15%" >Site</th>
+									<th class="DetailHeader" width="15%" >Vacancy</th>
+									<th class="DetailHeader" width="25%" >Candidate</th>
+									<th class="DetailHeader" width="15%" >Pay Band</th>
+									<th class="DetailHeader" width="10%" >Units</th>
+									<th class="DetailHeader" width="5%" ></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td width="15%" >	<!-- Account -->
+										<select id="Combo_1" class="Medium" onChange="TimesheetComboChanged(this.id,this.value)">
+										</select>
+										<input id="Input_1" class="MedNarrow hidden" />
+									</td>
+									<td width="15%" >	<!-- Site -->
+										<select id="Combo_2" class="Medium" onChange="TimesheetComboChanged(this.id,this.value)">
+										</select>
+										<input id="Input_2" class="MedNarrow hidden" />
+									</td>
+									<td width="15%" >	<!-- Vacancy -->
+										<select id="Combo_3" class="Medium" onChange="TimesheetComboChanged(this.id,this.value)">
+										</select>
+										<input id="Input_3" class="MedNarrow hidden" />
+									</td>
+									<td width="25%" >	<!-- Candidate  -->
+										<input id="InputCandidateName" class="Medium" onFocus="TimesheetOpenSearch()"/>
+										<button id="InputCandidateButton" type="button" onClick="TimesheetOpenSearch()" >...</button>
+										<input id="InputCandidate" class="Medium hidden" />
+									</td>
+									<td width="15%" >	<!-- Pay Band -->
+										<select id="Combo_5" class="Wide" onChange="TimesheetComboChanged(this.id,this.value)">
+										</select>
+										<input id="Input_5" class="MedNarrow hidden" />
+									</td>
+									<td width="10%" >	<!-- Units -->
+										<input id="InputUnits" class="MedNarrow" />
+									</td>
+									<td width="5%" >	<!-- button -->
+										<button type="button" onClick="TimesheetAddRow()" >&nbsp;&nbsp;Add&nbsp;&nbsp;</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+				</center>
+				<center>
+					<div id="ErrorMessage" class="errormessage"></div>
+				</center>
+				<div id="OwnerTimesheetBuildListDiv" style="display:none">
+					<center>
+						<fieldset class="wide ui-corner-all">
+							<table id="TimesheetBuildTable" >
+								<!-- empty space to build table in -->
+							</table>
+							<button type="button" onClick="TimesheetSave()" >Submit</button>
+						</fieldset>
+					</center>
+				</div>
+				<div id="receiver" ></div>
+				<div class="errormessage">[var.x_errormessage]</div>
+				<br>
+				<div class="usertext">[onload;file=txt_client_profile_bottom.html;noerr]</div>
+				<input id="RowCounter" class="MedNarrow hidden" value="0" />
+			</div>
+		</div>	
+	</body>
+</html>

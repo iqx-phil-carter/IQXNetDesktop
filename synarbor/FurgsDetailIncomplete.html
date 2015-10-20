@@ -1,0 +1,96 @@
+<!--[onload;tplvars;FurgSet='SynNetFurgsAllFiltered?pFromDate&pToDate&pSampleSize']-->
+
+<!-- 20120927 RC4 Node does not work in IE8 -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	IQXInitSection($("#divIFurgs"));
+		
+	$('#tblIFurgs').data('IQXdtDateFilter',{dateColumn:3});
+	var dtts=$('#tblIFurgs').dataTable({
+		"sPaginationType": "full_numbers",
+		"aaSorting": [ [0,'asc'], [1,'asc'], [2,'asc'],[3,'asc'] ],
+		"aoColumns": [{},{},{},{},{},{}]
+	});
+
+	if(dtts.fnGetData().length==0){
+		$('#divIFurgsDetail').html('<span class="EmptyTable">No data is available.</span>');
+		$('.FurgsInformationPanel').hide();
+		return;
+		}
+
+	$("#divIFurgs").data('dataTable',dtts);
+    $('.FurgsInformationPanel').show();
+	});
+	
+	
+function ShowTT(CellID){
+	// create ToolTip popup for long text
+	
+	var txt=$(CellID).children('span').html();
+	var x=$(CellID).position().left;
+	var y=$(CellID).position().top+40;
+	
+	$('#divPopup').css('top',y);
+	$('#divPopup').css('left',x);
+	$('#divPopup').show();
+	$('#divPopup').html(txt);
+}
+
+function ZoomComments(img,PlacementID){
+	// fetch furgs question details
+	
+	if($(img).parent().prev('td').html()=='0'){return;}
+	
+	var bOpen=img.src.match(/details_open/);
+	
+	$('.zoomeddiv').parent().parent().remove();
+	$('img.dataTableExpand').attr('src', 'css/images/details_open.png');
+	$('img.dataTableExpand').attr('title', 'Show Details');
+	
+	if (bOpen){
+		img.src = 'css/images/details_close.png';
+		img.title = 'Hide Details';
+		$(img.parentNode.parentNode).after('<tr><td colspan=9><div id="divZoomedDetail" class="zoomeddiv"></div></td></tr>');
+		IQXChain('#divZoomedDetail',{action:'load',page:'FurgsDetailComments&pPlacementID='+PlacementID});
+	}else{
+		$(img).attr('src', 'css/images/details_open.png');
+		$(img).attr('title', 'Show Details');
+	}
+}
+
+
+</script>
+
+<div id="divIFurgs">
+<table class="Xtablesorter" id="tblIFurgs">
+	<thead>
+		<tr>
+		<th>Candidate</th>
+		<th>Client</th>
+		<th>Vacancy</th>
+		<th>Placement Date</th>
+		<th>Average</th>
+		<th>Timesheet Count</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[FurgSet.PlacementID;block=tr]">
+	    <td>[FurgSet.CandName]</td>
+		<td>[FurgSet.CompanyName]</td>
+		<td>[FurgSet.Position]</td>
+		<td>[FurgSet.Placedate;noerr]</td>
+	    <td>[FurgSet.Average;noerr]</td>
+		<td class="rightalign">[FurgSet.TimesheetCount;noerr]</td>
+		<th><img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="ZoomComments(this,'[FurgSet.PlacementID;noerr]')" /></th>
+		</tr>
+	</tbody>
+</table>
+<span class="errormessage">[var.x_errormessage]</span>
+	
+</span>
+</div>
+

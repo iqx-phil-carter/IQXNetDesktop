@@ -1,0 +1,250 @@
+
+<?xml version="1.0"?>
+<Job autoclose="YES">
+  <SetVariable type="S" name="CRLF" sql="select string(char(10))"/>
+  <SetVariable type="S" name="TAB" sql="select string(char(9))"/>
+  <SetVariable type="S" name="SMTPHost" value="172.16.1.225"/>
+  <SetVariable type="S" name="SMTPUserID" value=""/>
+  <SetVariable type="S" name="SMTPPassword" value=""/>
+  <SetVariable type="S" name="SMTPSender" value="cascade@asarecruitment.co.uk"/>
+  <SetVariable type="S" name="MasterAgencyName" value="ASA Recruitment"/>
+  <SetVariable type="S" name="EmailFoot" value="Please do NOT respond to this request by email, please CALL US. No booking is valid until you receive confirmation from us.  All bookings are subject to our terms and conditions."/>
+  <!--Notify Agencies of ModifiedUnfilledShifts-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'ModifiedUnfilled' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF, 'Client Note: ', TempShiftPlan.ClientNote,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company  					WHERE CascadedShift.ReNotifyState = 'ModifiedUnfilled' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="MODIFIED Unfilled Booking(s) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>MODIFIED Unfilled Booking(s) for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>The following unfilled booking(s) have been modified since they were last cascaded to you:</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'ModifiedUnfilled'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of CancelUnfilled and BookedElsewhere-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState in ('CancelUnfilled','BookedElsewhere') and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company  					WHERE CascadedShift.ReNotifyState in ('CancelUnfilled','BookedElsewhere') and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="CANCELLED Booking(s) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>CANCELLED Booking(s) for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>We no longer require your assistance to fill the following booking(s):</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState in ('CancelUnfilled','BookedElsewhere')</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of Unfilled-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'Unfilled' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company  					WHERE CascadedShift.ReNotifyState = 'Unfilled' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="Unfilled Booking(s) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>Unfilled Booking(s) for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>The following booking(s), which you were PREVIOUSLY NOTIFIED as NO LONGER REQUIRED, are now available for filling again:</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'Unfilled'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of FilledByThisAgency-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'FilledByThisAgency' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('Worker: ',person.name,:CRLF,'{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company left outer join TempShift on (TempShiftPlan.TempShiftPlanID=TempShift.TempShiftPlanID and TempShift.State in ('B','W','P')) key join person inner join pay_employee on (person.personid=pay_employee.personid and pay_employee.SecondaryAgencyID = :AgencyID)  					WHERE CascadedShift.ReNotifyState = 'FilledByThisAgency' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="FILLED Booking(s) Confirmation from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>FILLED Booking(s) Confirmation for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>You have FILLED the following booking(s):</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'FilledByThisAgency'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of ModifiedAfterFilled-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'ModifiedAfterFilled' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('Worker: ',person.name,:CRLF,'{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company left outer join TempShift on (TempShiftPlan.TempShiftPlanID=TempShift.TempShiftPlanID and TempShift.State in ('B','W','P')) key join person inner join pay_employee on (person.personid=pay_employee.personid and pay_employee.SecondaryAgencyID = :AgencyID)  					WHERE CascadedShift.ReNotifyState = 'ModifiedAfterFilled' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="Filled Booking(s) MODIFICATIONS from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>Filled Booking(s) MODIFICATIONS for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>There have been MODIFICATIONS to the following filled booking(s):</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'ModifiedAfterFilled'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of CancelledAfterFilled-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'CancelledAfterFilled' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('Worker: ',person.name,:CRLF,'{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company left outer join TempShift on (TempShiftPlan.TempShiftPlanID=TempShift.TempShiftPlanID and TempShift.State = 'C') key join person inner join pay_employee on (person.personid=pay_employee.personid and pay_employee.SecondaryAgencyID = :AgencyID)  					WHERE CascadedShift.ReNotifyState = 'CancelledAfterFilled' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="CANCELLED Filled Booking(s) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>CANCELLED Filled Booking(s) for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>The following filled booking(s), have been CANCELLED:</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'CancelledAfterFilled'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+  <!--Notify Agencies of UnfilledAfterFilled-->
+  <BeginTransaction/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+                SELECT distinct Company.Name as AgencyName,  isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address, CascadedShift.SecondaryAgencyID as AgencyID
+				FROM CascadedShift key join Company key left outer join CascadeDeliveryAddress
+		                inner join TempShiftPlan on (CascadedShift.TempShiftPlanID=TempShiftPlan.TempShiftPlanID)
+                		inner join Vacancy on (TempShiftPlan.VacancyID=Vacancy.VacancyID )
+				WHERE CascadedShift.ReNotifyState = 'UnfilledAfterFilled' and DeliveryMethod = 'E';
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SetVariable name="ShiftDetails" sql="select first list(string('Previously filled with: ',person.name,:CRLF,'{MasterAgencyName} Order Number: ',TempShiftPlan.ShiftSerialNumber,:CRLF,'Client: ',Company.Name,:CRLF,'Job Title: ',Vacancy.Position,:CRLF,'Date: ',dateformat(TempShiftPlan.ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(TempShiftPlan.TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(TempShiftPlan.TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(TempShiftPlan.Description, if locate(TempShiftPlan.Description, ',') > 0 then locate(TempShiftPlan.Description, ',')-1 else length(TempShiftPlan.Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(TempShiftPlan.EssentialSkill, TempShiftPlan.EssentialSkillChoiceList, vacancy.departmentid),:CRLF,'Band: ', TempShiftPlan.EssentialSkillGradeID,:CRLF),:CRLF)  					FROM TempShiftPlan key join CascadedShift,  					 TempShiftPlan key join Vacancy key join Employment key join Company left outer join TempShift on (TempShiftPlan.TempShiftPlanID=TempShift.TempShiftPlanID and TempShift.State ='C') key join person inner join pay_employee on (person.personid=pay_employee.personid and pay_employee.SecondaryAgencyID = :AgencyID)  					WHERE CascadedShift.ReNotifyState = 'UnfilledAfterFilled' and CascadedShift.SecondaryAgencyID = :AgencyID"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="Unfilled Booking(s) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>Unfilled Booking(s) for {AgencyName}</Writeln>
+              <Writeln/>
+              <Writeln>The following booking(s), which you PREVIOUSLY FILLED, are again available for filling:</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <SQLExec>update CascadedShift set ReNotifyState='Notified' where CascadedShift.SecondaryAgencyID = :AgencyID and ReNotifyState = 'UnfilledAfterFilled'</SQLExec>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+</Job>

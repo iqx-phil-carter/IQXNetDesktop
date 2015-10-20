@@ -1,0 +1,6 @@
+<!--
+	category: XML
+	name: Wrap in CDATA
+	toolTip: Wrap in CDATA
+-->
+<![CDATA[${selection}]]>

@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+
+        <title>[var.x_title]</title>
+		
+		<link rel="stylesheet" href="css/ui.tabs.css" type="text/css" />
+		<link rel="stylesheet" href="css/ui.datepicker.css" type="text/css" />
+		<link rel="stylesheet" href="css/jquerySelect.css" type="text/css" />
+		<link rel="stylesheet" href="css/dataTables.css" type="text/css" />
+		<link rel="stylesheet" href="css/main.css" type="text/css" />
+		
+		<!--[if IE]><script language="javascript" type="text/javascript" src="lib/jquery/excanvas.min.js"></script><![endif]-->
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.ui.custom.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.tablesorter.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.form.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.validate.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.pstrength.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquerySelect.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.dataTables.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/IQXInc.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.iqxplugins.js" ></script>
+		<script language="javascript" type="text/javascript" src="lib/jquery/jquery.flot.js"></script>
+	    <!--[var.x_headcontent;htmlconv=no;comm]-->
+    </head>
+
+    <body>
+        <div id="divheading">
+            <h1>[var.x_title]</h1>
+			<h2>[var.x_subtitle]</h2>
+			<h3>[var.x_usertitle]</h3>
+        </div>
+
+        <div id="divcontent">
+            [onload;file=[var.x_divcontentfilename]]
+        </div>
+		<p class="errormessage">[var.x_errormessage]</p>
+    </body>
+</html>
+

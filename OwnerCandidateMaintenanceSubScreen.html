@@ -1,0 +1,34 @@
+<!--[onload;tplvars;EmployeeDesc='NetOwnerCandidateSearch?SearchValue']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	// ## nothing required	
+});
+
+// ## Button calls on 'OwnerCandidateMaintenance.html'
+	
+</script>
+
+<center>
+<div id="OwnerCandMaintSeatchResults">
+	<table id="OwnerTimesheetTable" class="tablesorter ui-corner-all" >
+			<thead>
+				<tr>
+					<th class="qquestion ui-widget-header" >Name</th>
+					<th class="qquestion ui-widget-header" >Address</th>
+					<th class="qquestion ui-widget-header" ></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr id="[EmployeeDesc.PersonID;block=tr]">
+					<td>[EmployeeDesc.Name]</td>
+					<td>[EmployeeDesc.Address]</td>
+					<td>
+						<button onClick="CandMaintEditButtonClick('Profile','[EmployeeDesc.PersonID]')" >Details</button >
+						<button onClick="CandMaintEditButtonClick('Bank','[EmployeeDesc.PersonID]')" >Bank details</button >
+					</td>
+				</tr>
+			</tbody>
+		</table>
+</div>
+</center>

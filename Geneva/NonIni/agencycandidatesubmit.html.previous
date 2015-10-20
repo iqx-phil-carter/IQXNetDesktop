@@ -1,0 +1,38 @@
+<!--[onload;tplvars;cands='GenevaNetAgencyCandidates?pVacancyID&pRowID']-->
+
+<!-- 20120820 lock submit or document button -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divagcand"));
+	$('#divUpload').hide();
+	});
+
+</script>
+
+<div id="divagcand" >
+
+<table class="tablesorter" id="tblagcand">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Reference Code</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[cands.CandidateName;block=tr;noerr]</td>
+	    <td>[cands.CandidateReference;noerr]</td>
+		<td class="buttoncolumn">
+			<button type="button" class="tablebutton nonformbutton" [onshow;if [cands.AlreadySubmitted;noerr]==1;then 'disabled="disabled"'; else ''] onclick="submitcandidate('[cands.PersonID]')">Submit</button>
+			<button type="button" class="tablebutton nonformbutton FixedA" [onshow;if [cands.AlreadySubmitted;noerr]==0;then 'disabled="disabled"'; else ''] onclick="UploadCandidateDocument(this.parentNode.parentNode,'[cands.ProgressID]','[cands.CandidateName;noerr]',this)">Documents</button>
+			<button type="button" class="tablebutton nonformbutton FixedB" [onshow;if [cands.AlreadySubmitted;noerr]==0;then 'disabled="disabled"'; else ''] onclick="ShowProgressHistory(this.parentNode.parentNode,'[cands.ProgressID]',this)">History</button>
+		</td>
+		</tr>
+		
+	</tbody>
+</table>
+
+<button type="button" class="fixed nonformbutton" onclick="abandonsubmitcandidate()" >Abandon</button>
+</div>

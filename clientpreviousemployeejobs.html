@@ -1,0 +1,92 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';empjobs='NetClientPreviousEmployeeJobs?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid';candDeptquest='F_questions_table?showblock=$x_local.Switches.ShowDeptQuestionnaire&pTaglocation=$x_local.Switches.ShowDeptQuestionnaire&pid']-->
+
+<!-- 20130114 modify to include Health Questionnaire and obscure value with Completed -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	//Show Client Candidate documents
+	IQXInitSection($("#divcliprevtempjobs_[var.x_params.pPersonID]"));
+	IQXInitSection($("#divcliprevtempdetails_[var.x_params.pPersonID]"));
+	
+	$(".questionnaire","#divcliprevtempjobs_[var.x_params.pPersonID]").questionnaire({disabled:true});
+	if('[var.x_local.Switches.ClientCandidateDocuments;noerr]'=='1'){
+		IQXChain('#ClientDocDetails', {
+			action: 'load',
+			page: 'clientcandidatedocuments&pPersonID=' + encodeURIComponent('[var.x_params.pPersonID]')
+		});
+	}
+		
+	// hide questionnaire values
+	if('[var.x_local.Switches.ObfuscateQuestValues;noerr]'=='1'){
+		$('#divDeptQuest :input').each(function(){
+			if ($(this).val() !=''){$(this).val('Completed');}
+		});
+	}
+	
+	// link image
+	if('[var.x_local.Switches.ShowPhoto;noerr]'=='1'){
+		if ($("table","#divhiddendetails_[var.x_params.pPersonID]").attr('border')=='1'){   // Will be set if candidate has an image
+			$('#pimage_[var.x_params.pPersonID]').attr('src','IQXRawData.php?page=S_FileDownload&binary=1&type=PRIMARY_PHOTO&personid=[var.x_params.pPersonID]');
+		} else {   // Hide broken link
+			$("#pimage_[var.x_params.pPersonID]").hide();
+		}
+	}
+});
+
+</script>
+
+<div id="divcliprevtempjobs_[var.x_params.pPersonID]">
+	<table class="tablesorter">
+		<thead>
+			<tr>
+				<th>Position</th>
+				<th>Start Date</th>
+				<th>Finish Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+	    	<td>[empjobs.Position;block=tr;noerr]</td>
+	    	<td>[empjobs.StartDate;noerr]</td>
+	    	<td>[empjobs.FinishDate;noerr]</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div>[onload_showblock1;block=div;when [var.x_local.Switches.ShowPubQuestionnaire;noerr]=1]
+		[candpubquest;block=div]
+	</div>
+	
+	<br />
+
+	<div id="divDeptQuest">[onload_showblock2;block=div;when [var.x_local.Switches.ShowDeptQuestionnaire;noerr]=1]
+		<div>[candDeptquest;block=div]</div>
+	</div>
+	
+	<div id="divcliprevtempdetails_[var.x_params.pPersonID]">
+		
+		<div>[onload_showblock3;block=div;when [var.x_local.Switches.ShowCandQuestionnaire;noerr]=1]
+			[candpubquest;block=div]
+		</div> 
+
+		<div id="ClientDocDetails">[onload_showblock4;block=div;when [var.x_local.Switches.ClientCandidateDocuments;noerr]=1]
+		</div>
+		
+		<div id="divhiddendetails_[var.x_params.pPersonID]"  >[onload_showblock5;block=div;when [var.x_local.Switches.ShowDateOfBirth;noerr] =1] 
+			<table title="[cand.Name;block=table;noerr]" border="[cand.hasPhoto;noerr]">
+				<tbody>
+					<tr class="qquestrow">
+	   					<td class="qquestion ui-widget-header">Date of Birth</td>
+	   					<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.DOB;noerr]" /></td>
+					</tr>	
+	   			</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<p  align="center">[onload_showphoto;block=p;when [var.x_local.Switches.ShowPhoto;noerr]=1]
+	<img id="pimage_[var.x_params.pPersonID]"  src="" alt="" height="200px" />
+</p>
+
+	

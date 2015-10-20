@@ -1,0 +1,52 @@
+#divheading {
+	background-color: #8a9d20;
+	background-image: url(images/sitelogo.png);
+}
+
+#divheadingSmall {
+	background-color: #8a9d20;
+}
+
+#divheading h1 {
+	color:white;
+}
+
+#divheadingSmallSpanLeft {
+	color:white;
+}
+
+.logoutlink {
+	color:green;
+}
+
+div.LoadPage .multiSelect {
+	width: 50px;
+}
+
+table.display{
+    border-collapse:collapse;
+    border:none;
+}
+
+table dataTableDetails{
+    border-collapse:collapse;
+    border:none;
+}
+
+table.display td{
+    padding: 3px 0px 0px 0px;
+}
+
+table.display tfoot th {
+	padding: 3px 0px 0px 0px;  /* MHS change for proper total alignment */
+	border-top: 1px solid black;
+	font-weight: bold;
+}
+
+table.display thead th {
+	padding: 3px 18px 3px 0px;
+	border-bottom: 1px solid black;
+	font-weight: bold;
+	cursor: pointer;
+	* cursor: hand;
+}

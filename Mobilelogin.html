@@ -1,0 +1,143 @@
+<!--[onload;tplvars;]-->
+
+<!-- 20140424 Modify for Mobile -->
+
+<script language="javascript" type="text/javascript" src="lib/jquery/jquery.mobile-1.4.2.css" ></script> 
+<link rel="stylesheet" href="css/jquery.mobile-1.4.2.css" type="text/css" />
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection("#frmlogin");
+	IQXEnableForm("#frmlogin",{successhandler:IQXRefreshBrowser});
+	$('#labForgotten').show();	// starts off hidden so does not show if javascript is disabled
+		
+	$('#frmlogin').on('submit',false);
+	
+});
+ 
+function SubmitForm(){
+  	// send login request
+   	  	
+   	$('#frmlogin').attr('action','IQXLogin.php'); 
+	$('#frmlogin').ajaxSubmit({
+		success: function (data, textStatus){
+			if(data=='Invalid user name or password'){
+				if($('#parForgotten').html()!=null){
+					CheckCount();
+					return;
+				}else{
+					$('.localerrormessage').html(data);
+					throw new error('stop');
+					return;
+				}
+			}
+			if(data=='Ok'){
+				window.location.reload(true);
+				return;
+			}
+			$('#respnse').html(data);
+		},
+		error: function (data,textStatus){
+			$('#respnse').html('The Login routine returned the following error: '+data);
+		},
+		dataType: "html"
+	});
+	
+}
+
+  	
+function SubmitForgottenPasswordRequest(){
+  	// submit forgotten password
+  	  		
+	$('#frmlogin').attr('action','IQXlogin.php?forgotten=true');
+	$('#frmlogin').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					$('#respnse').text('A request has been placed. Your new password will be emailed to you shortly.');	
+					$('#parForgotten').hide();
+					$('#divForgotten').hide();
+					DisableLogin(false);
+				}else{
+					$('#respnse').text(data);	
+				}
+			} else {
+				$('#respnse').text(data);
+			}
+		},
+		dataType: "html"
+	});
+}
+	
+ 
+
+function CatchEnter(e){
+	// interrogate keystrokes on password and if enter was pressed, submit the form
+	
+	var code = (e.keyCode ? e.keyCode : e.which);
+	if (code==13){SubmitForm();}
+}	
+		
+</script>
+
+<p>[var.x_BrowserClass;noerr]</p>
+
+<style>
+p {font-size:30px;}
+label {font-size:30px;}
+input {font-size:30px;}
+button {font-size:30px;}
+fieldset {font-size:30px;}
+</style>
+
+<form id="frmlogin" name="login" method="POST" accept-charset="utf-8" >
+    <fieldset>
+        <p>
+            <label for="login_uid" >
+                User ID
+            </label>
+            <input type="text" id="login_uid" name="login_uid" class="required" />
+        </p>
+        <p>
+            <label for="login_pwd" >
+                Password
+            </label>
+            <input type="password" id="login_pwd" name="login_pwd" class="required" onkeypress="CatchEnter(event)"/>
+        </p>
+        <p>
+            <button type="button"  id="login_submit"  onclick="SubmitForm()" >
+                Login
+            </button>
+			
+        </p> 
+        
+        <div>[onload_PW;block=div;when [var.x_local.Switches.ShowForgottenPasswordLink;noerr]=1]
+        	<p id='parForgotten' >
+				<label id="labForgotten" onClick="ShowForgotten('Password')" class="ForgottenPassword" >Forgotten password?</label>
+				<div id='divForgotten' style="display:none">
+					<label for="login_email"  >
+                		email address
+            		</label>
+            		<input type="text" id="login_email" name="login_email" />
+            		<input type="hidden" id="login_count" name="login_count" />				      
+					<button type="button" onclick="SubmitForgottenPasswordRequest()" >Reset password</button>
+				</div>
+			</p>
+        </div>
+    </fieldset>	
+</form>
+
+<p align="center">
+    <span id='respnse' class="errormessage" ></span>
+</p>
+
+<noscript>
+		<div style="overflow:auto">
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+				<div style="background-color:lightgray;float:left;overflow:auto;width:60%">
+					<p>Your browser does not support javascript, or javascript is disabled in your settings.</p>
+				</div>
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+		</div>	
+</noscript>

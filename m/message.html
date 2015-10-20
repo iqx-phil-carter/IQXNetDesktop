@@ -1,0 +1,84 @@
+<!--[onload;tplvars;CorH='';TSID='';TSNo='';ReturnPage='']-->
+
+<script type="text/javascript">
+	
+	$(document).ready(function() {
+		if('[var.x_params.CorH;noerr]'=='C'){$('#msg_provtsid').val('[var.x_params.TSID;noerr]');}
+		if('[var.x_params.CorH;noerr]'=='H'){$('#msg_tsid').val('[var.x_params.TSID;noerr]');}
+		$('#msg_type').val('TIMESHEET');
+		$('#msg_title').val('Query timesheet '+'[var.x_params.TSNo;noerr]');	
+	});
+	
+	function MQerrMsg(msg,frmdiv){
+		$('#msg_error',frmdiv).text(msg);
+	}
+	
+	function MQloadInd(htm,frmdiv){
+		$('#divLoadIndicator',frmdiv).html(htm);
+	}
+	
+	function MQfldEmpty(fldID,fldLab,frmdiv){
+		if($.trim($('#'+fldID,frmdiv).val())=='') {
+			MQerrMsg('Please enter '+fldLab,frmdiv);
+			return true;
+		}
+		return false;
+	}
+	
+	function MQpostQuery(){
+		
+		//if (MQfldEmpty('msg_title','Subject',frmdiv) || MQfldEmpty('msg_descrip','Details',frmdiv)) {
+		//	return;
+		//}
+		//MQerrMsg('',frmdiv);
+		
+		var dat=$('#frmmessage').serializeArray();
+		//MQloadInd(IQXLoadMessage('Sending'));
+		$.post('IQXPost.php?proc=netmessage',dat,function(data, textStatus){
+			if (data == 'Ok') {
+				LoadPage('[var.x_params.ReturnPage]');
+			} else {
+				//MQloadInd('',frmdiv);
+				//MQerrMsg(data,frmdiv);
+				$('errormessage').html(data);
+			}
+		},'text');
+	}
+	
+	function LoadPage(NewPage){
+	jQuery.mobile.changePage('iqxnet.php?P='+NewPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+
+</script>
+
+
+	<form id="frmmessage" name="message" class="Message" action="IQXPost.php?proc=netmessage" method="POST" accept-charset="ISO-8859-1">
+        <input type="hidden" id="msg_type" name="ptype" value="" />
+        <input type="hidden" id="msg_vacancyid" name="pvacancyid" value="[var.x_params.pVacancyID;noerr]" />
+        <input type="hidden" id="msg_placementid" name="pplacementid" value="[var.x_params.pPlacementID;noerr]" />
+        <input type="hidden" id="msg_progressid" name="pprogressid" value="[var.x_params.pProgressID;noerr]" />
+        <input type="hidden" id="msg_provtsid" name="pprovtimesheetid" ></input>
+        <input type="hidden" id="msg_tsid" name="ptimesheetid" ></input>
+        <p>
+            <label for="msg_title">
+                Subject
+            </label>
+            <input type="text" id="msg_title" name="ptitle" class="required" value="" />
+        </p>
+		<p>
+			<label for="msg_descrip">Details</label>
+		</p>
+        <p>
+            <textarea rows=3 cols=45 wrap=soft class="required" id="msg_descrip" name="pdescription"></textarea>
+        </p>
+		<div id="divLoadIndicator"></div>
+		
+	</form>
+	
+
+<a data-role="button" onclick="MQpostQuery()">Send</a>
+<a data-role="button" onclick="LoadPage('[var.x_params.ReturnPage]')">Cancel</a>

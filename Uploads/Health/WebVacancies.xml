@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobSearch>
+ <SearchForm>
+  <SearchField fieldtype="select" caption="Job Type" name="xpath_tempperm" multiple="" class="required">
+<option value="T">Temp</option><option value="P">Perm</option>  </SearchField>
+ </SearchForm>
+ <Captions>
+<Caption fieldname="ourref">Reference</Caption><Caption fieldname="position">Position</Caption><Caption fieldname="jobtype">Job Type</Caption><Caption fieldname="department">Department</Caption><Caption fieldname="branch">Branch</Caption><Caption fieldname="startdate">Start Date</Caption> </Captions>
+ <Jobs>
+  <Job id="XX1GFAVS060420090060">
+<ourref tbl="1" exp="1"><![CDATA[2035]]></ourref><position tbl="1" exp="1"><![CDATA[Domiciliary Carer]]></position><jobtype tbl="1" exp="1"><![CDATA[Temp]]></jobtype><department tbl="1" exp="1"><![CDATA[Healthcare]]></department><branch tbl="1" exp="1"><![CDATA[Head Office]]></branch><startdate tbl="1" exp="1"><![CDATA[Mon 09/03/2009]]></startdate><JobId tbl="" exp=""><![CDATA[XX1GFAVS060420090060]]></JobId><description tbl="" exp=""><![CDATA[]]></description><contactname tbl="" exp=""><![CDATA[Viola Scott]]></contactname><contactemail tbl="" exp=""><![CDATA[vhs@accorddemo.uk]]></contactemail><tempperm tbl="" exp=""><![CDATA[T]]></tempperm><departmentid tbl="" exp=""><![CDATA[HE]]></departmentid>  </Job>
+  <Job id="XX1GHIVS060420090063">
+<ourref tbl="1" exp="1"><![CDATA[2038]]></ourref><position tbl="1" exp="1"><![CDATA[RGN]]></position><jobtype tbl="1" exp="1"><![CDATA[Temp]]></jobtype><department tbl="1" exp="1"><![CDATA[Healthcare]]></department><branch tbl="1" exp="1"><![CDATA[Head Office]]></branch><startdate tbl="1" exp="1"><![CDATA[Mon 09/03/2009]]></startdate><JobId tbl="" exp=""><![CDATA[XX1GHIVS060420090063]]></JobId><description tbl="" exp=""><![CDATA[]]></description><contactname tbl="" exp=""><![CDATA[Viola Scott]]></contactname><contactemail tbl="" exp=""><![CDATA[vhs@accorddemo.uk]]></contactemail><tempperm tbl="" exp=""><![CDATA[T]]></tempperm><departmentid tbl="" exp=""><![CDATA[HE]]></departmentid>  </Job>
+  <Job id="XX1DAAVS070420090031">
+<ourref tbl="1" exp="1"><![CDATA[2039]]></ourref><position tbl="1" exp="1"><![CDATA[hca]]></position><jobtype tbl="1" exp="1"><![CDATA[Temp]]></jobtype><department tbl="1" exp="1"><![CDATA[Healthcare]]></department><branch tbl="1" exp="1"><![CDATA[Head Office]]></branch><startdate tbl="1" exp="1"><![CDATA[Mon 06/04/2009]]></startdate><JobId tbl="" exp=""><![CDATA[XX1DAAVS070420090031]]></JobId><description tbl="" exp=""><![CDATA[]]></description><contactname tbl="" exp=""><![CDATA[Viola Scott]]></contactname><contactemail tbl="" exp=""><![CDATA[vhs@accorddemo.uk]]></contactemail><tempperm tbl="" exp=""><![CDATA[T]]></tempperm><departmentid tbl="" exp=""><![CDATA[HE]]></departmentid>  </Job>
+  <Job id="XX0T4QPC260920110000">
+<ourref tbl="1" exp="1"><![CDATA[7236]]></ourref><position tbl="1" exp="1"><![CDATA[Banana Straightener]]></position><jobtype tbl="1" exp="1"><![CDATA[Temp]]></jobtype><department tbl="1" exp="1"><![CDATA[Healthcare]]></department><branch tbl="1" exp="1"><![CDATA[Head Office]]></branch><startdate tbl="1" exp="1"><![CDATA[Mon 26/09/2011]]></startdate><JobId tbl="" exp=""><![CDATA[XX0T4QPC260920110000]]></JobId><description tbl="" exp=""><![CDATA[]]></description><contactname tbl="" exp=""><![CDATA[Phil]]></contactname><contactemail tbl="" exp=""><![CDATA[phil@iqx.co.uk]]></contactemail><tempperm tbl="" exp=""><![CDATA[T]]></tempperm><departmentid tbl="" exp=""><![CDATA[HE]]></departmentid>  </Job>
+ </Jobs>
+</JobSearch>

@@ -1,0 +1,137 @@
+
+<?xml version="1.0"?>
+<Job autoclose="YES" breakpoint="no">
+  <BeginTransaction/>
+  <SetVariable type="S" name="CRLF" sql="select string(char(10))"/>
+  <SetVariable type="S" name="TAB" sql="select string(char(9))"/>
+  <SetVariable type="S" name="SMTPHost" value="172.16.1.225"/>
+  <SetVariable type="S" name="SMTPUserID" value=""/>
+  <SetVariable type="S" name="SMTPPassword" value=""/>
+  <SetVariable type="S" name="SMTPSender" value="cascade@asarecruitment.co.uk"/>
+  <SetVariable type="S" name="MasterAgencyName" value="ASA Recruitment"/>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+SELECT
+ GetVacancyCascadeTime(employment.companyid,vacancy.vacancyid,vacancy.entrydate,vacancy.startdate,current timestamp,vacancy.cascadelevel+2) as NewCascadeDateTime,
+ vacancy.cascadelevel+1 as NewCascadeLevel,
+ (select first agencystoredselectionid from cascaderule where CompanyID=employment.companyid and vacancyid is null and isnull(vacancyrule, 0)=1 and cascadelevel=vacancy.cascadelevel+1) as TheStoredSelection,
+ Vacancy.RefCode,
+ Company.Name as Client,
+ Vacancy.Position,
+ if isnull(Vacancy.OtherNotes, '') = '' then 'None' else Vacancy.OtherNotes endif VacNotes,
+ Person.Name as Contact,
+ Vacancy.EntryDate,
+ if Vacancy.StartDate = CURRENT DATE then 'ASAP' else DATEFORMAT(Vacancy.StartDate, 'Ddd dd Mmm yyyy') endif StartDateString,
+ if isnull(Vacancy.FinishDate, '2999-12-31') >= '2999-12-31' then 'ONGOING' else DATEFORMAT(Vacancy.FinishDate, 'Ddd dd Mmm yyyy') endif FinishDateString,
+ (select staff.email from staff where vacancy.staffid = staff.staffid) as ConsEmail,
+ isnull(GetQuestAnswer('V','CC',Vacancy.VacancyID),ConsEmail,:SMTPSender) as ReturnEmail,
+ Vacancy.VacancyID as ThisVacancyID,
+ Vacancy.CascadeLevel as ThisCascadeLevel,
+ Vacancy.departmentid,
+ Vacancy.EmploymentID as VacEmpID,
+ GetQuestAnswer(string('V',Vacancy.DepartmentID),'LO',Vacancy.VacancyID) as Location,
+ GetQuestAnswer('V','HW',Vacancy.VacancyID) as HoursOfWork,
+ GetQuestAnswer('V','DIS',Vacancy.VacancyID) as Disclosure,
+ GetQuestAnswer('V','MAN',Vacancy.VacancyID) as Training,
+ GetQuestAnswer('V','DT',Vacancy.VacancyID) as Drugs,
+ GetQuestAnswer('V','PH',Vacancy.VacancyID) as Photo,
+ GetQuestAnswer('V','MED',Vacancy.VacancyID) as Medical, 
+ GetQuestAnswer('V','DR',Vacancy.VacancyID) as DressCode
+ 
+FROM 
+ Vacancy key join 
+ Employment key join 
+ (Company,Person)
+WHERE 
+ Vacancy.CascadeDateTime <= Current Timestamp 
+ and 
+ --original query only cascaded up to the start date, changed to cascade up-to the end of the vacancy
+ --vacancy.startdate >= Current Date
+ --and
+ isnull(Vacancy.FinishDate, '2999-12-31') >= CURRENT DATE
+ and
+ vacancy.status='C' and
+-- need to check progress states that de-select a vacancy
+ (select count(progressid) from progress where progress.vacancyid = vacancy.vacancyid and status in ('G','H','E','I','C','D','6','X','Q','V','7')) <1
+]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <!-- Do The Cascade-->
+        <!-- Get the agency list and delivery method-->
+        <SQLQuery>
+          <SQLSelect><![CDATA[
+                    SELECT 
+                     Name as AgencyName, isnull(DeliveryMethod,'.') as DeliveryMethod, Address, Company.CompanyID as AgencyID
+                    FROM Company key left outer join CascadeDeliveryAddress
+                    WHERE 
+                       company.companyid in 
+                         (select Record from StoredSelectionMember where StoredSelectionMember.StoredSelectionID = :TheStoredSelection)
+]]></SQLSelect>
+          <IfAnyRows>
+            <ForEachRow>
+              <SetVariable name="CascadeErrorFlag" value="0" type="N"/>
+              <IfSQL condition=":DeliveryMethod = 'E'">
+                <SendEmail subject="Cascaded Vacancy from {MasterAgencyName} - {Position}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{ReturnEmail}" smtppassword="{SMTPPassword}">
+                  <EmailRecipients>
+                    <WriteLn>{Address}</WriteLn>
+                  </EmailRecipients>
+                  <EmailBody>
+                    <Writeln>A new vacancy has been distributed for your review. Please hit reply or email candidate details to {ReturnEmail}.</Writeln>
+                    <Writeln/>
+                    <Writeln>{MasterAgencyName} Vacancy Ref No: {RefCode}</Writeln>
+                    <Writeln/>
+                    <Writeln>Client Name: {Client}</Writeln>
+                    <Writeln/>
+                    <Writeln>Job Title: {Position}</Writeln>
+                     <Writeln/>
+                   <Writeln>Job Description:</Writeln>
+                    <Writeln>{VacNotes}</Writeln>                                       
+                    <Writeln/>
+                    <Writeln>Location: {Location}</Writeln>
+                    <Writeln/>     
+                     <Writeln>Hours of Work: {HoursofWork}</Writeln>
+                    <Writeln/>                       
+                    <Writeln>Start Date: {StartDateString}</Writeln>
+                    <Writeln/>
+                    <Writeln>End Date: {FinishDateString}</Writeln>
+                    <Writeln/>
+                    <Writeln>It is also essential that all candidates have 2 work references, the right to work in the UK and the following details:</Writeln>
+			<Writeln/>
+		        <Writeln>{TAB}Disclosure Required: {Disclosure}</Writeln>
+		        <Writeln>{TAB}Mandatory Training: {Training}</Writeln>
+		        <Writeln>{TAB}Drugs Test Passed: {Drugs}</Writeln>
+		        <Writeln>{TAB}PhotoID Required: {Photo}</Writeln>
+		        <Writeln>{TAB}Passed Medical Questions: {Medical}</Writeln>
+		        <Writeln>{TAB}Dress Code / PPE: {DressCode}</Writeln>
+		        <Writeln/>
+                  </EmailBody>
+                </SendEmail>
+                <Else>
+                  <SetVariable name="CascadeErrorFlag" value="2" type="N"/>
+                </Else>
+              </IfSQL>
+              <IfSQL condition=":DeliveryMethod not in ('E')">
+                <SetVariable name="CascadeErrorFlag" value="1" type="N"/>
+              </IfSQL>
+              <!--Record the cascade in the cascade log-->
+              <SQLExec><![CDATA[IF VAREXISTS('uniqueroll') = 0 THEN CREATE VARIABLE uniqueroll integer; end if;]]></SQLExec>
+              <SQLExec><![CDATA[
+insert into CascadedVacancy(CascadedVacancyID,VacancyID,SecondaryAgencyID,CascadeTime,CascadeLevel,Method,Details,ErrorLevel)
+values (uniquekey(current timestamp),:ThisVacancyID,:AgencyID,current timestamp,:ThisCascadeLevel,:DeliveryMethod,
+    case :CascadeErrorFlag when 0 then  string('Vacancy cascaded to ',:AgencyName,' at ',:Address) 
+                           when 1 then string('Vacancy cascade FAILED to ',:AgencyName,'. Delivery method not set or not supported') 
+                           when 2 then string('Vacancy cascade FAILED to ',:AgencyName,'. Email delivery problem') end ,
+       :CascadeErrorFlag)
+]]></SQLExec>
+            </ForEachRow>
+          </IfAnyRows>
+        </SQLQuery>
+        <!-- Update the vacancies with new cascade values-->
+        <SQLExec><![CDATA[
+      update Vacancy set CascadeDateTime = :NewCascadeDateTime, CascadeLevel = :NewCascadeLevel where Vacancy.VacancyID = :ThisVacancyID;
+]]></SQLExec>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <Commit/>
+</Job>

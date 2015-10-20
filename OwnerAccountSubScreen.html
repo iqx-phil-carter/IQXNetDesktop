@@ -1,0 +1,154 @@
+<!--[onload;tplvars;AccountDesc='NetOwnerAccountDetails?pAccountID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	IQXInitSection("#FormAccount");
+	$("#FormAccount .questionnaire").questionnaire();				
+	if ($('#ObjID').val() == 0) {	// if a new record, unlock text fields for editing
+		$('input[id*="L_"]','#OwnerActiveDiv').val('New');
+		FormAccountEdit();
+		$('#AccNewCompany').hide();
+		$('#AC_New').css('background', '#CC9900');
+		$('#L_Client_Code').css('background', '#FFCC00');
+		$('#L_Client_Code').css('color', '#FF0000');
+	}	
+	$('#ParentObject').val('0');	// carried forward from previous object		
+});
+	
+function FormAccountEdit(){
+	// ## Enable local form for editing, add successhandler for successful submit, deal with returned parent value from database
+	
+	IQXEnableForm('#FormAccount', {
+		successhandler: function(response){
+			if (response.success) {
+				$('#OwnerTreeRoot').jstree("refresh");
+				$('#OwnerActiveDiv').html('');
+				var Obj={IngoingValue:response.id,ObjID:0,ParentID:0};
+				SplitReturnValue(Obj);
+				if(Obj.ParentID){$('#TempParent').val(Obj.ParentID)};
+				var nxt = {
+					action: 'func',
+					func: function(){$('#AC_' + $('#L_Client_Code').val()).css('background', '#CFCFCF');}
+				};
+	
+				IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerAccountSubScreen&pAccountID='+Obj.ObjID,nextlink:nxt});
+			}
+			else {
+				$('#ErrorMessage').html(response.message);
+			}
+		},
+		responsetype: 'json'
+	});
+}
+
+function OwnerAccountFormNew(){
+	// ## Don't use standard New routine because Account has no parent. Requires to be seeded.
+	
+	$('#TempParent').val($('#L_Client_Code').val());
+	OwnerNodeClicked('CO#0');
+}
+
+</script>
+
+<div id="OwnerAccountDiv"  style="float:left"  >
+	<form id="FormAccount" method="POST" action="IQXPost.php?proc=NetOwnerAccountEdit&jsonresponse=1" accept-charset="utf-8" >
+		<fieldset class="Narrow ui-corner-all" >
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header" >Account Code</div>
+				<div class="qquestrow bg">
+					<input id="L_Client_Code" name="pClient_Code" class="Wide Grey" readonly="readonly" value="[AccountDesc.Client_Code]" />
+					<input id="OldClient_Code" name="pOldClient_Code" class="Wide hidden" value="[AccountDesc.Client_Code]" />
+				</div>
+			</div>	
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header" >Account Name</div>
+				<div class="qquestrow bg">
+					<input id="E_Account_Name" type="text" name="pAccount_Name" class=" Wide required" readonly="readonly" value="[AccountDesc.Company_Name]" />
+					<input id="OldAccount_Name" name="pOldAccount_Name" class="Wide hidden" value="[AccountDesc.Company_Name]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Address Line 1</div>
+				<div class="qquestrow bg">
+					<input id="E_Address_Line_1" name="pAddress_Line_1" class="Wide required" readonly="readonly" value="[AccountDesc.Address_Line_1]" />
+					<input id="OldAddress_Line_1" name="pOldAddress_Line_1" class="Wide hidden" value="[AccountDesc.Address_Line_1]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Address Line 2</div>
+				<div class="qquestrow bg">
+					<input id="E_Address_Line_2" name="pAddress_Line_2" class="Wide" readonly="readonly" value="[AccountDesc.Address_Line_2]" />
+					<input id="OldAddress_Line_2" name="pOldAddress_Line_2" class="Wide hidden" value="[AccountDesc.Address_Line_2]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Address Line 3</div>
+				<div class="qquestrow bg">
+					<input id="E_Address_Line_3" name="pAddress_Line_3" class="Wide" readonly="readonly" value="[AccountDesc.Address_Line_3]" />
+					<input id="OldAddress_Line_3" name="pOldAddress_Line_3" class="Wide hidden" value="[AccountDesc.Address_Line_3]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Town</div>
+				<div class="qquestrow bg">
+					<input id="E_Town" name="pTown" class="Wide required" readonly="readonly" value="[AccountDesc.Town]" />
+					<input id="OldTown" name="pOldTown" class="Wide hidden" value="[AccountDesc.Town]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">County</div>
+				<div class="qquestrow bg">
+					<input id="E_County" name="pCounty" class="Wide" readonly="readonly" value="[AccountDesc.County]" />
+					<input id="OldCounty" name="pOldCounty" class="Wide hidden" value="[AccountDesc.County]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Country</div>
+				<div class="qquestrow bg">
+					<input id="E_Country" name="pCountry" class="Wide" readonly="readonly" value="[AccountDesc.Country]" />
+					<input id="OldCountry" name="pOldCountry" class="Wide hidden" value="[AccountDesc.Country]" />
+				</div>
+			</div>
+			<div  class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Post Code</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Postcode" name="pPostcode" class="MedNarrow required" readonly="readonly" value="[AccountDesc.Postcode]" /></div>
+					<input id="OldPostcode" name="pOldPostcode" class="MedNarrow hidden" value="[AccountDesc.Postcode]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Phone</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Phone" name="pPhone" class="MedNarrow" readonly="readonly" value="[AccountDesc.Phone]" /></div>
+					<input id="OldPhone" name="pOldPhone" class="MedNarrow hidden" value="[AccountDesc.Phone]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Fax</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Fax" name="pFax" class="MedNarrow" readonly="readonly" value="[AccountDesc.Fax]" /></div>
+					<input id="OldFax" name="pOldFax" class="Wide hidden" value="[AccountDesc.Fax]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Web Site</div>
+				<div class="qquestrow bg">
+					<input id="E_Web_Site" name="pWeb_Site" class="Wide" readonly="readonly" value="[AccountDesc.Web_Site]" />
+					<input id="OldWeb_Site" name="pOldWeb_Site" class="Wide hidden" value="[AccountDesc.Web_Site]" />
+				</div>
+			</div>
+			<div>
+				<input id="ObjID" name="pObjID" class="Wide hidden" value="[AccountDesc.ObjID]" />
+				<input id="ParentObject" name="pParentObject" class="Wide hidden" value="0" />
+			</div>	
+		</fieldset>
+		
+		<div id='OwnerButtonDiv' class="FloatDivLeft" > 
+			<button type="button" id="AccEdit" class="fixed nonformbutton" onclick="FormAccountEdit()">Edit</button>
+			<button type="button" id="AccNewCompany" class='fixed nonformbutton' onClick="OwnerAccountFormNew()" >Add Site</button>
+        	<button type="submit" id="AccSubmit" class="fixed formbutton" >Save</button>
+			<button type="button" id="AccReset" class="fixed formbutton" onclick="OwnerFormUndo('Account')" >Undo</button>
+		</div>
+	</form> 
+</div>

@@ -1,0 +1,35 @@
+<!--[onload;tplvars;tss='GenevaNetTimesheetShiftsDetail?ptemptimesheetid']-->
+
+<!-- 20121218 add Shift ID -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("div.divFtimesheetshifts"));
+	});
+	
+</script>
+
+<table class="tablesorter">
+	<thead>
+		<tr>
+			<th>Shift Ref</th>
+			<th>Date</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Break (minutes)</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="Shift_[tss.tempshiftid;block=tr]" >
+			<td>[tss.ShiftSerialNo]</td>
+			<td>[tss.shiftdate]</td>
+			<td>[tss.timefrom]</td>
+			<td>[tss.timeto]</td>
+	    	<td>[tss.breakminutes;noerr]</td>
+	    	<td>[tss.description;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<span class="errormessage">[var.x_errormessage]</span>

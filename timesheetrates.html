@@ -1,0 +1,81 @@
+<!--[onload;tplvars;tsr='NetTimesheetRates?ptemptimesheetid']-->
+
+<!-- 20131108 Date and Ref columns added -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("div.divFtimesheetrates"));
+	$(".tstotal",'#tblrates_[var.x_params.ptemptimesheetid]').totalcolumn("#tstotal_[var.x_params.ptemptimesheetid]",2);
+	if ($("#tstotal2_[var.x_params.ptemptimesheetid]").length > 0) {
+		$(".tstotal2", '#tblrates_[var.x_params.ptemptimesheetid]').totalcolumn("#tstotal2_[var.x_params.ptemptimesheetid]", 2);
+	}
+	});
+
+</script>
+
+<table class="tablesorter" id="tblrates_[var.x_params.ptemptimesheetid]">
+	[onload_PAYandCHARGE;block=table;when [var.x_userclass;noerr]='OWNER']
+	<thead>
+		<tr>
+		<th>Day</th>
+		<th>Ref</th>	
+		<th>Pay Type</th>
+		<th>Unit</th>
+		<th class="rightalign">Units</th>
+		<th class="rightalign">Pay Rate</th>
+		<th class="rightalign">Total Pay</th>
+		<th class="rightalign">Charge Rate</th>
+		<th class="rightalign">Total Charge</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="Rate_[tsr.TempTimesheetLineID;block=tr]">
+			<td>[tsr.ShiftDay]</td>
+			<td>[tsr.TheirRef]</td>
+			<td>[tsr.BandDescription]</td>
+			<td>[tsr.UnitDescription;noerr]</td>
+			<td class="number twodp rightalign">[tsr.Units;noerr]</td>
+	    	<td class="number twodp rightalign">[tsr.Rate;noerr]</td>
+			<td class="tstotal twodp rightalign">[tsr.Total;noerr]</td>
+	    	<td class="number twodp rightalign">[tsr.Rate2;noerr]</td>
+			<td class="tstotal2 twodp rightalign">[tsr.Total2]</td>
+		</tr>
+		<tr>
+			<td colspan=6>Total</td>	
+			<td id="tstotal_[var.x_params.ptemptimesheetid]" class="twodp rightalign"></td>	
+			<td></td>
+			<td id="tstotal2_[var.x_params.ptemptimesheetid]" class="twodp rightalign"></td>	
+		</tr>
+	</tbody>
+</table>
+<table class="tablesorter" id="tblrates_[var.x_params.ptemptimesheetid]">
+	[onload_PAYandCHARGE;block=table;default]
+	<thead>
+		<tr>
+			<th>Day</th>
+			<th>Ref</th>
+			<th>Pay Type</th>
+			<th>Unit</th>
+			<th class="rightalign">Units</th>
+			<th class="rightalign">Rate</th>
+			<th class="rightalign">Total</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="Rate_[tsr.TempTimesheetLineID;block=tr]">
+			<td>[tsr.ShiftDay]</td>
+			<td>[tsr.TheirRef]</td>
+			<td>[tsr.BandDescription]</td>
+			<td>[tsr.UnitDescription;noerr]</td>
+			<td class="number twodp rightalign">[tsr.Units;noerr]</td>
+	    	<td class="number twodp rightalign">[tsr.Rate;noerr]</td>
+			<td class="tstotal twodp rightalign">[tsr.Total;noerr]</td>
+		</tr>
+		<tr>
+		<td colspan=6>Total</td>	
+		<td id="tstotal_[var.x_params.ptemptimesheetid]" class="twodp rightalign"></td>	
+		</tr>
+	</tbody>
+</table>
+<span class="errormessage">[var.x_errormessage]</span>

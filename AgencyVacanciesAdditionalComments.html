@@ -1,0 +1,43 @@
+<!--[onload;tplvars;AdditionalComments=NetAgencyAdditionalComments?pVacID&pTempShiftID]-->
+
+<!-- 20130828 RC1 -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("#divAdditionalDetails"));	
+	if($('#tblDetail').html().length>=100){$('#NoComment').hide();}
+	});
+
+
+</script>
+
+<div id="divAdditionalDetails" class='ZoomedDivSub'>
+	<span id="spanDetailTable" class='ZoomedSpanLeft'>
+		<table id="tblDetail" style="float:right;width='100%'">
+			<tr>
+				<th>Date</th>
+				<th>Recipient</th>
+				<th>Note</th>
+			</tr>
+			<tr id="[AdditionalComments.ActionTime;block=tr]">
+				<td>[AdditionalComments.ActionTime]</td>
+				<td>[AdditionalComments.SentTo]</td>
+				<td>[AdditionalComments.Note]</td>
+			</tr>
+		</table>
+	</span>
+	<span id="NoComment" class="SpanNoComment">(No Comments)</span>
+	<span id="CommentError" class="errormessage">[var.x_errormessage]</span>
+</div>
+
+<script type="text/javascript">
+	if ($('#tblDetail tr').length == 1){
+		$('#spanDetailTable').html('');
+		$('#NoComment').show();
+	}
+</script>
+
+
+
+	

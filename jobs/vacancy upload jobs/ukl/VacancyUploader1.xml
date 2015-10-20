@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Job autoclose="yes">
+	<Parameters>
+		<Parameter name="FileToUpload" />
+	</Parameters>
+	<FTPConnection host="174.143.247.190" username="uklsolut" password="9SG4h2TaRW" passive="NO">
+		<ChangeDirectory ftppath="/tmp" />
+		<CopyFile source="{FileToUpload}" ftptarget="WebVacancies.xml" />
+	</FTPConnection>
+</Job>

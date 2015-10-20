@@ -1,0 +1,132 @@
+/* BCL */
+
+#divheading {
+	height: 80px;
+	margin-bottom: 10px;
+	background-color: white;
+	color: #BCBCBC;
+	font-family: Calibri, sans-serif;
+	font-size:20px;
+	background-image: url(images/sitelogo.png);
+	background-repeat: no-repeat;
+	background-position: right;
+	overflow:auto;
+}
+
+#divheading h1 {
+	display:none;
+}
+
+#divheading h2 {
+	display:none;
+}
+
+#divheading h3 {
+	text-align:left;
+	vertical-align:top;
+	top:25%;
+	height: 50%;
+	position:relative;
+	text-indent:170px;
+	color: #BCBCBC;
+}
+
+#divheadingSmall {
+	height: 25px;
+	margin-bottom: 10px;
+	background-color: #FFFFFF;
+	text-align:center;
+	vertical-align:top;
+	color: white;
+	background-repeat: no-repeat;
+	background-position:right;
+	display: none;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#divheadingSmallSpanLeft {
+	font-size:20px;
+	color: #D0043C;
+	margin-bottom:10px;
+	float:left;
+	padding-left:10px;
+}
+
+#divheadingSmallSpanCentre {
+	font-size:18px;
+	color: #BCBCBC;
+	margin-bottom:10px;
+	margin-bottom:2px;
+}
+
+#divheadingSmallSpanRight {
+	font-size:18px;
+	margin-bottom:10px;
+	float:right;
+	padding-right:10px;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+.logoutlink{	/* set colour for logout link */
+	color:blue;
+}
+
+/* white text on active tab */
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a {
+    cursor: text;
+    color: #FFFFFF;
+}
+
+.ui-tabs .ui-tabs-nav {
+    list-style: none outside none;
+    padding: 5px;
+    position: relative;
+}
+
+/* tabs background */
+.ui-widget-header {
+    background: url("") repeat-x scroll 50% 50% #FFFFFF;
+    border: 4px solid #D0043C;
+    color: #222222;
+    font-weight: bold;
+}
+
+/* pale grey background on non-active tab */
+.ui-state-default, .ui-widget-content .ui-state-default {
+    background: url("") repeat-x scroll 50% 50% #BBBBBB;
+    border: 1px solid #BBBBBB;
+    color: #FFFFFF;
+    font-weight: bold;
+    outline: medium none;
+    padding-bottom: 2px;
+}
+
+/* red text on non-active tab */
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
+    color: #D0043C;
+    outline: medium none;
+    text-decoration: none;
+}
+
+/* dark grey on active tab */
+.ui-state-active, .ui-widget-content .ui-state-active {
+	background: url("") repeat-x scroll 50% 50% #D0043C;
+    background-color: #6E6E6E;
+    border: 1px solid #2694E8;
+    color: #FFFFFF;
+    font-weight: bold;
+    outline: medium none;
+}

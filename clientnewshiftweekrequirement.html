@@ -1,0 +1,214 @@
+<!--[onload;tplvars;newsh='NetClientShiftOrderReasons']-->
+
+<!-- 20140422 -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var dlg=$('#divclientnewshiftweek').dialog({
+		title:'New Requirement',   
+		modal:true,
+		width:650,
+		close: function(){
+				$("#cli_newsh_startdate").datepicker('hide');
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+		buttons: {
+			"Cancel": function(){
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+			"Save": function(){
+				$("#frmclientnewshiftweek").submit();
+			}
+		}
+	});
+	IQXInitSection($("#frmclientnewshiftweek"));
+	IQXEnableForm("#frmclientnewshiftweek",{wholeformvalidator:shiftsFormValid,successhandler:function(){
+		IQXDisableForm();
+		IQXcloseUIdialog(dlg);
+		IQXRefreshTab();
+	}});
+	$("#cli_newsh_startdate").datepicker('option',{onSelect:calDateSelected});
+	doPickList('SV','','#cli_newsh_vacancyid');
+	makeTableRow(0,'Monday');
+	makeTableRow(1,'Tuesday');
+	makeTableRow(2,'Wednesday');
+	makeTableRow(3,'Thursday');
+	makeTableRow(4,'Friday');
+	makeTableRow(5,'Saturday');
+	makeTableRow(6,'Sunday');
+	});
+	
+function showPicker(){
+	$("#cli_newsh_startdate").datepicker('show');
+}
+
+function checkStartsMonday(){
+	var sdat=$.trim($('#cli_newsh_startdate','#frmclientnewshiftweek').val());
+	if (!sdat) {
+		return "";
+	}
+	var ddat= new Date(UKtoJSdate(sdat));
+	if (ddat.getDay() == 1) {
+		return "";
+	}
+	return "The Week Beginning date must be a Monday";
+}
+
+function calDateSelected(dateText, inst){
+	if (dateText) {
+		var ddat = new Date(UKtoJSdate(dateText));
+		var day = 1000 * 60 * 60 * 24;
+		while (ddat.getDay() != 1) {
+			ddat.setTime(ddat.getTime() - day);
+		}
+		this.value = $.datepicker.formatDate('D dd/mm/yy', ddat);
+		for (var i=0;i<=6;i++) {
+			$('#xxxlabday'+i).children('td').first().text($.datepicker.formatDate('D dd/mm/yy', ddat));
+			ddat.setTime(ddat.getTime() + day);
+		}
+	}
+}
+
+function shiftsFormValid(){
+	var rv=checkStartsMonday();
+	if (rv) return rv;
+	$('#cli_newsh_daytable').find('tr').each(function(i,e){
+		var tds=$(this).children('td');
+		var shiftid=tds.eq(1).find('select').val();
+		var qty=parseInt(tds.eq(5).find('input').val());
+		var timefrom=tds.eq(2).find('input').val();
+		var timeto=tds.eq(3).find('input').val();
+		if (shiftid && qty) { // Unless shift type selected and qty>0, no booking will be made
+			if (!(timefrom && timeto)) {  
+				rv='Missing shift times for '+tds.eq(0).text();
+				return false;
+			}
+		}
+	});
+	return rv;
+}
+
+function doPickList(sType,sVacancyID,sSelector,fOnComplete){
+	if (sVacancyID) sVacancyID='&pVacancyID='+sVacancyID;
+	$.getJSON('IQXRawData.php?page=[var.x_local.Switches.DivertString;noerr]NetClientRequirementTemplates&pType='+sType+sVacancyID+'&render=text_plain__IQXNetResultJSONArray.xsl', function(aChoices){
+		$(sSelector).val('');
+		var sOptions='';
+		$.each(aChoices, function(ix,x){
+			if (x[1]) x[0]+='|'+x[1];
+			if (x[3]) x[2]+=', '+x[3];
+			sOptions+='<option value="'+x[0]+'">'+x[2]+'</option>';
+		});
+		if (sOptions) sOptions='<option value=""> </option>'+sOptions;
+		$(sSelector).html(sOptions);
+		if (typeof(fOnComplete)=='function') {
+			fOnComplete();
+		}
+	});
+}
+
+function vacancyClicked(x){
+	var vacid=$(x).val();
+	$('#cli_newsh_daytable').find('select,input').val('');
+	$('#cli_newsh_daytable').find('select').attr('disabled','disabled');  // In IE the disabling and re-enabling is necessary to reliably force the new combo contents to appear
+	doPickList('SS',vacid,'#cli_newsh_daytable select.shiftselect',function(){
+		$('#cli_newsh_daytable').find('select').removeAttr('disabled');
+		});
+}
+
+function shiftClicked(x){
+	var s=$(x).val();
+	var ar=s.split('|');
+	var tr=$(x).closest('tr');
+	tr.children('td').eq(2).find('input').val(ar[1].substr(0,5));  // Set times and break
+	tr.children('td').eq(3).find('input').val(ar[2].substr(0,5));
+	tr.children('td').eq(4).find('input').val(ar[3]);
+	if (ar[4]=='1'){  //moveable
+		tr.children('td').find('input.mover').removeClass('readonly').removeAttr('readonly','readonly');
+	} else {
+		tr.children('td').find('input.mover').addClass('readonly').attr('readonly','readonly');
+	}
+	if (tr.children('td').eq(5).find('input').val()=='') {
+		tr.children('td').eq(5).find('input').val('1');
+	}
+}
+
+function makeTableRow(nDay,sDay){
+	var s='<tr id="xxxlabday'+nDay+'">';
+	s+='<td>'+sDay+'</td>';
+	s+='<td><select class="medium noncheckbox shiftselect" name="p'+sDay+'" onchange="shiftClicked(this);"></select></td>';
+	s+='<td><input name="p'+sDay+'From" class="time narrow mover" /></td>';
+	s+='<td><input name="p'+sDay+'To" class="time narrow mover" /></td>';
+	s+='<td><input name="p'+sDay+'Brk" class="digits narrow mover" /></td>';
+	s+='<td><input name="p'+sDay+'Qty" class="digits narrow" /></td>';
+	s+='<td><input name="p'+sDay+'Note" class="medium" /></td>';
+	s+='</tr>';
+ 	$('#cli_newsh_daytable').append(s);
+}
+
+</script>
+
+<style type="text/css">
+	#frmclientnewshiftweek p label {
+		width:115px;
+	}
+	#cli_newsh_vacancyid {
+		width:450px;
+	}
+</style>
+
+<div id="divclientnewshiftweek">
+<form id="frmclientnewshiftweek" action="IQXPost.php?proc=NetClientAddShiftsMultiWeek" method="post" accept-charset="utf-8">
+	<fieldset>
+        <p>
+            <label for="cli_newsh_vacancyid">
+                Requirement
+            </label>
+            <select id="cli_newsh_vacancyid" name="pvacancyid" class="required noncheckbox" onchange="vacancyClicked(this);"></select>
+        </p>
+        <p>
+            <label for="cli_newsh_startdate">
+                Week Beginning
+            </label>
+            <input type="text" id="cli_newsh_startdate" name="pstartdate" autocomplete="off" class="medium required longdate" />
+        </p>
+		<table id="cli_newsh_daytable">
+			<tr>
+				<td width="110"></td>
+				<td></td>
+				<td>From</td>
+				<td>To</td>
+				<td>Break (mins)</td>
+				<td>Qty</td>
+				<td>Note</td>
+			</tr>
+		</table>
+        <p>
+            <label for="cli_newsh_plusweeks">
+                Repeat for
+            </label>
+            <input type="text" id="cli_newsh_plusweeks" name="pextraweeks" class="narrow digits" />
+			additional weeks
+        </p>
+        <p>
+            <label for="cli_newsh_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newsh_ref" name="ptheirref" class="medium uppercase" />
+        </p>
+		<p>
+			<label for="cli_newsh_orderreason">
+				Reason
+			</label>
+			<select id="cli_newsh_orderreason" name="porderreason" class="noncheckbox" >
+				<option value=""></option>
+				[newsh.OrderReasonList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+		<p>
+		    <span class="errormessage">[var.x_errormessage]</span>
+		</p>
+	</fieldset>	
+</form>
+</div>

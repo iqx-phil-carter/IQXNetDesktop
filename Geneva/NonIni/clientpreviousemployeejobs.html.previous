@@ -1,0 +1,59 @@
+<!--[onload;tplvars;empjobs='NetClientPreviousEmployeeJobs?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid']-->
+
+<!-- 2011-12-23 chain ClientCandidateDocuments on to bottom -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliprevtempjobs_[var.x_params.pPersonID]"));
+	$(".questionnaire","#divcliprevtempjobs_[var.x_params.pPersonID]").questionnaire({disabled:true});
+	IQXChain('#ClientDocDetails', {
+			action: 'load',
+			page: 'clientcandidatedocuments&pPersonID=' + encodeURIComponent('[var.x_params.pPersonID]')
+		});
+		
+	});
+
+</script>
+<div id="divcliprevtempjobs_[var.x_params.pPersonID]">
+<table class="tablesorter">
+	<thead>
+		<tr>
+			<th>Position</th>
+			<th>Start Date</th>
+			<th>Finish Date</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[empjobs.Position;block=tr;noerr]</td>
+	    <td>[empjobs.StartDate;noerr]</td>
+	    <td>[empjobs.FinishDate;noerr]</td>
+		</tr>
+		
+	</tbody>
+</table>
+<div>[candpubquest;block=div]</div>  
+</div>
+
+<div id="divcliprevtempdetails_[var.x_params.pid]">
+
+	<p id="pimage_[var.x_params.pid]" align="center">
+		<img src="" alt="" height="200px" />
+	</p> 
+
+	<div>[candpubquest;block=div]</div> 
+
+	<div id="ClientDocDetails"></div>
+
+	<div id="divhiddendetails_[var.x_params.pid]" class="ui-helper-hidden">
+		<table title="[cand.Name;block=table;noerr]" border="[cand.hasPhoto;noerr]">
+			<tbody>
+				<tr class="qquestrow">
+	   				<td class="qquestion ui-widget-header">Date of Birth</td>
+	   				<td class="qanswer"><input class="qsingleentry" type="text" value="[cand.DOB;noerr]" /></td>
+				</tr>	
+	   		</tbody>
+		</table>
+	</div>
+</div>
+

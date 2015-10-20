@@ -1,0 +1,55 @@
+<!--[onload;tplvars;deptquest='F_questions_div?pTaglocation']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#divdeptcandreg");
+		$(".questionnaire").questionnaire();
+		IQXEnableForm('#frmdeptcandreg');
+	});
+	
+</script>
+
+<div id="divdeptcandreg">
+
+<form id="frmdeptcandreg" name="canddeptreg" action="IQXPost.php?proc=NetCandidateDepartmentRegister" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+    	<legend>[var.x_params.pDepartmentName;noerr] Registration</legend>
+        <input type="hidden" id="cdr_personid" name="ppersonid" value="[var.x_params.pPersonID;noerr]" />
+        <input type="hidden" id="cdr_departmentid" name="pdepartmentid" value="[var.x_params.pDepartmentID;noerr]" />
+		<div class="questionnaire">
+		<div class="qquestrow">
+            <div class="qquestion">
+                Seeking Temp Jobs
+            </div>
+			<div class="qanswer">
+            <input type="checkbox" id="cdr_temp" name="pTemp" value="1" [var.x_params.pTemp;noerr;if [val]='1';then 'checked="checked"';else ''] class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Seeking Permanent Jobs
+            </div>
+			<div class="qanswer">
+            <input type="checkbox" id="cdr_perm" name="pPerm" value="1" [var.x_params.pPerm;noerr;if [val]='1';then 'checked="checked"';else ''] class="qpseudoquestanswer" />
+            </div>
+        </div>
+		</div>
+	 <div class="cleardiv" ></div>
+   	 <div>[deptquest;block=div]</div>  
+     <p>
+            <button type="submit" id="cdr_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cdr_reset" class="fixed formbutton" onclick="undoregdepartment()" >
+                Undo
+            </button>
+        </p>
+    	<p>
+        	<span class="errormessage">[var.x_errormessage]</span>
+    	</p>
+    </fieldset>
+</form>
+
+
+</div>
+

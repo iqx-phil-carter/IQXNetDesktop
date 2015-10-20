@@ -1,0 +1,44 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#ownertabs");
+	$('a').click(function(){
+		if($(this).attr('href') == '#tabcontent-1'){
+			$('#divheading').show();
+			$('#divheadingSmall').hide();
+		}else{
+			$('#divheading').hide();
+			$('#divheadingSmall').show();
+		}
+	})
+});
+</script>
+    
+<div id="ownertabs" >
+    <ul>
+        <li><a href="#tabcontent-1"><span>Welcome</span></a></li>
+        <li><a href="IQXPage.php?page=OwnerCandidateMaintenance"><span>Candidates</span></a></li>
+		<li><a href="IQXPage.php?page=OwnerClientJobs"><span>Clients / Jobs</span></a></li>
+        <li id="P"><a href="IQXPage.php?page=ownerprovtimesheets"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheets"><span>Historic Timesheets</span></a></li>
+        <li><a href="IQXPage.php?page=reports"><span>Reports[onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+   </ul>
+    <div id="tabcontent-1">
+		<div class="usertext">[onload;file=txt_owner_welcome_top.html;noerr]</div>
+		<div id="Ownernonstandardtext" class="usertext">[onload;file=txt_owner_nonstandard_welcome.html;noerr;]</div>
+		<div id="Ownerstandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title] Owner Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Maintain clients, contacts, jobs and pay and charge rates</li>
+				<li>Maintain candidates</li>
+				<li>Complete timesheets</li>
+				<li>View historical details and management information</li>
+			</ul>
+		</div>
+		<div class="usertext">[onload;file=txt_owner_welcome_bottom.html;noerr]</div>
+    </div>
+    <div id="tabcontent-blank">
+    </div>
+ </div>
+

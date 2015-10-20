@@ -1,0 +1,28 @@
+/* ABC Recruitment */
+
+#divheading {
+height: 100px;
+margin-bottom: 10px;
+background-color: #27537a;
+text-align:center;
+color: white;
+background-image: url(images/sitelogo.png);
+background-repeat: no-repeat;
+background-position:right;
+}  
+ 
+#divheading h1 {
+color:blue;
+margin-bottom:2px;
+}
+
+#divheading h2 {
+font-size:18px;
+margin-top:2px;
+margin-bottom:2px;
+}
+
+#divheading h3 {
+margin-top:10px;
+}
+

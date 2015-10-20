@@ -1,0 +1,35 @@
+<!--[onload;tplvars;vactemplates='NetClientVacancyTemplates']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliaddjobs"));
+	});
+
+</script>
+
+<table class="tablesorter" id="tblclivactemplates">
+	<thead>
+		<tr>
+			<th>Position</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vactemplates.VacancyID;block=tr]|[vactemplates.TempShiftTemplateID;noerr]">
+	    <td>[vactemplates.Position;noerr] [vactemplates.ShiftDescription;noerr]</td>
+		<td>
+			<button type="button" class="tablebutton nonformbutton" onclick="addjob('[vactemplates.VacancyID]','[vactemplates.TempShiftTemplateID;noerr]')">Add</button>
+		</td>	
+		</tr>
+		
+	</tbody>
+</table>
+
+<p>
+    <span id="clivactemplateerror" class="errormessage">[var.x_errormessage]</span>
+</p>
+<p>
+	<button type="button" id="clivac_add" class="fixed nonformbutton" onclick="unaddjob()">
+		Abandon Add
+	</button>
+</p>

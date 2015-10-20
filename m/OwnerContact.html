@@ -1,0 +1,125 @@
+﻿<!--[onload;tplvars;ContactList='MobileNetOwnerContact?pContactID']-->
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (window.pEventType == 'F') {
+            $('#NavFavouriteButtons').show();
+            $('#NavButtons').hide();
+        } else {
+            $('#NavFavouriteButtons').hide();
+            $('#btnContactDiaryHome').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType);
+            $('#btnContactDiaryDetailHome').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        }
+        $('#ContactTaskButtons').hide();
+        $('#btnContactHelp').attr('href', window.HelpRoot + 'hat_1');
+        $('form').keypress(function (event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                ContactSave();
+            }
+        })
+    });
+
+    
+    function CreateContactContactEvent(line, ContactType) {
+        window.pMethod = ContactType;
+        window.pAddress = $(line).html();
+        
+        var DestPage = 'iqxnet.php?P=OwnerContactEvent&pCalendarLineID=' + window.pContactEventLineID + '&pEventType=' + window.pEventType;
+        
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
+   
+    function ContactEdit(line) {
+        ContactShowNav();
+        $('#ContactNoteArea').html('<textarea id="ContactNoteText" name="pNote" value="" />');
+        $('#divContactError').html('');
+        $('#ContactNoteText').focus();
+    }
+
+    function ContactSave() {
+        var NoteText = '';
+        if ($('#ContactNoteText').val() != '') { NoteText = $('#ContactNoteText').val(); }
+        if (NoteText == '') {
+            $('#ContactNoteArea').html('[ContactList.Note;noerr]');
+        } else {
+            $('#frmContactDetails').ajaxSubmit({
+                success: function (data, textStatus) {
+                    if (textStatus == 'success' && data == 'Ok') {
+                        $('#ContactNoteArea').html(NoteText);
+                    } else {
+                        $('#divOwnerContactError').html(data);
+                    }
+                },
+                error: function (data, textStatus) {
+                    $('#divOwnerContactError').html(data);
+                },
+                dataType: "html"
+            });
+        }
+        $('#btnContactSave').hide();
+        $('#btnContactEdit').show();
+    }
+
+    function ContactShowNav() {
+        $('#ContactTaskButtons').fadeIn();
+        $('#ContactTaskButtons').fadeOut();
+        $('#ContactTaskButtons').fadeIn();
+    }
+
+</script>
+<nav role="navigation" id="NavHelpButtons" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnContactHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<nav role="navigation" id="NavButtons" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnContactHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    <span class="btnNavLeft"><a id="btnContactDiaryHome" href="" data-role="button" data-icon="grid" data-iconpos="notext">Diary</a></span>
+    <span class="btnNavLeft"><a id="btnContactDiaryDetailHome" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Detail</a></span>
+</nav>
+<nav role="navigation" id="NavFavouriteButtons" style="display:block;float:left;">
+    <span class="btnNavLeft"><a id="btnContactHome" href="iqxnet.php?P=OwnerFavourites" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+</nav>
+<span>Contact</span>
+<nav id="ContactTaskButtons" style="display:block;float:right;">
+    <span class="btnNavRight"><a id="btnContactSave" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="ContactSave()">Complete</a></span>
+</nav>
+<br />
+
+<div id="divContactError" class="errormessage"></div>
+
+<div>
+    <form id="frmContactDetails" action="IQXPost.php?proc=MobileNetOwnerEditContact" method="post">
+        <table class="tablesorter">
+            <tr>
+                <td>Name</td>
+                <td id="PersonName">[ContactList.PersonName]</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>[ContactList.State;noerr]</td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td><a href="mailto:[ContactList.Email;noerr]" onclick="CreateContactContactEvent(this,'Email')">[ContactList.Email;noerr]</a></td>
+            </tr>
+            <tr>
+                <td>Mobile</td>
+                <td><a href="tel:+[ContactList.MobileLink;noerr]" onclick="CreateContactContactEvent(this, 'Phone')">[ContactList.MobileView;noerr]</a></td>
+            </tr>
+            <tr>
+                <td>Home Phone</td>
+                <td><a href="tel:+[ContactList.HomePhoneLink;noerr]" onclick="CreateContactContactEvent(this, 'Phone')">[ContactList.HomePhoneView;noerr]</a></td>
+            </tr>
+        </table>
+        <table class="tablesorter"
+            <tr onclick="ContactEdit()">
+                <td id="ContactNoteArea">[ContactList.Notes;noerr]</td>
+            </tr>
+        </table>
+        <input type="hidden" name="pContactID" value="[ContactList.PersonID;noerr]" />
+    </form>
+</div>

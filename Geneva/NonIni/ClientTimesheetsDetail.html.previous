@@ -1,0 +1,183 @@
+<!--[onload;tplvars;ts='GenevaNetTimesheetsAllFiltered?pStartDate&pEndDate&pPageNo&SearchString&SampleSize']-->
+
+<!-- 20121219 add shift list -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("#divFtimesheets"));
+	$('#TSNavButtons').hide();
+	
+	$('#tblFtimesheets').data('IQXdtDateFilter',{dateColumn:0});
+
+	var dtts=$('#tblFtimesheets').dataTable({
+		"sPaginationType": "full_numbers",
+		"aaSorting": [ [0,'desc'], [1,'desc'] ],
+		"aoColumns": [{},{},{},{},{},{},{},{bSortable:false,bSearchable:false},{bVisible:false}]
+	});
+
+	$("#divFtimesheets").data('dataTable',dtts);
+	IQXDeepLink("T",dtts);
+	// To place the date range put D between l and f in the sDom
+		
+	var RecordCount=$('#TSRecordCount').val();
+	var SampleSize=$('#TSSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1};
+	PageCount=Root+Mantissa;
+	
+	$('#TSLastPage').html(PageCount);
+	if($('#TSLastPage').html() != 'NaN'){
+		$('#TSNavButtons').show();
+		} 
+		
+	});
+
+function loadshifts(row){
+	var ts=$(row).data("zoomedts");
+	if (ts.type=='C'){
+		loadrates(row);
+	} else {
+		var shiftpage;
+		if (ts.type == 'S') {
+			shiftpage = 'timesheetshifts';
+		}
+		else {
+			shiftpage = 'timesheettimes';
+		} 
+		var shiftsDiv=$(row).next('tr').find('div.divFtimesheetshifts').get(0);
+		var nxt={action:'func',func: function(){
+			loadrates(row);
+		}};
+		IQXChain(shiftsDiv,{action:'load',page:shiftpage + '&ptemptimesheetid=' + encodeURIComponent(ts.id),nextlink:nxt});
+	}
+}
+
+function loadrates(row){
+	var tsid=$(row).data("zoomedts").id;
+	var ratesDiv=$(row).next('tr').find('div.divFtimesheetrates').get(0);
+	IQXChain(ratesDiv,{action:'load',page:'timesheetrates&ptemptimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function openmessage(btn){
+	var row=$(btn).closest('tr').prev('tr').get(0);
+	var ts=$(row).data("zoomedts");
+	var stit='pTitle=' + encodeURIComponent('Query Timesheet '+ts.serialnumber);
+	var sid='pTempTimesheetID=' + encodeURIComponent(ts.id);
+	var msgDiv=$(row).next('tr').find('div.divFmessage').get(0);
+	IQXChain(msgDiv,{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid});
+} 
+
+function zoomtimesheet(img,tstype,tsid,serialnumber){
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#divFtimesheets").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+		
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		$(row).next('tr').remove();
+		return;
+	}
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).data("zoomedts",{
+		type: tstype,
+		id: tsid,
+		serialnumber: serialnumber,
+		expandImage: img
+	});
+	$(row).rowafter({dataTable:dt,alldivsclass:"zoomeddiv",divs:[{divclass:"divFtimesheetshifts"},
+		{divclass:"divFtimesheetrates"},
+		{divclass:"divFtimesheetbuttons"},
+		{divclass: "divFmessage"}]});
+
+	var newrow=$(row).next('tr');		
+	$("div.divFtimesheetbuttons",newrow).html('<button type="button" class="fixed nonformbutton" onclick="abandontimesheet(this)">Close</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="openmessage(this)">Query</button>'+	
+				    '<button type="button" class="fixed nonformbutton" onclick="IQXopenInNewWindow(\'IQXNetEx.php?page=TimesheetSingle&wrapper=bare&tsnumber='+encodeURIComponent(serialnumber)+'&ptemptimesheetid=' + encodeURIComponent(tsid)+'&ptstype='+tstype+'\')">Printable Version</button>');	
+	IQXInitSection(newrow);
+	loadshifts(row);
+}
+
+function abandontimesheet(btn){
+	var row=$(btn).closest('tr').prev('tr').get(0);
+	var img=$(row).data('zoomedts').expandImage;
+	zoomtimesheet(img);
+}
+
+function ChangeInvoicedTick(TickBoxID){
+	
+	var TBChecked=$('#'+TickBoxID).attr('checked');
+	var TBid=TickBoxID.substring(2);
+	
+	if(TBChecked=='checked'){
+		$('#pTickValue').val('1');
+	}else{
+		$('#pTickValue').val('0');
+	}
+	$('#pTimesheetID').val(TBid);
+	
+	  
+	$('#FInvoiced').ajaxSubmit(
+		{
+		success: function(data, textStatus){	
+			if (textStatus != 'success') {
+				$('.errormessage').html(data);
+				}
+			},
+		error: function(data,textStatus){
+			$('.errormessage').html(data);
+			},
+		dataType: "text"
+		});	
+}
+	
+</script>
+
+<span id="agTSerror" class="errormessage">[var.x_errormessage]</span>
+
+<div id="divTSheets">
+<table class="tablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+		<th>Period End Date</th>
+		<th>Number</th>
+		<th>Temp</th>
+		<th>Client</th>
+		<th>Position</th>
+		<th>Invoice No</th>
+		<th>Total</th>
+		<th>Invoice Paid</th>
+		<th>Shift List</th>
+		<th>Details</th>
+		<th style="display:none">ID</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[ts.temptimesheetid;block=tr]" >
+	    <td>[ts.weekenddate;noerr]</td>
+		<td>[ts.serialnumber;noerr]</td>
+		<td>[ts.tempname]</td>
+		<td>[ts.companyname]</td>
+	    <td>[ts.position;noerr]</td>
+	    <td>[ts.InvoiceNo;noerr]</td>
+		<td class="number twodp rightalign">[ts.timesheettotal;noerr]</td>
+		<td><input type="checkbox" id="TB[ts.temptimesheetid]" onchange="ChangeInvoicedTick('TB[ts.temptimesheetid]')" [ts.ExternalStatus;if [val]='1'; then 'checked="checked"'; else ''] /></td>
+		<td>[ts.ShiftList;noerr]</td>
+		<td class="center"><img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="zoomtimesheet(this,'[ts.timesheettype]','[ts.temptimesheetid]','[ts.serialnumber;noerr]')" /><input id="TSRecordCount" type="hidden" value="[ts.RowCount;noerr]" /></td>
+		<td style="display:none">[ts.temptimesheetid]</td>
+		</tr>
+	</tbody>
+</table>
+
+<div style="visibility: hidden">
+	<form id="FInvoiced" action="IQXPost.php?proc=GenevaNetTimesheetsTickInvoiced" method="post" accept-charset="utf-8">
+		<input id="pTickValue" name="pTickValue" value="" /><input id="pTimesheetID" name="pTimesheetID" value="" />
+	</form>
+</div>
+
+</div>
+

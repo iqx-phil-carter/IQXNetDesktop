@@ -1,0 +1,188 @@
+<!-- 20140122 Standardised -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	var dlg=$('#divclientnewcontract').dialog({
+		title:'New Requirement',   
+		modal:true,
+		width:650,
+		position:[window.width/2,100],
+		close: function(){
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+		buttons: {
+			"Cancel": function(){
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+			"Save": function(e){
+				SubmitFormContractRequirement(this,e);
+			}
+		}
+	});
+	IQXInitSection($("#frmclientnewcontract"));
+	IQXEnableForm("#frmclientnewcontract",{successhandler:function(){
+		IQXDisableForm();
+		IQXcloseUIdialog(dlg);
+		IQXRefreshTab();
+	}});
+	$('#errormessage').show();
+	doPickList('CV','','#cli_newvac_vacancyid');
+	
+	});
+
+
+function SubmitFormContractRequirement(ThisDialog,e){
+		
+	$(e.target).closest("button").html('<span class="ui-button-text" >Sending...</span>');
+	$(e.target).closest("button").attr('disabled','disabled');
+	
+	$('#frmclientnewcontract').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			if (data != 'Ok') {
+				$(e.target).closest("button").html('<span class="ui-button-text" style="color:red" >Error</span>');
+				$('#spanError').html(data);
+			}else{
+				IQXDisableForm();
+				IQXcloseUIdialog(ThisDialog);
+			}
+		},
+		error: function(data,textStatus){
+			$(e.target).closest("button").html('<span class="ui-button-text" style="color:red" >Error</span>');
+			$('#spanError').html(data);
+			},
+		dataType: "text"
+		});
+	
+}	
+	
+function doPickList(sType,sVacancyID,sSelector,fOnComplete){
+	if (sVacancyID) sVacancyID='&pVacancyID='+sVacancyID;
+	$.getJSON('IQXRawData.php?page=NetClientRequirementTemplates&pType='+sType+sVacancyID+'&render=text_plain__IQXNetResultJSONArray.xsl', function(aChoices){
+		$(sSelector).val('');
+		var sOptions='';
+		$.each(aChoices, function(ix,x){
+			if (x[1]) x[0]+='|'+x[1];
+			if (x[3]) x[2]+=', '+x[3];
+			sOptions+='<option value="'+x[0]+'">'+x[2]+'</option>';
+		});
+		if (sOptions) sOptions='<option value=""> </option>'+sOptions;
+		$(sSelector).html(sOptions);
+		if (typeof(fOnComplete)=='function') {
+			fOnComplete();
+		}
+	});
+}
+
+function contractVacancyClicked(x){
+	// Load values when required
+	
+	var vacid=$(x).val();
+	$('#errormessage').html('');
+	$.getJSON('IQXRawData.php?page=NetClientContractVacancyDetails&pVacancyID='+vacid+'&render=text_plain__IQXNetResultJSONArray.xsl', function(aDetails){
+		if (aDetails && aDetails.length){
+			$('#cli_newvac_pos').val(aDetails[0][0]);
+			$('#cli_newvac_desc').val(aDetails[0][1]);
+		}
+		});
+}
+function CheckRequirement(){
+	// Ensure that Requirement has been selected first
+	if($('#cli_newvac_vacancyid').val()=="" || $('#cli_newvac_vacancyid').val()==null){	// "" or null to handle empty ComboBox
+		$('#errormessage').html('Select a requirement first');
+		$('#cli_newvac_vacancyid').focus();
+	}
+}
+
+function CheckDateRequirement(DateBox){
+	// Ensure date is not in the past, and that Requirement has been selected
+	
+	var x=$('#'+DateBox).val();
+	var ddat = new Date(UKtoJSdate(x));
+	var cdat = new Date();
+	cdat.setHours(0,0,0,0);
+	ddat.setHours(0,0,0,0);
+	
+	if($('#cli_newvac_vacancyid').val()=="" || $('#cli_newvac_vacancyid').val()==null){	// "" or null to handle empty ComboBox
+		$('#errormessage').show();
+		$('#errormessage').html('Requirement must be chosen before entering dates');
+		$('#'+DateBox).val('');
+		return;
+	}else{
+		$('#errormessage').html('');
+	}
+	if(ddat < cdat){
+		$('#errormessage').show();
+		$('#errormessage').html('Date must not be in the past');
+		$('#'+DateBox).val('');
+		return;	
+	}else{
+		$('#errormessage').html('');
+	}
+	if(Date.parse($('#cli_newvac_from').val()) && Date.parse($('#cli_newvac_to').val())){
+		if(Date.parse($('#cli_newvac_from').val()) > Date.parse($('#cli_newvac_to').val())){
+			$('#errormessage').show();
+			$('#errormessage').html('From date must not be later than To date');
+			$('#'+DateBox).val('');
+			return;	
+		}else{
+			$('#errormessage').html('');
+		}
+	}	
+}
+</script>
+
+<style type="text/css">
+	#cli_newvac_vacancyid {
+		width:450px;
+	}
+</style>
+
+<div id="divclientnewcontract">
+<form id="frmclientnewcontract" action="IQXPost.php?proc=NetClientAddVacancies" method="post" accept-charset="utf-8">
+	<fieldset>
+        <p>
+            <label for="cli_newvac_vacancyid">
+                Requirement
+            </label>
+            <select id="cli_newvac_vacancyid" name="ptemplatevacancyid" class="required noncheckbox" onchange="contractVacancyClicked(this);"></select>
+        </p>
+        <p>
+            <label for="cli_newvac_pos">
+                Position
+            </label>
+            <input type="text" id="cli_newvac_pos" name="ptitle" class="required" onfocus="CheckRequirement()" />
+        </p>
+        <p>
+            <label for="cli_newvac_from">
+                From
+            </label>
+            <input type="text" id="cli_newvac_from" name="pdatefrom" class="required longdate" onchange=CheckDateRequirement("cli_newvac_from") />
+        </p>
+        <p>
+            <label for="cli_newvac_to">
+                To
+            </label>
+            <input type="text" id="cli_newvac_to" name="pdateto" class="required longdate" onchange=CheckDateRequirement("cli_newvac_to") />
+        </p>
+        <p>
+            <label for="cli_newvac_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newvac_ref" name="ptheirref" class="uppercase" onfocus="CheckRequirement()" />
+        </p>
+		<p>
+			<label for="cli_newvac_desc">
+				Description
+			</label>
+           <textarea rows=10 cols=45 wrap=soft id="cli_newvac_desc" name="pdescription" onfocus="CheckRequirement()" ></textarea>
+        </p>
+		<p>
+		    <span id="errormessage" class="errormessage">[var.x_errormessage]</span>
+		</p>
+	</fieldset>	
+</form>
+</div>

@@ -1,0 +1,27 @@
+ALTER PROCEDURE "pears"."x"( in pWebUserID char(20)  )
+ RESULT ( a char(250), b char(250) ) 
+BEGIN
+	select a,b     
+	from x key join iqxnetuserlink
+	     where iqxnetuserlink.iqxnetuserid=pwebuserid;
+END
+
+
+
+
+
+ALTER PROCEDURE "pears"."xSet"( pWebUserID char(20), pid char(20),
+     pval char(250) default 'NOT_SET',pOLDval char(250) default 'NOT_SET' ) 
+RESULT (pResult char(250))
+BEGIN
+	if pid not in (select pid from iqxnetuserlink where iqxnetuserid=pwebuserid) then
+        select '99:~Permission denied';
+        return;
+    end if;
+
+    if isnull(pval,'')<>isnull(pOLDval,'') then
+      
+    end if;
+    
+	select '0:~Success';
+END

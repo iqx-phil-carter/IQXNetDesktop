@@ -1,0 +1,139 @@
+
+<style>
+
+#welcomenav {margin: 20px 0 0 20px;}
+#welbuttonlarge {width:470px; height: 300px; float:left;}
+
+#welbuttonlarge button{margin:0 40px 40px 0; position: relative; display:block; float:left;}
+
+#welbuttonsmall {width:200px; height: 300px; float:left;}
+
+#welbuttonsmall button{margin:0 0 12px 0; position:relative;}
+
+</style>
+
+     <div id="welcomenav">
+                        <div id="welbuttonlarge">
+                            <button id="bookstaff" onclick="showaddnewshiftrequirements(2)" type="button">
+                                Book Staff
+                            </button>
+                            <button id="checkbookings" onclick="goTab(2)" type="button">
+                                Check Bookings
+                            </button>
+                            <button id="historicaltimesheets" onclick="goTab(4)" type="button">
+                              <div>
+				Historic
+                                    </div>
+                                <div>
+                                    Timesheets</div>
+                            </button>
+			
+			<button id="reportsandstatistics" onclick="goTab(7)" type="button">
+                                <div>
+                                    Reports</div>
+                                <div>
+                                    & Statistics</div>
+                            </button>
+                        </div>
+                        <div id="welbuttonsmall">
+  				<button id="permcontractplacement" onclick="openPermContractPlacement()" type="button">
+	                               Perm/Contract Placement
+                            </button>
+                              <button id="previoustemps" onclick="goTab(5)" type="button">
+                                Previous Temps
+                            </button>
+			    <button id="timesheetstoauthorise" onclick="goTab(3)" type="button">
+                                Timesheets to Authorise
+                            </button>
+                            
+                        
+                            <button id="updatecontactdetails" onclick="goTab(1)" type="button">
+                                <div>Update Contact Details /</div>
+				<div>Change Password</div>
+                            </button>
+			    	
+                        </div>
+                    </div>
+
+                    <div id="welfooter">
+                        <div class="fright">
+                            <div id="copyright">
+                                &copy; Copyright Geneva 2013</div>
+                            <img alt="" src="css/images/GenIOS-logo.jpg" id="genevalogofooter" />
+                        </div>
+                    </div>
+
+
+<script type="text/javascript">
+
+	function goTab(i){
+		
+		
+	$moTabs.tabs({ selected: i });
+
+	//tabsshowhide(true);	
+
+	}
+
+	var mlWorkingWithTabID = 0;
+	function gotochangepassword(i)
+	{
+		$moTabs.tabs({ selected: i });
+	
+		//Hide the tab we have just displayed while we popup up the password form
+		// Give the tab 2 seconds to render before we pop the password form.
+		mlWorkingWithTabID = i;	
+		$("#ui-tabs-" + mlWorkingWithTabID).hide();
+		window.setTimeout('showChangePassword();', 2000);
+
+	}
+	function showaddnewshiftrequirements(i)
+	{
+		$moTabs.tabs({ selected: i });
+
+		window.setTimeout('doAddVacancies("clientnewshiftmultidayrequirement");', 2000);	
+
+	}
+	function showaddnewcontractrequirements(i)
+	{
+		$moTabs.tabs({ selected: i });
+
+		window.setTimeout('doAddVacancies("clientnewcontractrequirement");', 2000);	
+
+	}
+	function openPermContractPlacement(){
+	
+		window.open('/pdf/PermJobVacancyForm.pdf');
+
+	}
+
+	function showChangePassword(){
+	
+		$("#frmclicontact").hide();
+		IQXChain("#divchangepassword", {action: "load", page: "changepassword"}); 
+		$("#ui-tabs-" + mlWorkingWithTabID).show();
+
+	}
+
+	function tabsshowhide(show)
+	{	
+		var  thetabs = $('#clienttabs ul').get(0);
+		if(show == true)
+		{
+			thetabs.style.display = 'block';
+		}
+		else
+		{
+			thetabs.style.display = 'none';
+		}
+
+		}
+
+
+	$(document).ready(function(){
+
+			
+		//tabsshowhide(false);	
+
+	});
+</script>

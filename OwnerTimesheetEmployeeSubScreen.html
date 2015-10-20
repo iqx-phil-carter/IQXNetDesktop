@@ -1,0 +1,79 @@
+<!--[onload;tplvars;EmployeeDesc='NetOwnerTimesheetCandidateSearch?SearchValue']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var dlg=$('#OwnerTimesheetTempPopupDiv').dialog(
+		{
+		title:'Candidates',   
+		modal:true,
+		width:"60%",
+		position:[window.width/2,100],
+		close: function(){
+			//
+			},
+		buttons:
+			{
+			"Cancel": function()
+				{
+				$(this).dialog('destroy');
+				}
+			}
+		}
+	);
+	$('#SearchBox').focus();	
+});
+
+function CheckForReturn(event){
+	// ## run search on pressing enter in search box
+	
+	if(event.keyCode==13){RunSearch(SearchValue=$('#SearchBox').val());}
+}
+
+function RunSearch(){
+	// ## open candidate select popup using search criteria from 'SearchValue' textbox
+
+	IQXChain('#OwnerTimesheetTempPopupDiv', {action: 'load',page: 'OwnerTimesheetEmployeeSubScreen&SearchValue=' + $('#SearchBox').val()});
+	}
+
+function TimesheetCandidateButtonClick(PersonID){
+	// ## retreive selected candidate id from 'candidate popup' select button
+	var PersonName=$('#PN'+PersonID).val();
+	$('#InputCandidate').val(PersonID);
+	$('#InputCandidateName').val(PersonName);
+	$('#OwnerTimesheetTempPopupDiv').dialog('destroy');
+	TimesheetClearSuccessiveFields('4');	// routine on 'OwnerTimesheetMaster.html'
+	}
+	
+</script>
+
+<style>
+	input.VeryWide, select.VeryWide{
+		width:350px;
+	}
+	
+</style>
+
+<div id="OwnerTimesheetDiv">
+	<fieldset class="regular ui-corner-all">
+		<input id="SearchBox" class="Wide" onKeyUp="CheckForReturn(event)" />
+		<button onClick="RunSearch()">Search</button>
+	</fieldset>
+	<fieldset class="regular ui-corner-all" >	
+		<table  class="questionnaire" id="OwnerTimesheetTable" >
+			<thead>
+				<tr>
+					<th class="DetailHeader" >Name</th>
+					<th class="DetailHeader" >Address</th>
+					<th class="DetailHeader" ></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr id="[EmployeeDesc.PersonID;block=tr]">
+					<td><input id="PN[EmployeeDesc.PersonID]" class="Wide" readonly="readonly" value="[EmployeeDesc.Name]" /></td>
+					<td><input class="VeryWide" readonly="readonly" value="[EmployeeDesc.Address]" /></td>
+					<td><button onClick="TimesheetCandidateButtonClick('[EmployeeDesc.PersonID]')" >Select</button ></td>
+				</tr>
+			</tbody>
+		</table>
+	</fieldset>
+</div>

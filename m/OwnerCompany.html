@@ -1,0 +1,158 @@
+﻿<!--[onload;tplvars;CompanyList='MobileNetOwnerCompany?pCompanyID';ContactList='MobileNetOwnerContacts?pCompanyID']-->
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (window.pEventType == 'F') {
+            $('#NavFavouriteButtons').show();
+            $('#NavButtons').hide();
+        } else {
+            $('#NavFavouriteButtons').hide();
+            $('#btnCompanyDiaryHome').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType);
+            $('#btnCompanyDiaryDetailHome').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        }
+        $('#CompanyTaskButtons').hide();
+        $('#btnCompanyHelp').attr('href', window.HelpRoot + 'hat_3');
+        $('form').keypress(function (event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                CompanySave();
+            }
+        })
+    });
+   
+    function CreateCompanyContactEvent(line, ContactType) {
+        window.pMethod = ContactType;
+        window.pAddress = $(line).html();
+       
+        var DestPage = 'iqxnet.php?P=OwnerContactEvent&pCalendarLineID=' + window.pContactEventLineID + '&pEventType=' + window.pEventType;
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
+
+    function LoadContactPage(line) {
+
+        var DestPage = 'iqxnet.php?P=OwnerContact&pContactID=' + $(line).attr('id');
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
+
+    function CompanyEdit(line) {
+        CompanyShowNav();
+        $('#CompanyWarningArea').html('<input id="CompanyWarningText" name="pWarning" style="width:100%" value="" />');
+        $('#divCompanyError').html('');
+        $('#CompanyWarningText').focus();
+    }
+
+    function CompanySave() {
+        var NoteText = '';
+        if ($('#CompanyWarningText').val() != '') { NoteText = $('#CompanyWarningText').val(); }
+        
+        if (NoteText == '') {
+            $('#CompanyWarningArea').html('[CompanyList.CompanyWarning;noerr]');
+        } else {
+            $('#frmCompanyDetails').ajaxSubmit({
+                success: function (data, textStatus) {
+                    if (textStatus == 'success' && data == 'Ok') {
+                        $('#CompanyWarningArea').html(NoteText);
+                    } else {
+                        $('#divCompanyError').html(data);
+                    }
+                },
+                error: function (data, textStatus) {
+                    $('#divCompanyError').html(data);
+                },
+                dataType: "html"
+            });
+        }
+        $('#CompanyTaskButtons').fadeOut();
+    }
+
+    function CompanyShowNav() {
+        $('#CompanyTaskButtons').fadeIn();
+        $('#CompanyTaskButtons').fadeOut();
+        $('#CompanyTaskButtons').fadeIn();
+    }
+
+</script>
+
+<nav role="navigation" id="NavHelpButtons" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnCompanyHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<nav role="navigation" id="NavButtons" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnCompanyHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    <span class="btnNavLeft"><a id="btnCompanyDiaryHome" href="" data-role="button" data-icon="grid" data-iconpos="notext">Diary</a></span>
+    <span class="btnNavLeft"><a id="btnCompanyDiaryDetailHome" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Detail</a></span>
+</nav>
+<nav role="navigation" id="NavFavouriteButtons" style="display:block;float:left;">
+    <span class="btnNavLeft"><a id="btnCompanyHome" href="iqxnet.php?P=OwnerFavourites" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+</nav>
+<span>Client</span>
+<nav id="CompanyTaskButtons" style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnCompanySave" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="CompanySave()">Complete</a></span>
+</nav>
+
+<br />
+
+<div id="divCompanyError" class="errormessage"></div>
+
+<div>
+    <form id="frmCompanyDetails" action="IQXPost.php?proc=MobileNetOwnerEditCompany" method="post">
+        <table class="tablesorter">
+            <tr>
+                <td>Name</td>
+                <td>[CompanyList.CompanyName]</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>[CompanyList.CompanyStatus;noerr]</td>
+            </tr>
+            <tr>
+                <td>Division</td>
+                <td>[CompanyList.DivisionName;noerr]</td>
+            </tr>
+            <tr>
+                <td>Owner</td>
+                <td>[CompanyList.OwnerName;noerr]</td>
+            </tr>
+            <tr ondblclick="CompanyEdit()">
+                <td>Warning</td>
+                <td id="CompanyWarningArea">[CompanyList.CompanyWarning;noerr]</td>
+            </tr>
+            <tr>
+                <td>Website</td>
+                <td><a href="[CompanyList.WebAddress;noerr]">[CompanyList.WebAddress;noerr]</a></td>
+            </tr>
+            <tr>
+                <td>Main Phone</td>
+                <td><a href="tel:+[CompanyList.PhoneLink;noerr]" onclick="CreateCompanyContactEvent(this,'Phone')">[CompanyList.PhoneView;noerr]</a></td>
+            </tr>
+            <tr>
+                <td>Main Email</td>
+                <td><a href="mailto:[CompanyList.Email;noerr]" onclick="CreateCompanyContactEvent(this, 'Email')">[CompanyList.Email;noerr]</a></td>
+            </tr>
+        </table>
+        <input type="hidden" name="pCompanyID" value="[CompanyList.CompanyID;noerr]" />
+    </form>
+    <table class="tablesorter">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="[ContactList.PersonID;block=tr]" onclick="LoadContactPage(this)">
+                <td class="PrimaryContact[ContactList.PrimaryContact;noerr]">[ContactList.PersonName]</td>
+                <td>[ContactList.Position;noerr]</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

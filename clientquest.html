@@ -1,0 +1,32 @@
+<!--[onload;tplvars;cliquest='F_questions?ptaglocation=C']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#frmcliquest");
+		$("#frmcliquest").questionnaire();
+	});
+</script>
+
+<form id="frmcliquest" name="clientquest" action="IQXPost.php?proc=netquestset" method="POST" accept-charset="ISO-8859-1">
+    <fieldset class="regular">
+		<div>[cliquest;block=div]</div>  
+		<div class="cleardiv" ></div>     
+		<p>
+            <button type="button" id="q_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+                Edit
+            </button>
+            <button type="button" id="q_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+                Refresh
+            </button>
+            <button type="submit" id="q_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="q_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+                Undo
+            </button>
+        </p>
+    </fieldset>
+    <p>
+        <span class="errormessage">[var.x_errormessage]</span>
+    </p>
+</form>

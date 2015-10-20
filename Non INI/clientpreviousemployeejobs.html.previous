@@ -1,0 +1,29 @@
+<!--[onload;tplvars;empjobs='NetClientPreviousEmployeeJobs?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliprevtempjobs_[var.x_params.pPersonID]"));
+	$(".questionnaire","#divcliprevtempjobs_[var.x_params.pPersonID]").questionnaire({disabled:true});
+	});
+
+</script>
+<div id="divcliprevtempjobs_[var.x_params.pPersonID]">
+<table class="tablesorter">
+	<thead>
+		<tr>
+			<th>Position</th>
+			<th>Start Date</th>
+			<th>Finish Date</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[empjobs.Position;block=tr;noerr]</td>
+	    <td>[empjobs.StartDate;noerr]</td>
+	    <td>[empjobs.FinishDate;noerr]</td>
+		</tr>
+		
+	</tbody>
+</table>
+<div>[candpubquest;block=div]</div>  
+</div>

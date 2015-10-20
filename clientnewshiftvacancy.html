@@ -1,0 +1,98 @@
+<!--[onload;tplvars;newsh='NetClientShiftTemplate?pVacancyID&pShiftTemplateID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliaddjobs"));
+	$('#frmclientnewshift select').multiSelect();
+	var frm=$('#frmclientnewshift').get(0);
+	IQXEnableForm(frm);
+	$('#frmclientnewshift .readonly').attr('readonly','readonly');
+	});
+
+</script>
+
+<form id="frmclientnewshift" action="IQXPost.php?proc=NetClientAddShifts" method="post" accept-charset="utf-8">
+	<fieldset>
+		<legend>New Requirement - [newsh.Position]</legend>
+		<input type="hidden" id="cli_newsh_vacid" name="pvacancyid" value="[newsh.VacancyID;block=fieldset]" />
+		<input type="hidden" id="cli_newsh_shiftid" name="pshifttemplateid" value="[newsh.TempShiftTemplateID]" />
+        <p>
+            <label for="cli_newsh_date">
+                Date
+            </label>
+            <input type="text" id="cli_newsh_date" name="pshiftdate" class="required longdate" />
+        </p>
+        <p>
+            <label for="cli_newsh_from">
+                From
+            </label>
+            <input type="text" id="cli_newsh_from" name="ptimefrom" class="required time [newsh.Moveable;if [val]=1;then '';else 'readonly']" value="[newsh.TimeFrom;noerr]"/>
+        </p>
+        <p>
+            <label for="cli_newsh_to">
+                To
+            </label>
+            <input type="text" id="cli_newsh_to" name="ptimeto" class="required time [newsh.Moveable;if [val]=1;then '';else 'readonly']"  value="[newsh.TimeTo;noerr]" />
+        </p>
+        <p>
+            <label for="cli_newsh_brk">
+                Break (minutes)
+            </label>
+            <input type="text" id="cli_newsh_brk" name="pbreak" class="digits [newsh.Moveable;if [val]=1;then '';else 'readonly']"  value="[newsh.BreakMinutes;noerr]" />
+        </p>
+        <p>
+            <label for="cli_newsh_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newsh_ref" name="ptheirref" class="uppercase" />
+        </p>
+		<p>
+			<label for="cli_newsh_desc">
+				Description
+			</label>
+           <textarea rows=3 cols=45 wrap=soft id="cli_newsh_desc" name="pdescription">[newsh.ShiftDescription;noerr]</textarea>
+        </p>
+		<p>
+			<label for="cli_newsh_skills">
+				Skills
+			</label>
+			<select id="cli_newsh_skills" name="pskills[]" multiple="multiple" class="required">
+				[newsh.ChoiceList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+		<p>
+			<label for="cli_newsh_grade">
+				Grade
+			</label>
+			<select id="cli_newsh_grade" name="pgrade" class="required">
+				<option value=""></option>
+				[newsh.GradeList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+        <p>
+            <label for="cli_newsh_quantity">
+                Quantity
+            </label>
+            <input type="text" id="cli_newsh_quantity" name="pquantity" class="digits"  value="1" />
+        </p>
+        <p>
+            <label for="cli_newsh_note">
+                Note
+            </label>
+            <input type="text" id="cli_newsh_note" name="pnote"  />
+        </p>
+		<p>
+		    <button type="submit" id="cli_newsh_submit" class="fixed formbutton" >
+		        Save
+		    </button>
+		    <button type="button" id="cli_newsh_reset" class="fixed formbutton" onclick="unaddjob()" >
+		        Undo
+		    </button>
+		</p>
+	
+	</fieldset>
+</form>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

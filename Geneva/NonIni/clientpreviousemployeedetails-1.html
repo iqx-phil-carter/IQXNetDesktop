@@ -1,0 +1,61 @@
+<!--[onload;tplvars;cand='NetCandidatePublicProfile?pPersonID';candpubquest='F_questions_table?pTaglocation=P&pid';deptpubquest='F_questions_table?pTaglocation=AAA&pid']-->
+
+<!-- 20120625 remove photo and date of birth -->
+<!-- 20120626 change pDeptID in top line to match department code -->
+<!-- 20120627 move bottom questionnaire section to top, and vice versa -->
+ 
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	
+	IQXInitSection($("#divcliprevtempdetails_[var.x_params.pid]"));
+	
+	$(".questionnaire","#divcliprevtempdetails_[var.x_params.pid]").questionnaire({disabled:true});
+	
+	$("tbody","#divcliprevtempdetails_[var.x_params.pid]").prepend($("tbody","#divhiddendetails_[var.x_params.pid]").html());
+	   
+	$("td.qanswer > input[value='']","#divcliprevtempdetails_[var.x_params.pid]").closest('tr.qquestrow').remove();
+
+	
+	IQXChain('#DocDetails', {
+		action: 'load',
+		page: 'ClientCandidateDocuments&pPersonID=' + encodeURIComponent('[var.x_params.pid]')
+	});
+			
+	$('#divcliprevtempdetails_[var.x_params.pid]').dialog({
+		title:$("#divhiddendetails_[var.x_params.pid]").attr('title'),   
+		modal:false,
+		width:630,
+		close: function(){
+				IQXcloseUIdialog(this);
+			},
+		buttons: {
+			"Close": function(){
+				IQXcloseUIdialog(this);
+			},
+			"Printable": function(){
+				IQXopenInNewWindow('IQXNetEx.php?page=clientprevempdetailsprintable&wrapper=bare&pPersonID='
+     				+ encodeURIComponent('[var.x_params.pid]')+'&pid=' 
+	 				+ encodeURIComponent('[var.x_params.pid]'));				
+			}
+		}
+	});
+
+	});
+
+</script>
+
+<div id="divcliprevtempdetails_[var.x_params.pid]">
+
+	<div id="divhiddendetails_[var.x_params.pid]" class="ui-helper-hidden" title="[cand.Name;block=div;noerr]"></div>
+	
+	<div id="DeptQuest">[deptpubquest;block=div]</div> 
+
+	<div>[candpubquest;block=div]</div>
+	
+	<div id="DocDetails"></div>
+	
+	
+</div>
+
+

@@ -1,0 +1,115 @@
+<!--[onload;tplvars;ts='NetCandidateCalendar?pstart=0&pend=2000000000&pShiftOverflowEndTime=0&pFilterType=0&pWorkingString=']-->
+
+<script language="javascript" type="text/javascript" src="lib/jquery/jquery.js" ></script>
+<link rel="stylesheet" href="css/jquery.mobile.theme-1.4.2.css" />
+
+<style>
+	table{
+		font-size:30px;
+		line-height: 1.3;
+		width:100%;
+		text-align: left;
+		padding: 40px;
+	}
+	
+	td.expanded {
+		width: 100%;
+		background-color:#29abe2;
+	}
+	th{
+		text-align: left;
+	}
+	.calendarAvailable{
+		color: red;
+	}
+	.calendarBooked{
+		color:blue;
+	}
+	.calendarUnavailable{
+		color:green;
+	}
+	p{
+		font-size:50px;
+		line-height: 1.3;
+		width:100%;
+		text-align: center;
+		padding: 40px;
+		text-decoration:underline;
+	}
+	.ui-btn{
+		font-size:30px;
+	}
+</style>
+
+<script>
+	
+	var IsJQLoaded = window.$;
+	if(IsJQLoaded==null){
+		var head=document.getElementsByTagName('head')[0];
+		var JQ=document.createElement('script');
+		JQ.type='text/javascript';
+		JQ.src='lib/jquery/jquery.js';
+		head.appendChild(JQ);
+		alert('do the same for the stylesheet');
+		alert('post-loaded');
+	}
+</script>
+
+<script>	
+	$(document).ready(function(){
+	
+		
+	//	$.get('IQXRawData.php?page=NetCandidateCalendar&pstart=0&pend=2000000000&pShiftOverflowEndTime=0&pFilterType=0&pWorkingString=WT', function(data,textStatus){
+	//		ResultString = data; // below: lose xml headers and add option tags
+	//		alert(data);	
+	//	});
+	});
+	
+	
+	function ShowDetail(RowID,editable,deletable,confirmable,unconfirmable) {
+		
+		var ExpandedID=RowID+'_Expanded';
+		var Event='';
+		var Action=$('#'+ExpandedID).html();
+		if(Action==null){
+				$.get('IQXRawData.php?page=MobileNetCandidateCalendarDetail&pRefID='+RowID+'&pWorkingString=WT', function(data,textStatus){
+					Event=String(data.substring(data.indexOf('description')+21,data.indexOf('/description')-4));
+					$('#'+RowID).after('<tr id="'+ExpandedID+'"><td class="expanded" colspan="2"><span onClick="ShowDetail('+'&#39;'+RowID+'&#39;'+')">'+Event+'</span>'
+					+'<span>'+editable+' '+deletable+' '+confirmable+' '+unconfirmable+'</span></td></tr>'
+					);	
+					
+				});
+		} else {
+			$('#'+ExpandedID).remove();
+			$('#'+ExpandedID+'Bottom').remove();
+		} 
+	}
+	
+	function AddBooking(){
+		alert('Add Booking');
+	}
+</script>
+
+<div data-role="page" > 
+	<p>Bookings</p>
+
+	<button data-role="button" class="ui-btn ui-corner-all" id="BtnAddBooking" onClick="AddBooking()">Add Bookings</button>
+
+	booking div here
+	
+	<table id="tbltimesheets"  data-role="table" data-mode="reflow">
+		<thead>
+			<tr>	
+				<th>Number</th>
+				<th>Shift Date and Time</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="[ts.id;block=tr]" class="[ts.className;noerr]" onClick="ShowDetail('[ts.id;noerr]','[ts.editable;noerr]','[ts.deletable;noerr]','[ts.confirmable;noerr]','[ts.unconfirmable;noerr]')">
+				<td>[ts.title;noerr]</td>
+				<td>[ts.shiftStart;noerr]</td>
+			</tr>
+		</tbody>
+	</table>
+	<button data-role="button" class="ui-btn ui-btn-a ui-corner-all" id="Btn" onClick="alert($('#Btn').attr('id'))">Click Me</button>
+</div>

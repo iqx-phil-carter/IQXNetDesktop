@@ -1,0 +1,117 @@
+<!--[onload;tplvars;cand='NetCandidateProfileBank']-->
+
+<!-- 20140409 combined -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#frmcandAdmin");
+		$("#frmcandAdmin .questionnaire").questionnaire();
+	});
+	
+	function SplitBankCode(){
+		// split combined bank and account field into original separate fields
+		
+		$('#cand_BankSortCode').val($('#cand_FullBankCode').val().substr(0,7));
+		$('#cand_BankAcNo').val($('#cand_FullBankCode').val().substr(8,19));
+	}
+	
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_profile_Bank_top.html;noerr]</div>
+<form id="frmcandAdmin" name="candAdmin" action="IQXPost.php?proc=NetCandidateProfileSetBank" method="POST" accept-charset="utf-8">
+    <div align="center" class="ButtonGroup" >[onload_BG1;block=div;when [var.x_local.Switches.TopButtonGroup;noerr]='1']
+        <button type="button" id="cand_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+            Edit
+        </button>
+        <button type="button" id="cand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+            Refresh
+        </button>
+        <button type="submit" id="cand_submit" class="fixed formbutton" >
+            Save
+        </button>
+        <button type="button" id="cand_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+            Undo
+        </button>
+	</div>
+	<div class="errormessage" align="center" >[var.x_errormessage]</div>
+    <fieldset class="regular">
+        <input type="hidden" id="cand_personid" name="ppersonid" value="[cand.PersonID;block=fieldset]" />
+        <div>[onload_IG1;block=div;when [var.x_local.Candidate.BankName;noerr]='1']<input type="hidden" name="poldBankName" value="[cand.BankName;noerr]" /></div>
+        <div>[onload_IG2;block=div;when [var.x_local.Candidate.BankBranch;noerr]='1']<input type="hidden" name="poldBankBranch" value="[cand.BankBranch;noerr]" /></div>
+		<div>[onload_IG3;block=div;when [var.x_local.Candidate.BankAcName;noerr]='1']<input type="hidden" name="poldBankAcName" value="[cand.BankAcName;noerr]" /></div>
+        <div>[onload_IG4;block=div;when [var.x_local.Candidate.BankSortCode;noerr]='1']<input type="hidden" name="poldBankSortCode" value="[cand.BankSortCode;noerr]" /></div>
+        <div>[onload_IG5;block=div;when [var.x_local.Candidate.NZCombinedBankCode;noerr]='1']<input type="hidden" name="poldFullBankCode" value="[cand.BankSortCode;noerr]" /></div>
+        <div>[onload_IG6;block=div;when [var.x_local.Candidate.BankAcNo;noerr]='1']<input type="hidden" name="poldBankAcNo" value="[cand.BankAcNo;noerr]" /></div>
+        <div>[onload_IG7;block=div;when [var.x_local.Candidate.NI;noerr]='1']<input type="hidden" name="poldni" value="[cand.ni;noerr]" /></div>
+        <div>[onload_IG8;block=div;when [var.x_local.Candidate.IRD;noerr]='1']<input type="hidden" name="poldird" value="[cand.ni;noerr]" /></div>
+        <div>[onload_IG9;block=div;when [var.x_local.Candidate.UTR;noerr]='1']<input type="hidden" name="poldUniqueTaxReference" value="[cand.UniqueTaxReference;noerr]" /></div>
+        <div>[onload_IG10;block=div;when [var.x_local.Candidate.TaxCode;noerr]='1']<input type="hidden" name="poldTaxCode" value="[cand.TaxCode;noerr]" /></div>
+        <div>[onload_IG11;block=div;when [var.x_local.Candidate.NZBankSortCode;noerr]='1']<input type="hidden" id="cand_BankSortCode" name="pBankSortCode" value="[cand.BankSortCode;noerr]" class="validNZBankSortCode qpseudoquestanswer" /></div>
+		<div>[onload_IG12;block=div;when [var.x_local.Candidate.NZBankAcNo;noerr]='1']<input type="hidden" id="cand_BankAcNo" name="pBankAcNo" value="[cand.BankAcNo;noerr]" class="validNZBankAccountNo qpseudoquestanswer"  /></div>
+		
+		<div class="questionnaire">
+		<div class="qquestrow">[onload_QG1;block=div;when [var.x_local.Candidate.BankName;noerr]='1']
+            <div class="qquestion">Name Of Bank</div>
+			<div class="qanswer"><input type="text" id="cand_BankName" name="pBankName" value="[cand.BankName;noerr]" class="qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">[onload_QG2;block=div;when [var.x_local.Candidate.BankBranch;noerr]='1']
+        	<div class="qquestion">Branch Name</div>
+			<div class="qanswer"><input type="text" id="cand_BankBranch" name="pBankBranch" value="[cand.BankBranch;noerr]" class="qpseudoquestanswer" /></div>
+        </div>
+		<div class="qquestrow">[onload_QG4;block=div;when [var.x_local.Candidate.BankSortCode;noerr]='1']
+            <div class="qquestion">Sort Code</div>
+			<div class="qanswer"><input type="text" id="cand_BankSortCode" name="pBankSortCode" value="[cand.BankSortCode;noerr]" class="validBankSortCode qpseudoquestanswer" /></div>
+        </div>
+		<div class="qquestrow">[onload_QG3;block=div;when [var.x_local.Candidate.BankAcName;noerr]='1']
+            <div class="qquestion">Account Name</div>
+			<div class="qanswer"><input type="text" id="cand_BankAcName" name="pBankAcName" value="[cand.BankAcName;noerr]" class="qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">[onload_QG6;block=div;when [var.x_local.Candidate.BankAcNo;noerr]='1']
+            <div class="qquestion">Account Number</div>
+			<div class="qanswer"><input type="text" id="cand_BankAcNo" name="pBankAcNo" value="[cand.BankAcNo;noerr]" class="validBankAccountNumber qpseudoquestanswer"  /></div>
+        </div>
+        <div class="qquestrow">[onload_QG5;block=div;when [var.x_local.Candidate.NZCombinedBankCode;noerr]='1']
+        	<div class="qquestion">Bank and Account Number</div>
+			<div class="qanswer"><input type="text" id="cand_FullBankCode" name="pFullBankCode" value="[cand.BankSortCode;noerr]-[cand.BankAcNo;noerr]" class="validNZCombinedBankAccountNo qpseudoquestanswer" onChange="SplitBankCode()"/></div>
+        </div>
+        <div class="qquestrow">[onload_QG7;block=div;when [var.x_local.Candidate.NI;noerr]='1']
+            <div class="qquestion">National Insurance Number</div>
+			<div class="qanswer"><input type="text" id="cand_ni" name="pni" value="[cand.ni;noerr]" class="validNiNumber uppercase qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">[onload_QG8;block=div;when [var.x_local.Candidate.IRD;noerr]='1']
+        	<div class="qquestion">IRD Number</div>
+			<div class="qanswer"><input type="text" id="cand_ird" name="pird" value="[cand.ni;noerr]" class="validNZIRDNumber uppercase qpseudoquestanswer" /></div>
+        </div>
+        <div class="qquestrow">[onload_QG9;block=div;when [var.x_local.Candidate.UTR;noerr]='1']
+            <div class="qquestion">Unique Tax Reference</div>
+			<div class="qanswer"><input type="text" id="cand_UniqueTaxReference" name="pUniqueTaxReference" value="[cand.UniqueTaxReference;noerr]" class="validUTRNumber qpseudoquestanswer" /></div>
+        </div>
+    	<div class="qquestrow">[onload_QG10;block=div;when [var.x_local.Candidate.TaxCode;noerr]='1']
+        	<div class="qquestion">Tax Code</div>
+			<div class="qanswer"><input type="text" id="cand_TaxCode" name="pTaxCode" value="[cand.TaxCode;noerr]" class="validNZTaxCode qpseudoquestanswer" /></div>
+        </div>
+        	
+		<div class="cleardiv" ></div>
+	   	  
+	    <div align="center" class="ButtonGroup" >[onload_BG2;block=div;when [var.x_local.Switches.BottomButtonGroup;noerr]='1']
+            <button type="button" id="cand_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+                Edit
+            </button>
+            <button type="button" id="cand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+                Refresh
+            </button>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+                Undo
+            </button>
+            <span class="errormessage">[var.x_errormessage]</span>
+	    </div>
+		<p>
+			<div class="usertext">[onload;file=txt_candidate_profile_Bank_bottom.html;noerr]</div>
+		</p>
+    </fieldset>
+</form>
+
+

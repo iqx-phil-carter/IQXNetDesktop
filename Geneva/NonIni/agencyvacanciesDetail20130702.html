@@ -1,0 +1,416 @@
+<!--[onload;tplvars;vacancies='GenevaNetAgencyVacancies?pStartDate&pEndDate&pPageNo&SearchString&SampleSize']-->
+
+<!-- 20130625 modify to pass vacancyid separately. ShiftPlanid also included -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("#divagvacs"));
+	IQXDeepLink("R");
+	if($('#CanConfirmDecline').text()+$('#CanDownload').text() == ''){$('.dataTableExpand').hide()};
+	$('#NavButtons').hide();
+		
+	var RecordCount=$('#VacRecordCount').val();
+	var SampleSize=$('#VacSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1};
+	PageCount=Root+Mantissa;
+	$('#VacLastPage').html(PageCount);
+	if($('#VacLastPage').html() != 'NaN'){
+		$('#NavButtons').show();
+		} 
+	});
+
+	
+function preparesubmitcandidate(btn,row,vacid,planid) {
+	// fetch candidate list
+	
+	ClearErrorLine();
+	var RowID=$(row).attr('id');
+	var Caption=$(btn).html();
+	if(Caption=='Candidates'){
+		CloseForm();
+		$('.dataTableExpand').hide();
+		$('.submitbutton').attr('disabled','disabled');
+		$('.submitbutton').html('Candidates');
+		$(btn).html('Hide Candidates');
+		$(btn).removeAttr('disabled');
+		
+		$("#divagvacs").data("zoomedrow",{
+			row: row,
+			vacid: vacid,
+			planid: planid
+		});
+	
+		$(row).after('<tr><td colspan=9><div id="divsubmitcandidate" class="zoomeddiv"></div></td></tr>');
+		var postdata={pVacancyID:vacid,pRowID:RowID};
+		IQXChain('#divsubmitcandidate',{action:'load',page:'agencycandidatesubmit',postdata:postdata});
+		$('#pVacID').attr('value',vacid);
+	}else{
+		abandonsubmitcandidate();
+	}
+}
+
+
+function submitcandidate(persid) {
+	// referenced from agencycandidatesubmit.html
+	
+	ClearErrorLine();
+	var dat=$("#divagvacs").data("zoomedrow");
+	var postdata={pPersonID:persid,pVacancyID:dat.vacid,pShiftPlanID:dat.planid};
+	var nxt={action:'func',func:IQXRefreshTab};
+	IQXChain('#agvacerror',{action:'send',proc:'NetAgencyCandidateSubmit',postdata:postdata,nextlink:nxt});
+	}
+
+
+function abandonsubmitcandidate() {
+	// referenced from agencycandidatesubmit.html
+	
+	ClearErrorLine();
+	$(".submitbutton").html('Candidates');
+	$(".submitbutton").removeAttr('disabled');
+	$('.dataTableExpand').show();
+	var dat=$("#divagvacs").data("zoomedrow");
+	$(dat.row).next().remove();
+	$(".submitbutton").show();
+	$("#divagvacs").removeData("zoomedrow");
+}
+
+
+function ClearErrorLine(){
+	// remove any error messages
+	
+	$('#agvacerror').html('');	
+}
+
+
+function ButtonAction(ButtonID,VacID,TempShiftID){
+	// call appropriate routine based on button name
+	
+	var Action=$(ButtonID).html();
+	var RowID=$(ButtonID).attr('id').substring(1,22);
+	var TextArea=$('#CN'+$(ButtonID).attr('id').substring(1,22)).html();
+	
+	if(Action=='Documents'){
+		$('#divAdditional').css('display','none');
+		$('#divInterest').css('display','none');
+		$('#divDocDownload').css('display','inline');
+		showVacDocuments(RowID);
+		return;
+	};
+	if(Action=='Additional Details'){
+		$('#DocBtnSpan').css('display','none');
+		$('#divAdditional').css('display','none');
+		$('#divInterest').css('display','none');
+		$('#divDocDownload').css('display','none');
+		$('#divExtraDetails').css('display','inline');
+		IQXChain('#divExtraDetails',{action:'load',page:'AgencyVacanciesAdditionalDetails&pRowID='+RowID});
+		return;
+	}
+	if(TextArea=='Enter Confirm/Decline reason here'){
+		$('#agvacerror').html('Please enter a Confirm/Decline reason');
+		return;
+		}
+	if(Action=='Confirm Interest'){
+		hideDownloadButton(ButtonID);
+		DiaryAddSave(RowID,'C',VacID,TempShiftID);
+		}
+	if(Action=='Decline Interest'){
+		
+		hideDownloadButton(ButtonID);
+		DiaryAddSave(RowID,'E',VacID,TempShiftID);
+		}		
+}
+
+
+function DiaryAddSave(RowID,Action,VacID,TempShiftID){
+	// send request to database and retreive response
+	
+	$('#pVacID','#F'+RowID).val(VacID);	
+	$('#pTransactionType','#F'+RowID).val(Action);
+	$('#pShiftPlanID','#F'+RowID).val(TempShiftID);		
+	$('#F'+RowID).attr('action','IQXPost.php?proc=GenevaNetAgencyVacanciesLineStatusUpdate');
+	$('#F'+RowID).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var ConfirmText=data.toString().substring(data.toString().indexOf('#')+1);
+			$('#Int'+RowID).html(ConfirmText);	
+			if (textStatus != 'success') {
+				$('#agvacerror').html(data);
+				}
+			},
+		error: function(data,textStatus){
+			$('#agvacerror').html(data);
+			},
+		dataType: "text"
+		});
+		CloseForm();
+		$IQXFormContext = null;
+};
+	
+	
+function CloseForm(){
+	// Close an open form
+	
+	var frm=0;
+	if($('form').attr('id')){
+		frm=$('form').attr('id');
+	}
+	if(frm != 0){
+		var RowToClose=frm.substr(1);
+		$('#' + RowToClose).next('tr').remove();
+		$('#I'+RowToClose).attr('src', 'css/images/details_open.png');
+		$('#I'+RowToClose).attr('title', 'Show Details');
+		
+		}
+	$(".submitbutton").show();
+}
+
+
+function showVacDocuments(RowID) {
+	// show document list for download
+	
+	hideDownloadButton(RowID);
+	$('#D'+RowID).css('display','none');
+	var VacID=RowID.substring(1,21);
+	$('div.zoomeddivCurrent').attr('class','zoomeddivWide');
+	IQXChain('#divDocDownload',{action:'load',page:'vacancydocuments&pOwnerType=V&pOwnerID='+encodeURIComponent(VacID)});
+}
+
+
+function hideDownloadButton(RowID){
+	// hide download button when some other routine is selected
+	
+	$('#DocBtnSpan').css('display','none');
+}	
+
+
+function showShiftActions(img,Rowid,VacID,TempShiftID,ShowMilestones,ShowDecline) {
+	// Create subform for actions
+		
+	$('.errormessage').html('');	 
+	$('.submitbutton').hide();	
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#tblcliprevtemp").data('dataTable');
+	var bOpen=img.src.match(/details_open/);	
+	var TargetDiv;
+	var frm=0;
+	if($('form').attr('id')){
+		frm=$('form').attr('id');
+	}
+
+	if(frm != 0){
+		$('.submitbutton').show();	
+		var RowToClose=frm.substr(1);
+		if($('#' + RowToClose).next('tr').attr('id')){
+		}else{
+			$('#' + RowToClose).next('tr').remove();
+			$('#I'+RowToClose).attr('src', 'css/images/details_open.png');
+			$('#I'+RowToClose).attr('title', 'Show Details');
+		};	
+		if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		return;
+		}
+	}
+
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).rowafter({dataTable:dt,divs:[{divclass:"zoomeddivCurrent"}]});
+	TargetDiv=$(row).next('tr').find("div.zoomeddivCurrent");
+	$(TargetDiv).parent().attr('colspan','9');
+	
+	$('#divsubmitcandidate').parent().parent().html('');
+	
+	var FormString='<form id="F'+Rowid+'" method="post" >';
+	if ($('#CanDownload').text()=='1') {FormString=FormString+ "<div class='ZoomedDivSub'><span id='DocBtnSpan' class='ZoomedSpanRight'><button class='fixed' type='button' id='D"+Rowid+"' onClick=ButtonAction(this,'"+VacID+"') >Documents</button></span></div><hr />"};
+	FormString=FormString+ "<div id='divDocDownload' style='display:none' ></div>";
+	
+	if ($('#CanConfirmDecline').text()=='1' && ShowDecline=='1'){
+		if(('[var.x_local.Switches.ShowConfirmDecline;noerr]')=='1'){
+			FormString=FormString+ "<div id='divInterest' >";
+			FormString=FormString+ "	<div id='divConfirm' class='ZoomedDivSub' >";
+			FormString=FormString+ "		<span class='ZoomedSpanLeft'>";
+			FormString=FormString+ "				<textarea id='CN"+Rowid+"' name='pNote' rows='3' cols='40' class='StartingColour' onkeyup='NoteCountdown(this)' onClick='EnableButton(C"+Rowid+")' >Enter Confirm/Decline reason here</textarea>";
+			FormString=FormString+ "			<span id='CharCountC'>150</span>";
+			FormString=FormString+ "		</span>";
+			FormString=FormString+ "		<span class='ZoomedSpanRight'>";
+			FormString=FormString+ "				<button class='fixedA' type='button' id='C"+Rowid+"' onClick=ButtonAction(this,'"+VacID+"','"+TempShiftID+"') >Confirm Interest</button>";
+			FormString=FormString+ "			<br />";
+			FormString=FormString+ "				<button class='fixedA' type='button' id='E"+Rowid+"' onClick=ButtonAction(this,'"+VacID+"','"+TempShiftID+"') >Decline Interest</button>";
+			FormString=FormString+ "		</span>";
+			FormString=FormString+ "	</div>";
+			FormString=FormString+ "</div>";
+		}
+	}else{
+			FormString=FormString+ $('#Int'+Rowid).html();
+		}
+	
+	if(('[var.x_local.Switches.ShowAdditionalDetails;noerr]')=='1' && ShowMilestones=='1'){
+		FormString=FormString+ "<div id='divAdditional' style='width:100%;overflow:auto'>"
+		FormString=FormString+ "	<span id='spanExtraDetails'><hr /><span style='float:right'><button class='fixed' type='button' id='A"+Rowid+"' onClick=ButtonAction(this,'"+VacID+"') >Additional Details</button></span></span>"
+		FormString=FormString+ "</div>";
+	}
+	
+	FormString=FormString+ "<input id='pTransactionType' name='pTransactionType' style='display:none' />";
+	FormString=FormString+ "<input id='pVacID' name='pVacID' style='display:none' />";
+	FormString=FormString+ "<input id='pAdditionalQuestionCode' name='pAdditionalQuestionCode' style='display:none' />";
+	FormString=FormString+ "<input id='pShiftPlanID' name='pShiftPlanID' style='display:none' />";
+	
+	FormString=FormString+ "<div id='divExtraDetails' style='display:none' ><br />&nbsp;<hr />";
+	FormString=FormString+"</form>";
+	TargetDiv.html(TargetDiv.html() + FormString);
+}
+
+
+function SaveSubmit(row){
+	// save date to database
+	
+	$('#F'+$(row).attr('id')).attr('action','IQXPost.php?proc=GenevaNetAgencyVacanciesAdditionalQuestionsUpdate');
+	$('#F'+$(row).attr('id')).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			if (textStatus != 'success') {
+				$('#agvacerror').html(data);
+				};
+			$('#Int'+$(row).attr('id')).html('Submitted');
+			},
+		error: function(data,textStatus){
+			$('#agvacerror').html(data);
+			},
+		dataType: "text"
+		});	
+}
+
+
+function EnableButton(ButtonID){
+	// hide unused divs, except for the one which has been activated
+	
+	$('#divAdditional').css('display','none');
+	$('#CN'+$(ButtonID).attr('id').substring(1,22)).html('');
+	hideDownloadButton(ButtonID);
+	$('button.fixedA').removeAttr('disabled');
+}	
+
+
+function NoteCountdown(InputID){
+	// character count for note 
+	
+	var FieldLength=149-$(InputID).val().length;
+	if (FieldLength < 0) {
+		$(InputID).attr('class','Overflow');
+		$(InputID).val($(InputID).val().substring(0,149));
+		$('#CharCountC').focus();
+		$('#CharCountC').html('0');
+	} else{
+		$(InputID).attr('class','Normal');
+		$('#CharCountC').focus();
+		$('#CharCountC').html(FieldLength);
+	}
+	
+}
+
+
+function UploadCandidateDocument(row,ProgressID,PersonName,btn){
+	// Upload document from candidate detail
+	
+	$('div.zoomeddivCentre').parent().parent().remove();
+	
+	$(row).rowafter({divs:[{divclass:"zoomeddivCentre"}]});
+	TargetDiv=$(row).next('tr').find("div.zoomeddivCentre");
+	$(TargetDiv).parent().attr('colspan','3');
+	TargetDiv.html("<div id='divUploadTitle' style='text-align: center;font-size: 10pt'></div><div id='divUpload' style='border-style: solid;border-width:1px;padding: 5px' ></div>");
+	
+	var Caption=$(btn).html();
+	$('.FixedA').html('Documents');
+	
+	if(Caption=='Documents'){
+		$(btn).html('Hide Documents');	
+		var VacID=$('#pVacID').val();
+		$('#divUploadTitle').html('Progress Documents for '+PersonName);
+		$('#divUpload').show();
+		IQXChain($('#divUpload'),{action:'load',page:'ProgressDocuments&pOwnerType=R&pOwnerID='+encodeURIComponent(ProgressID)});
+	}else{
+		$('div.zoomeddivCentre').parent().parent().remove();
+		$(btn).html('Documents');
+		$('#divUploadTitle').html('');
+		$('#divUpload').hide();
+	}
+}
+
+
+function ShowProgressHistory(row,ProgressID,btn){
+	// show progress history for candidate in subform
+	
+	var VacID=$('#pVacID').val();
+	var Caption=$(btn).html();
+	$('.FixedB').html('History');
+	$('#divViewProgressHistory').parent().parent().remove();
+	
+	if(Caption=='History'){
+		$(btn).html('Hide History');
+		$(row).after('<tr><td colspan=3><div id="divViewProgressHistory" class="zoomeddiv"></div></td></tr>');
+		IQXChain('#divViewProgressHistory',{action:'load',page:'agencyCandidateProgressHistory&pProgressID='+encodeURIComponent(ProgressID)});
+	}else{
+		$('#divViewProgressHistory').parent().parent().remove();
+		$(btn).html('History');
+	}
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_agency_requirements_top.html;noerr]</div>
+<span id="agvacerror" class="errormessage">[var.x_errormessage]</span>
+
+<div id="divagvacs">
+<table class="tablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+			<th>Company</th>
+			<th>Position</th>
+			<th>Start Date</th>
+			<th>Time</th>
+			<th>Finish Date</th>
+			<th>Time</th>
+			<th>Our Ref</th>
+			<th>Submitted Candidates</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]">
+	    	<td>[vacancies.CompanyName;noerr]</td>
+	    	<td>[vacancies.Position;noerr] [vacancies.ShiftDescription;noerr]</td>
+	    	<td class="longdate">[vacancies.StartDate;noerr]</td>
+	    	<td class="time">[vacancies.StartTime;noerr]</td>
+	    	<td class="longdate">[vacancies.FinishDate;noerr]</td>
+	    	<td class="time">[vacancies.FinishTime;noerr]</td>
+	    	<td>[vacancies.OurRef;noerr]</td>
+			<td><span id="SubmittedCandidate[vacancies.RowID]">[vacancies.SubmittedCandidates;noerr]</span></td>
+			<td width='140px'>
+				<span style='margin-left:auto;margin-right: 0px;vertical-align: top;float:left'><img id="I[vacancies.RowID]" class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="showShiftActions(this,'[vacancies.RowID]','[vacancies.VacancyID]','[vacancies.TempShiftPlanID;noerr]','[vacancies.ShowMilestone;noerr;]','[vacancies.ShowDecline;noerr;]')" /></span>
+				<span class="spanConfirm[vacancies.InterestShort]" style='margin-left:5px;margin-right: 0px;vertical-align: top;float:left'>&nbsp;</span>
+				<span style='margin-left:auto;margin-right: 0px;vertical-align: top;float:right'>
+				<span> [vacancies.IsCurrent;ope=nif:0,minv;magnet=span] 
+					<span> [onload_fill;block=span;when [var.x_rights.SUBMITCANDIDATES;noerr]=1]
+	    				<button type="button" class="tablebutton nonformbutton submitbutton" onclick="preparesubmitcandidate(this,this.parentNode.parentNode.parentNode.parentNode.parentNode,'[vacancies.VacancyID]','[vacancies.TempShiftPlanID;noerr]')">Candidates</button>
+					</span>
+				</span>
+				<span id="CanConfirmDecline" style="visibility:hidden" >[vacancies.interest;noerr]</span>
+				<span id="CanDownload" style="visibility:hidden" >[var.x_rights.DOCVACDOWNLOAD;noerr]</span>
+				<span id="CB[vacancies.RowID]" style="visibility:hidden" >[vacancies.CreatedBy;noerr]</span>
+				<span id="CT[vacancies.RowID;noerr]" style="visibility:hidden" >[vacancies.CreateTime;noerr]</span>
+				<span id="Int[vacancies.RowID]" style="display:none" >[vacancies.Interest;noerr]</span>
+				<input id="VacRecordCount" type="hidden" value="[vacancies.RowCount;noerr]" />				
+				</span>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<p id="agvacstatus" ></p>
+</div>
+
+<div class="usertext">[onload;file=txt_agency_requirements_bottom.html;noerr]</div>

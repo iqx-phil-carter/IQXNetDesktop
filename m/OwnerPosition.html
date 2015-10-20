@@ -1,0 +1,127 @@
+﻿<!--[onload;tplvars;PositionList='MobileNetOwnerPositions?pPositionID';]-->
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        
+        var DestPage = 'http://maps.apple.com?q='+$('#SitePostCode').val();
+        $('#btnPositionMap').attr('href', DestPage);
+        $('#btnPositionDiaryHome').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType);
+        $('#btnPositionDiaryDetailHome').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        $('#PositionTaskButtons').hide();
+        $('#btnPositionHelp').attr('href', window.HelpRoot + 'ug12-00');
+        $('form').keypress(function (event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                PositionSave();
+            }
+        })
+    });
+
+    function PositionEdit(line) {
+        PositionShowNav();
+        $('#PositionNoteArea').html('<input id="PositionNoteText" name="pNote" style="width:100%" value="" />');
+        $('#divPositionError').html('');
+        $('#PositionNoteText').focus();
+    }
+
+    function PositionSave() {
+        var NoteText = '';
+        if ($('#PositionNoteText').val() != '') { NoteText = $('#PositionNoteText').val(); }
+        if (NoteText == '') {
+            $('#PositionNoteArea').html('[PositionList.Note;noerr]');
+        } else {
+            $('#frmPositionDetails').ajaxSubmit({
+                success: function (data, textStatus) {
+                    if (textStatus == 'success' && data == 'Ok') {
+                        $('#PositionNoteArea').html(NoteText);
+                    } else {
+                        $('#divOwnerPositionError').html(data);
+                    }
+                },
+                error: function (data, textStatus) {
+                    $('#divOwnerPositionError').html(data);
+                },
+                dataType: "html"
+            });
+        }
+        $('#btnPositionSave').fadeOut();
+    }
+
+    function PositionShowNav() {
+        $('#PositionTaskButtons').fadeIn();
+        $('#PositionTaskButtons').fadeOut();
+        $('#PositionTaskButtons').fadeIn();
+    }
+
+</script>
+
+<nav role="navigation" style="float:left;">
+    <span class="btnNavLeft"><a id="btnPositionMap" href="" data-role="button" data-icon="search" data-iconpos="notext" target="_new">Location</a></span>
+    <span class="btnNavLeft"><a id="btnPositionHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext" >Home</a></span>
+    <span class="btnNavLeft"><a id="btnPositionDiaryHome" href="" data-role="button" data-icon="grid" data-iconpos="notext">Diary</a></span>
+    <span class="btnNavLeft"><a id="btnPositionDiaryDetailHome" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Detail</a></span>
+    <span class="btnNavLeft"><a id="btnPositionHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<span>Vacancy</span>
+<nav id="PositionTaskButtons" style="display:block;float:right">
+    <span class="btnNavRight"><a class="LongButton" id="btnPositionSave" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="PositionSave()">Complete</a></span>
+</nav> 
+   <br />
+
+<div id="divPositionError" class="errormessage"></div>
+
+    <div>
+        <form id="frmPositionDetails" action="IQXPost.php?proc=MobileNetOwnerEditPosition" method="post">
+            <table class="tablesorter">
+                <tr>
+                    <td>Position</td>
+                    <td>[PositionList.Position]</td>
+                </tr>
+                <tr>
+                    <td>Owner</td>
+                    <td>[PositionList.StaffName;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Start Date</td>
+                    <td>[PositionList.StartDate;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Finish Date</td>
+                    <td>[PositionList.FinishDate;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>[PositionList.Status;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Our Ref</td>
+                    <td>[PositionList.OurRef;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Their Ref</td>
+                    <td>[PositionList.TheirRef;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Site contact</td>
+                    <td>[PositionList.SiteContact;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Site Name</td>
+                    <td>[PositionList.SiteName;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Site Address</td>
+                    <td>[PositionList.SiteAddress;noerr]</td>
+                </tr>
+            </table>
+            <table class="tablesorter">
+                <tr onclick="PositionEdit()">
+                    <td id="PositionNoteArea">[PositionList.OtherNotes;noerr]</td>
+                </tr>
+            </table>
+            <input type="hidden" name="pVacancyID" value="[PositionList.VacancyID;noerr]" />
+            <input type="hidden" id="SitePostCode" value="[PositionList.SitePostCode;noerr]" />
+            </form>
+</div>

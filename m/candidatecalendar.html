@@ -1,0 +1,97 @@
+<!--[onload;tplvars;ts='NetCandidateCalendar?pstart=&pend=&pShiftOverflowEndTime=0&pFilterType=0&pWorkingString=']-->
+
+<script  type="text/javascript">
+
+function ShowDetail(RowID,editable,deletable,confirmable,unconfirmable) {
+		
+	var ExpandedID=RowID+'_Expanded';
+	var Event='';
+	var Action=$('#'+ExpandedID).html();
+	$('[id*="_Expanded"]').remove();
+	if(Action==null){
+		$.get('IQXRawData.php?page=MobileNetCandidateCalendarDetail&pRefID='+RowID+'&pWorkingString=WT', function(data,textStatus){
+			Event=String(data.substring(data.indexOf('description')+21,data.indexOf('/description')-4));
+			var FootStr='<tr id="'+ExpandedID+'"><td class="expanded" colspan="2" ><span onClick="ShowDetail('+'&#39;'+RowID+'&#39;'+')">'+Event+'</span><hr /><span>';
+			FootStr=FootStr+'<form id="frmCandCalendar" action="IQXPost.php?proc=MobileNetCandidateDiaryAdd" method="post" data-ajax="false" >';
+			FootStr=FootStr+'<a id="Del'+RowID+'" onclick="ActionEvent(this)" class="link'+deletable+'" >Delete</a>&nbsp;';
+			FootStr=FootStr+'<a id="Con'+RowID+'" onclick="ActionEvent(this)"  class="link'+confirmable+'">Confirm</a>&nbsp;';
+			FootStr=FootStr+'<a id="Unc'+RowID+'" onclick="ActionEvent(this)" class="link'+unconfirmable+'">Unconfirm</a>';
+			FootStr=FootStr+'<fieldset data-role="fieldcontain">';
+			FootStr=FootStr+'<label for="IDCode"></label><input type="hidden" data-role="input" id="pShiftType" name="pShiftType" />';
+			FootStr=FootStr+'<label for="pTimeTo"></label><input type="hidden" data-role="input" id="pTimeTo" name="pTimeTo" />';
+			FootStr=FootStr+'<label for="IDCode"></label><input type="hidden" data-role="input" id="IDCode" name="IDCode" />';
+			FootStr=FootStr+'<label for="pDateFrom"></label><input type="hidden" data-role="input" id="pDateFrom" name="pDateFrom" />';
+			FootStr=FootStr+'<label for="pTimeFrom"></label><input type="hidden" data-role="input" id="pTimeFrom" name="pTimeFrom" />';
+			FootStr=FootStr+'<label for="pState"></label><input type="hidden" data-role="input" id="pState" name="pState" />';
+			FootStr=FootStr+'</fieldset>';
+			FootStr=FootStr+'</form>';
+			FootStr=FootStr+'</td></tr>';
+			$('#'+RowID).after(FootStr);	
+		});
+	} else {
+		$('[id*="_Expanded"]').remove();
+	} 
+}
+			
+function ActionEvent(RowID){
+	var ActionStr=$(RowID).attr('id').substring(0,3);
+	var IdCode=$(RowID).attr('id').substring(3);
+			
+	if(ActionStr=='Del'){ActionStr='D';}
+	if(ActionStr=='Con'){ActionStr='F';}
+	if(ActionStr=='Unc'){ActionStr='C';}
+			
+	$('#IDCode').val(IdCode);
+	$('#pState').val(ActionStr);
+		
+	$('#frmCandCalendar').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					RefreshPage();
+				}else{
+					$('.localerrormessage').html('Error A: '+data);	
+				}
+			} else {
+				$('.localerrormessage').html('Error B: '+data);
+			}
+		},
+		error: function(data,textStatus){
+			$('.localerrormessage').html('Error C: '+data);
+		},
+		dataType: "html"
+	});
+}
+	
+function LoadPage(NewPage){
+	var DestPage='iqxnet.php?P='+NewPage;
+	if(NewPage=='Refresh'){DestPage=window.location.href;}
+	jQuery.mobile.changePage(DestPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+</script>
+	
+<div > 
+	<table id="tbltimesheets" class="tablesorter" data-role="table" data-mode="reflow">
+		<thead>
+			<tr>	
+				<th>Event</th>
+				<th>Event Time</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="[ts.id;block=tr]"  onClick="ShowDetail('[ts.id;noerr]','[ts.editable;noerr]','[ts.deletable;noerr]','[ts.confirmable;noerr]','[ts.unconfirmable;noerr]')">
+				<td class="[ts.className;noerr]Mobile">[ts.title;noerr]</td>
+				<td class="[ts.className;noerr]Mobile">[ts.MShiftStart;noerr]</td>
+			</tr>
+		</tbody>
+	</table>
+    <a data-role="button" class="btnMenu" onclick="LoadPage('candidate_tabs')">Back to Menu</a>
+    <a data-role="button" class="btnMenu" onclick="LoadPage('candidateNewMultidayEvent')">Add Event</a>
+    <a data-role="button" class="btnMenu" onclick="LoadPage('Refresh')">Reload</a>	
+	</div>
+</div>
+

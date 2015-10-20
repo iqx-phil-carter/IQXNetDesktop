@@ -1,0 +1,102 @@
+<!-- changes:
+	line 12 - starts off hidden so does not show if javascript is disabled
+    lines 15-39 forgotten password routines
+	lines 85-91 forgotten password list item
+-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection("login-form");
+	IQXEnableForm("login-form",{successhandler:IQXRefreshBrowser});
+	$('#labForgotten').show();
+});
+
+function ForgottenPassword(){
+		$('#frmlogin').attr('action','IQXlogin.php?forgotten=true');
+		$('#frmlogin').ajaxSubmit({
+			success: function (data, textStatus){
+				if (textStatus=='success') {
+					if(data=='Ok'){	
+						$('#respnse').text('A request has been placed. Your new password will be emailed to you shortly.');	
+						$('#parForgotten').hide();
+						$('#divForgotten').hide();
+					}else{
+						$('#respnse').text(data);	
+					}
+				} else {
+					$('#respnse').text(data);
+				}
+			},
+			dataType: "html"
+		});
+	}
+	
+ function ShowForgotten(){
+ 	$('#respnse').text('');
+ 	$('#labForgotten').hide();
+ 	$('#divForgotten').show();
+ }
+  
+</script>
+<!--
+<form id="frmlogin" class="centreform" name="login" action="IQXLogin.php" method="POST" accept-charset="utf-8">
+    <fieldset>
+        <p>
+            <label for="login_uid" >
+                User ID
+            </label>
+            <input type="text" id="login_uid" name="login_uid" class="required" />
+        </p>
+        <p>
+            <label for="login_pwd" >
+                Password
+            </label>
+            <input type="password" id="login_pwd" name="login_pwd" class="required" />
+        </p>
+        <p>
+            <button type="submit" id="login_submit" class="fixed">
+                Login
+            </button>
+        </p>
+        <p>
+            <span class="errormessage" ></span>
+        </p>
+    </fieldset>
+</form>
+-->
+
+<h2>Already registered with UKL?<br /> Sign in here...</h2>
+
+<form action="IQXLogin.php" method="POST" accept-charset="utf-8" id="login-form" class="clearfix">
+    <ul>
+	    <li class="clearfix">
+		    <label for="email_login">Username <em> *</em></label>
+		    <input size="25" name="login_uid" type="email" id="email_login" />
+	    </li>
+	    <li class="clearfix">
+
+		    <label for="password">Password: <em> *</em></label>
+		    <input type="password" size="30" name="login_pwd" id="password" />
+	    <li class="login-btn clearfix">
+		<button type="submit" class="btn">Login</button>
+		<button type="button" class="btn" onClick='ShowForgotten()' >Forgotten Password</button>
+	    </li>
+		<li class="login-btn clearfix">
+			<div id='divForgotten' style="display:none">
+			<label for="login_email" >email address</label>
+           	<input type="email" id="login_email" name="login_email" />
+			<button class="btn" onclick="ForgottenPassword()" >Reset password</button>
+		</div>
+		</li>
+	    <li class="clearfix">
+		<span id='respnse' class="errormessage" ></span>
+	    </li>
+    </ul>	
+</form>
+<p class="help">
+    <strong>Having problems logging in or registering?</strong> Please call us and we will be happy to help 0845 189 8112
+</p>
+
+<!-- http://uklgroup.com/IQXNet/IQXNet.php?P=LoginNew -->
+

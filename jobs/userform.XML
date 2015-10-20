@@ -1,0 +1,3176 @@
+<Job title="WPK Import" dateformat="yyyy-mm-dd" timeformat="hh:nn:ss" datetimeformat="yyyy-mm-dd hh:nn:ss">
+ <IfYesDialog text="This job will import the USER form. Ok to proceed?">
+  <SQLExec>
+   delete from wpkform where &#x0D;&#x0A;wpkformid=&apos;USER&apos;
+  </SQLExec>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="Caption" type="S">
+    </Field>
+    <Field name="Colour" type="S">
+    </Field>
+    <Field name="DefaultDetailView" type="S">
+    </Field>
+    <Field name="DefaultLayout" type="S">
+    </Field>
+    <Field name="FormClass" type="S">
+    </Field>
+    <Field name="FormHeight" type="S">
+    </Field>
+    <Field name="FormLeft" type="S">
+    </Field>
+    <Field name="FormSwitches" type="S">
+    </Field>
+    <Field name="FormTop" type="S">
+    </Field>
+    <Field name="FormType" type="S">
+    </Field>
+    <Field name="FormWidth" type="S">
+    </Field>
+    <Field name="MasterView" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="TestSwitches" type="S">
+    </Field>
+    <Field name="UpdateCallerFlag" type="N">
+    </Field>
+    <Field name="VideoRecordType" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <Caption><![CDATA[Q_caption]]></Caption>
+     <Colour><![CDATA[G_agcolour]]></Colour>
+     <DefaultLayout><![CDATA[Q_layout]]></DefaultLayout>
+     <FormHeight><![CDATA[555]]></FormHeight>
+     <FormSwitches><![CDATA[staffid
+]]></FormSwitches>
+     <FormType><![CDATA[Single]]></FormType>
+     <MasterView><![CDATA[DETAILS]]></MasterView>
+     <Name><![CDATA[User]]></Name>
+     <TestSwitches><![CDATA[TI73]]></TestSwitches>
+     <UpdateCallerFlag>0</UpdateCallerFlag>
+     <VideoRecordType><![CDATA[U]]></VideoRecordType>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkform (CanEdit, Caption, Colour, DefaultDetailView, DefaultLayout, FormClass, FormHeight, FormLeft, FormSwitches, FormTop, FormType, FormWidth, MasterView, Name, Notes, TestSwitches, UpdateCallerFlag, VideoRecordType, WPKFormID) values &#x0D;&#x0A;(:CanEdit, :Caption, :Colour, :DefaultDetailView, :DefaultLayout, :FormClass, :FormHeight, :FormLeft, :FormSwitches, :FormTop, :FormType, :FormWidth, :MasterView, :Name, :Notes, :TestSwitches, :UpdateCallerFlag, :VideoRecordType, :WPKFormID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="BackColour" type="S">
+    </Field>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="CanSelect" type="S">
+    </Field>
+    <Field name="CaptionBackColour" type="S">
+    </Field>
+    <Field name="CaptionFontColour" type="S">
+    </Field>
+    <Field name="CaptionWidth" type="S">
+    </Field>
+    <Field name="DoubleClickButtonID" type="S">
+    </Field>
+    <Field name="DragSourceType" type="S">
+    </Field>
+    <Field name="DropTargetType" type="S">
+    </Field>
+    <Field name="Explanation" type="S">
+    </Field>
+    <Field name="FontColour" type="S">
+    </Field>
+    <Field name="FromClause" type="S">
+    </Field>
+    <Field name="GridMultiSelect" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="MultiSelectColumnTitle" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="NeedsRebuildCheck" type="S">
+    </Field>
+    <Field name="NeedsReloadCheck" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="OuterJoinIndicatorFields" type="S">
+    </Field>
+    <Field name="PreOpenScript" type="S">
+    </Field>
+    <Field name="SaveScript" type="S">
+    </Field>
+    <Field name="UpdatePrimaryKey" type="S">
+    </Field>
+    <Field name="UpdateTable" type="S">
+    </Field>
+    <Field name="UpdateVideoRecordType" type="S">
+    </Field>
+    <Field name="ValidationScript" type="S">
+    </Field>
+    <Field name="ViewType" type="S">
+    </Field>
+    <Field name="WhereClause" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanEdit><![CDATA[{!E}{Q_NEWRECORD}]]></CanEdit>
+     <CanSelect><![CDATA[G_Broadbean&G_IsBroadbeanInstalled]]></CanSelect>
+     <FromClause><![CDATA[Staff key join BroadbeanJobBoardAllocation]]></FromClause>
+     <Name><![CDATA[Job Boards]]></Name>
+     <UpdatePrimaryKey><![CDATA[StaffID, BroadBeanJobBoardID]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[BroadbeanJobBoardAllocation]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[BroadbeanJobBoardAllocation.StaffID = :F_StaffID]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanSelect><![CDATA[G_Broadbean&G_IsBroadbeanInstalled]]></CanSelect>
+     <CaptionWidth><![CDATA[130]]></CaptionWidth>
+     <FromClause><![CDATA[Staff key left outer join BroadbeanUser]]></FromClause>
+     <Name><![CDATA[Broadbean]]></Name>
+     <UpdatePrimaryKey><![CDATA[StaffID
+StaffID@1]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[*Staff
+BroadbeanUser]]></UpdateTable>
+     <ViewType><![CDATA[Inspector]]></ViewType>
+     <WhereClause><![CDATA[Staff.StaffID = :F_staffid]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <FromClause><![CDATA[department left outer join deptmaintenance on department.departmentid=deptmaintenance.departmentid and staffid=:F_staffid]]></FromClause>
+     <Name><![CDATA[Department Maintenance]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[SELECTED@1]]></OuterJoinIndicatorFields>
+     <UpdatePrimaryKey><![CDATA[departmentid
+departmentid@1,staffid@1
+]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[department
+deptmaintenance]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[2=:Q_departmentmaint]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <CaptionWidth><![CDATA[129]]></CaptionWidth>
+     <Explanation><![CDATA[Enter User Details]]></Explanation>
+     <FromClause><![CDATA[staff]]></FromClause>
+     <Name><![CDATA[Staff]]></Name>
+     <NeedsReloadCheck><![CDATA[{Q_defstaffid}]]></NeedsReloadCheck>
+     <SaveScript><![CDATA[!sql update staff set changetracker=isnull(changetracker,0)+1 where staffid=:F_staffid
+!if {!?F_staffid=C_userid:1}
+!!proxybutton #pbloaddefaults
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[staffid]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[staff]]></UpdateTable>
+     <ViewType><![CDATA[Inspector]]></ViewType>
+     <WhereClause><![CDATA[staff.staffid=:F_staffid]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <FromClause><![CDATA[division left outer join divisionaccess on division.divisionid=divisionaccess.divisionid and staffid=:F_staffid]]></FromClause>
+     <Name><![CDATA[{G_divisionname} Access]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[SELECTED@1]]></OuterJoinIndicatorFields>
+     <SaveScript><![CDATA[!sql update staff set changetracker=isnull(changetracker,0)+1 where staffid=:F_staffid
+!if {!?F_staffid=C_userid:1}
+!!proxybutton #pbloaddefaults
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[divisionid
+divisionid@1,staffid@1
+]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[division
+divisionaccess]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[2=:Q_divisionaccess]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanEdit><![CDATA[{!E}{Q_NEWRECORD}]]></CanEdit>
+     <CanSelect><![CDATA[G_escalatepopups]]></CanSelect>
+     <FromClause><![CDATA[popupescalation join staff on popupescalation.targetstaffid=staff.staffid]]></FromClause>
+     <Name><![CDATA[Popup Escalations]]></Name>
+     <UpdatePrimaryKey><![CDATA[origstaffid,targetstaffid]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[popupescalation]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[popupescalation.origstaffid=:F_staffid]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[G_EXTSLICENCED]]></CanSelect>
+     <Explanation><![CDATA[
+
+Please tick any Temp Desks in which the candidate will be registered]]></Explanation>
+     <FromClause><![CDATA[tempdesk key left outer join StaffExtTempdeskAccess tdap on 
+tempdesk.tempdeskid=tdap.tempdeskid and
+tdap.staffid=:F_staffid
+]]></FromClause>
+     <Image><![CDATA[tempdesk]]></Image>
+     <Name><![CDATA[External TempDesk Access]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[INPOOL@1]]></OuterJoinIndicatorFields>
+     <UpdatePrimaryKey><![CDATA[tempdeskid
+tempdeskid@1,staffid@1]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[tempdesk
+StaffExtTempdeskAccess]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[1=1 {M_DIVSQLtempdesk} ]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <FromClause><![CDATA[wpkrole left outer join wpkassignedrole on wpkrole.wpkroleid=wpkassignedrole.wpkroleid and wpkassignedrole.ownerid=:F_staffid]]></FromClause>
+     <Name><![CDATA[Layout Settings]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[ASSIGNED@1]]></OuterJoinIndicatorFields>
+     <SaveScript><![CDATA[!sql 
+update staff set changetracker=isnull(changetracker,0)+1, manager=isnull((select first 1 from wpkassignedrole where wpkroleid='MANAGER' and ownerid=:F_staffid),0) where staffid=:F_staffid
+!if {!?F_staffid=C_userid:1}
+!!proxybutton #pbloaddefaults
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[wpkroleid
+wpkroleid@1,ownerid@1
+]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[wpkrole
+wpkassignedrole
+]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[wpkrole.wpkroleid = 'USERSCRNMOD' or wpkrole.rolegroup = 'USER']]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <CaptionWidth><![CDATA[125]]></CaptionWidth>
+     <Explanation><![CDATA[User Questionnaire]]></Explanation>
+     <FromClause><![CDATA[staff]]></FromClause>
+     <Image><![CDATA[questionnaire]]></Image>
+     <Name><![CDATA[Questionnaire]]></Name>
+     <UpdatePrimaryKey><![CDATA[staffid]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[staff]]></UpdateTable>
+     <ViewType><![CDATA[Inspector]]></ViewType>
+     <WhereClause><![CDATA[staff.staffid=:F_staffid]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[QUESTIONNAIRE]]></WPKViewID>
+    </Record>
+    <Record>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <CaptionWidth><![CDATA[125]]></CaptionWidth>
+     <FromClause><![CDATA[staff]]></FromClause>
+     <Name><![CDATA[Staff]]></Name>
+     <SaveScript><![CDATA[!sql update staff set changetracker=isnull(changetracker,0)+1 where staffid=:F_staffid
+!if {!?F_staffid=C_userid:1}
+!!proxybutton #pbloaddefaults
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[staffid]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[*staff]]></UpdateTable>
+     <ViewType><![CDATA[Inspector]]></ViewType>
+     <WhereClause><![CDATA[staff.staffid=:F_staffid]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <FromClause><![CDATA[wpkrole left outer join wpkassignedrole on wpkrole.wpkroleid=wpkassignedrole.wpkroleid and wpkassignedrole.ownerid=:F_staffid]]></FromClause>
+     <Name><![CDATA[Roles]]></Name>
+     <OuterJoinIndicatorFields><![CDATA[ASSIGNED@1]]></OuterJoinIndicatorFields>
+     <SaveScript><![CDATA[!sql 
+update staff set changetracker=isnull(changetracker,0)+1, manager=isnull((select first 1 from wpkassignedrole where wpkroleid='MANAGER' and ownerid=:F_staffid),0) where staffid=:F_staffid
+!if {!?F_staffid=C_userid:1}
+!!proxybutton #pbloaddefaults
+]]></SaveScript>
+     <UpdatePrimaryKey><![CDATA[wpkroleid
+wpkroleid@1,ownerid@1
+]]></UpdatePrimaryKey>
+     <UpdateTable><![CDATA[wpkrole
+wpkassignedrole
+]]></UpdateTable>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[wpkrole.rolegroup != 'USER']]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <Explanation><![CDATA[Assign User Roles]]></Explanation>
+     <FromClause><![CDATA[wpkrole left outer join wpkassignedrole on wpkrole.wpkroleid=wpkassignedrole.wpkroleid and wpkassignedrole.ownerid=:Q_defstaffid]]></FromClause>
+     <Name><![CDATA[Roles]]></Name>
+     <NeedsReloadCheck><![CDATA[{Q_defstaffid}]]></NeedsReloadCheck>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[{!?Q_Alternate:G_ccaltcolour}]]></BackColour>
+     <CanEdit><![CDATA[{!E}]]></CanEdit>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <Explanation><![CDATA[Select Template User Record]]></Explanation>
+     <FromClause><![CDATA[staff]]></FromClause>
+     <Name><![CDATA[Selection]]></Name>
+     <ViewType><![CDATA[Grid]]></ViewType>
+     <WhereClause><![CDATA[staff.template=1]]></WhereClause>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkview (BackColour, CanEdit, CanSelect, CaptionBackColour, CaptionFontColour, CaptionWidth, DoubleClickButtonID, DragSourceType, DropTargetType, Explanation, FontColour, FromClause, GridMultiSelect, Image, MultiSelectColumnTitle, Name, NeedsRebuildCheck, NeedsReloadCheck, Notes, OuterJoinIndicatorFields, PreOpenScript, SaveScript, UpdatePrimaryKey, UpdateTable, UpdateVideoRecordType, ValidationScript, ViewType, WhereClause, WPKFormID, WPKViewID) values &#x0D;&#x0A;(:BackColour, :CanEdit, :CanSelect, :CaptionBackColour, :CaptionFontColour, :CaptionWidth, :DoubleClickButtonID, :DragSourceType, :DropTargetType, :Explanation, :FontColour, :FromClause, :GridMultiSelect, :Image, :MultiSelectColumnTitle, :Name, :NeedsRebuildCheck, :NeedsReloadCheck, :Notes, :OuterJoinIndicatorFields, :PreOpenScript, :SaveScript, :UpdatePrimaryKey, :UpdateTable, :UpdateVideoRecordType, :ValidationScript, :ViewType, :WhereClause, :WPKFormID, :WPKViewID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="BackColour" type="S">
+    </Field>
+    <Field name="ButtonGroup" type="N">
+    </Field>
+    <Field name="CanEdit" type="S">
+    </Field>
+    <Field name="CanView" type="S">
+    </Field>
+    <Field name="CaptionBackColour" type="S">
+    </Field>
+    <Field name="CaptionFontColour" type="S">
+    </Field>
+    <Field name="CheckValues" type="S">
+    </Field>
+    <Field name="ComboScript" type="S">
+    </Field>
+    <Field name="ComplexDataUpdateCommand" type="S">
+    </Field>
+    <Field name="DataLength" type="N">
+    </Field>
+    <Field name="DataType" type="S">
+    </Field>
+    <Field name="DefaultValue" type="S">
+    </Field>
+    <Field name="Descriptor" type="S">
+    </Field>
+    <Field name="DisplayFormat" type="S">
+    </Field>
+    <Field name="DisplaySize" type="N">
+    </Field>
+    <Field name="Expanded" type="S">
+    </Field>
+    <Field name="FontColour" type="S">
+    </Field>
+    <Field name="IDforVideoRecordType" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="Indent" type="N">
+    </Field>
+    <Field name="ItemType" type="S">
+    </Field>
+    <Field name="Mask" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="PickList" type="S">
+    </Field>
+    <Field name="Required" type="S">
+    </Field>
+    <Field name="Sortable" type="N">
+    </Field>
+    <Field name="SortExpression" type="S">
+    </Field>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+    <Field name="WPKViewItemID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>520</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComboScript><![CDATA[!If sql exists (select * from BroadbeanJobBoardAllocation where staffid = :F_StaffID and BroadbeanJobBoardID = :Q_BROADBEANJOBBOARDID) 
+!!Abort {G_staffname} already has rights to {Q_BROADBEANJOBBOARDID__COMBO}
+]]></ComboScript>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[BroadbeanJobBoardAllocation.BroadbeanJobBoardID]]></Descriptor>
+     <DisplaySize>47</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Job Board Rights]]></Name>
+     <PickList><![CDATA[select BroadbeanJobBoard.Name, BroadbeanJobBoard.BroadbeanJobBoardID from BroadbeanJobBoard 
+order by BroadbeanJobBoard.Name]]></PickList>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[BROADBEANJOBBOARDID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[1]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[D]]></DataType>
+     <Descriptor><![CDATA[BroadbeanJobBoardAllocation.Expiry]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Rights Expire]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EXPIRY]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[(select name from BroadBeanJobBoard  
+where  BroadBeanJobBoard.BroadBeanJobBoardID = BroadBeanJobBoardAllocation.BroadBeanJobBoardID)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Job Board Name]]></Name>
+     <Sortable>2</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[JOBBOARDNAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[1]]></DefaultValue>
+     <Descriptor><![CDATA[0]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Concatenated]]></ItemType>
+     <Name><![CDATA[New Record]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>510</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NEWRECORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!addrow]]></Descriptor>
+     <DisplaySize>150</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Grant Job Board Rights]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBADD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!ask Revoke rights to job board {Q_BROADBEANJOBBOARDID__COMBO}?
+!deleterow
+]]></Descriptor>
+     <DisplaySize>150</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Revoke Job Board Rights]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1010</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBDELETE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!Help
+If you set an expiry date, the user will no longer to be able to post jobs to the relevant job board after that date, otherwise the rights remain available until revoked.
+
+Once entered, dates cannot be changed. Instead, revoke rights to the job board and re-grant them with the new expiry date. 
+
+Granting rights to job boards that your agency does not have a subscription to via Broadbean will have no effect. Please contact your Broadbean account manager:
+
+Tel      020 7987 6900
+Web   www.broadbean.co.uk
+Email  sales@broadbean.co.uk]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>20</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Help]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1020</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBHELP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_StaffID]]></DefaultValue>
+     <Descriptor><![CDATA[BroadBeanJobBoardAllocation.StaffID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[BroadbeanUser.Password]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Broadbean Password]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PASSWORD@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[!Help
+Enter the user name and password previously set up on Broadbean. If you are not sure what details to enter, please contact your Broadbean account manager:
+
+Tel      020 7987 6900
+Web   www.broadbean.co.uk
+Email  sales@broadbean.co.uk]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Help]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBHELP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_StaffID]]></DefaultValue>
+     <Descriptor><![CDATA[Staff.StaffID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_StaffID{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[BroadbeanUser.StaffID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[BroadbeanUser.UserName]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Broadbean User Name]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+     <WPKViewItemID><![CDATA[USERNAME@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[department.departmentid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DepartmentID]]></Name>
+     <Sortable>2</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEPARTMENTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_departmentid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[deptmaintenance.departmentid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DepartmentID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>11</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEPARTMENTID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[department.name]]></Descriptor>
+     <DisplaySize>30</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Department]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_departmentmaint=1:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.departmentmaint
+1
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[All]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1020</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBALL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Maintained Departments:]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBLABEL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Must also have the 'Department Maintenance' Role]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1050</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBLABEL2]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_departmentmaint=:1=0:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.departmentmaint
+0
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[None]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1010</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBNONE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_departmentmaint=2:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.departmentmaint
+2
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Selected]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1030</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBSELECTED]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[x]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[ifnull(deptmaintenance.staffid,0,1)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Select]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[SELECTED@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{F_staffid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[deptmaintenance.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>12</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.access1]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Access1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ACCESS1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.access2]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Access2]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ACCESS2]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.access3]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Access3]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ACCESS3]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.access4]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Access4]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ACCESS4]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.access5]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Access5]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ACCESS5]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defagencyid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.agencyid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[G_branchname]]></Name>
+     <PickList><![CDATA[BRANCHALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[AGENCYID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.AnalysisCode]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Analysis Code]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>120</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ANALYSISCODE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.cancreatereports]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Cancreatereports]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CANCREATEREPORTS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.candragmerge]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Candragmerge]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CANDRAGMERGE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.canedittemplates]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Canedittemplates]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CANEDITTEMPLATES]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.canmailmerge]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Canmailmerge]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CANMAILMERGE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[x]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[New User]]></DefaultValue>
+     <Descriptor><![CDATA[staff.name]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Caption]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>600</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CAPTION]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>25</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defcombovisibility]]></DefaultValue>
+     <Descriptor><![CDATA[staff.combovisibility]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Combo Box Filter]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>165</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[COMBOVISIBILITY]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defdepartid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.defaultdepartid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Default Department]]></Name>
+     <PickList><![CDATA[DEPARTMENTALL]]></PickList>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFAULTDEPARTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[!F_wizard]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.defunct]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Not In Use]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>180</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFUNCT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defdepartmentmaint]]></DefaultValue>
+     <Descriptor><![CDATA[staff.departmentmaint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Departmentmaint]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEPARTMENTMAINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defdivisionaccess]]></DefaultValue>
+     <Descriptor><![CDATA[staff.divisionaccess]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Divisionaccess]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISIONACCESS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defdivisionid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.divisionid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[G_divisionname]]></Name>
+     <PickList><![CDATA[DIVISIONALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISIONID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defemail]]></DefaultValue>
+     <Descriptor><![CDATA[staff.EMail]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[E-Mail Address]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>46</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EMAIL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.empquestmaint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Empquestmaint]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EMPQUESTMAINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(if isnull(staff.password,'')='' then 0 else 1 endif)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Has Password]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>700</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[HASPASSWORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{!RQ_name}{!K}{!E}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[staff.Keyname]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Keyname]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[KEYNAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[NEW]]></DefaultValue>
+     <Descriptor><![CDATA[MAIN]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Concatenated]]></ItemType>
+     <Name><![CDATA[Layout]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>299</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[LAYOUT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.manager]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Manager]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[MANAGER]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>60</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.name]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Name]]></Name>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.password]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Password]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PASSWORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!close]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Abandon{!C}]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1030</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBABANDON]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!ask Delete this User?
+!sql 
+delete from deptmaintenance where staffid=:F_staffid
+!sql
+delete from staff where staffid=:F_staffid
+!closewithoutsaving
+
+]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Delete]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1045</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBDELETE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!HELP 95]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Help]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1050</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBHELP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[G_IQXNET&R_IQXNET]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!save
+!sql select iqxnetuserid from iqxnetuser where staffid=:F_staffid
+!if empty {F_scratch0}
+!!abortif empty {Q_email}
+Must have email address
+!!form NETUSER
+
+OWNER
+{Q_name}
+{Q_userid}
+{Q_email}
+{F_staffid}
+!else
+!!form NETUSER
+{F_scratch0}
+
+
+
+]]></Descriptor>
+     <DisplaySize>32</DisplaySize>
+     <Image><![CDATA[WORLD]]></Image>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Website Rights]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>3100</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBNETUSER]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!if !Q_haspassword
+!!message The user must use 'File - Change Password' to assign a password
+!!abort
+!ask Reset password for this user?
+!save
+!sql update staff set password=null where staffid=:F_staffid
+!refresh
+]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <FontColour><![CDATA[{!?Q_haspassword:G_ccblack:G_ccred}]]></FontColour>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[{!?Q_haspassword:Reset Password:No Password}]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1042</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBRESETPASSWORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!save
+!close]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Save and Close]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1020</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBSAVECLOSE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!update]]></Descriptor>
+     <DisplaySize>90</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Update]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1040</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBUPDATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.rateschememaint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Rateschememaint]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[RATESCHEMEMAINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportexport]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportexport]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Export Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>160</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTEXPORT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportprint]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportprint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Print Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>150</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTPRINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportview]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportview]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report View Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>140</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTVIEW]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.shortid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[!!]]></Mask>
+     <Name><![CDATA[Short ID]]></Name>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[SHORTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccYellow]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[M_sqldebug]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_staffid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Staffid]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[F_wizard]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_deftempdeskid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.tempdeskid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Default Tempdesk]]></Name>
+     <PickList><![CDATA[TEMPDESKALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>90</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPDESKID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[!F_wizard]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.template]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Template for New Users]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>170</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPLATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.tempsaccess]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Tempsaccess]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPSACCESS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>40</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.title]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Job Title]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>44</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TITLE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>25</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{!FQ_name}{!U}{!E}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[staff.userid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Login Name]]></Name>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[USERID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[{!O}]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!video]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>5</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Video]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1010</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[VIDEO]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.wpcvs]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Wpcvs]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPCVS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[R_techsupport]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_DEFWPKMAINFORMID]]></DefaultValue>
+     <Descriptor><![CDATA[Staff.WPKMainFormID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Override Form ID ]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>305</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKMAINFORMID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[R_techsupport]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[Q_defwpkstartupform]]></DefaultValue>
+     <Descriptor><![CDATA[staff.wpkstartupform]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Startup Form]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>310</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKSTARTUPFORM]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.wpletters]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Wpletters]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPLETTERS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[division.divisionid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DivisionID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISIONID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_divisionid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[divisionaccess.divisionid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DivisionID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>11</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISIONID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[division.name]]></Descriptor>
+     <DisplaySize>30</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[{G_divisionname}]]></Name>
+     <Sortable>2</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_divisionaccess=:1=0:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.divisionaccess
+0
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[All]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1010</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBALL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Division Access:]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBLABEL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_divisionaccess=1:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.divisionaccess
+1
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Own]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1020</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBOWN]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <ButtonGroup>10</ButtonGroup>
+     <CanView><![CDATA[1]]></CanView>
+     <DefaultValue><![CDATA[{!?Q_divisionaccess=2:1}]]></DefaultValue>
+     <Descriptor><![CDATA[!save
+!setfieldvalue details.divisionaccess
+2
+!update
+]]></Descriptor>
+     <DisplaySize>50</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Selected]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1030</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBSELECTED]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[x]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[ifnull(divisionaccess.staffid,0,1)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Select]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[SELECTED@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{F_staffid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[divisionaccess.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>12</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>510</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[1]]></DefaultValue>
+     <Descriptor><![CDATA[0]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Concatenated]]></ItemType>
+     <Name><![CDATA[New Record]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>500</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NEWRECORD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_staffid]]></DefaultValue>
+     <Descriptor><![CDATA[popupescalation.origstaffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[OrigStaffid]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>0</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ORIGSTAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!addrow]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Add Target]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBADD]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!ask Delete Target?
+!deleterow]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Delete Target]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>2000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBDELETE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[!label]]></Descriptor>
+     <DisplaySize>40</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Missed popup reminders are sent to these users]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>3000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBLABEL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComboScript><![CDATA[!If sql exists (select * from PopUpEscalation where OrigStaffID = :F_StaffID and TargetStaffID = :Q_TargetStaffID) 
+!!Abort {G_staffname} already escalates popus to {Q_TargetStaffID__COMBO}]]></ComboScript>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[popupescalation.targetstaffid]]></Descriptor>
+     <DisplaySize>20</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Target User]]></Name>
+     <PickList><![CDATA[staff]]></PickList>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TARGETSTAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[xxx]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(if tdap.staffid is null then 0 else 1 endif)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Allow Access to Desk]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[INPOOL@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[tempdesk.name]]></Descriptor>
+     <DisplaySize>30</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Temp Desk]]></Name>
+     <Sortable>2</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{F_StaffID}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[tdap.StaffID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[tempdesk.tempdeskid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[TempdeskID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPDESKID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_tempdeskid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[tdap.tempdeskid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[TempdeskID1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPDESKID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[xxx]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(if wpkassignedrole.ownerid is null then 0 else 1 endif)]]></Descriptor>
+     <DisplaySize>6</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Activate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ASSIGNED@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[wpkrole.criteriagroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Search Criteria Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CRITERIAGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[D]]></DataType>
+     <Descriptor><![CDATA[wpkassignedrole.expires]]></Descriptor>
+     <DisplaySize>12</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Expires]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EXPIRES@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.name]]></Descriptor>
+     <DisplaySize>26</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Setting]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[M]]></DataType>
+     <Descriptor><![CDATA[wpkrole.notes]]></Descriptor>
+     <DisplaySize>18</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Notes]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NOTES]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{F_staffid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[wpkassignedrole.ownerid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[OwnerID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[OWNERID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.rolegroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ROLEGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.wpkroleid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[WPKRoleID]]></Name>
+     <Sortable>2</Sortable>
+     <SortExpression><![CDATA[wpkrole.rolegroup,wpkrole.sortorder,wpkrole.name]]></SortExpression>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKROLEID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_wpkroleid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[wpkassignedrole.wpkroleid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[WPKRoleID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>5</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKROLEID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <Descriptor><![CDATA[U;*;staff.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Expanded><![CDATA[1]]></Expanded>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Question]]></ItemType>
+     <Name><![CDATA[Questionnaire]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[QUESTIONNAIRE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[QUEST]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[x]]></ComplexDataUpdateCommand>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[F_staffid]]></DefaultValue>
+     <Descriptor><![CDATA[staff.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[StaffID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[QUESTIONNAIRE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.agencyid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[G_branchname]]></Name>
+     <PickList><![CDATA[BRANCHALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[AGENCYID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.AnalysisCode]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Analysis Code]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>120</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ANALYSISCODE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>25</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.combovisibility]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Mask><![CDATA[*!]]></Mask>
+     <Name><![CDATA[Combo Box Filter]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>170</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[COMBOVISIBILITY]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.defaultdepartid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Default Department]]></Name>
+     <PickList><![CDATA[DEPARTMENTALL]]></PickList>
+     <Required><![CDATA[1]]></Required>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFAULTDEPARTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.defunct]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Not In Use]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFUNCT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.divisionid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[G_divisionname]]></Name>
+     <PickList><![CDATA[DIVISIONALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISIONID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[0]]></DefaultValue>
+     <Descriptor><![CDATA[staff.inboxlimit]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Inbox Limit]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>180</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[INBOXLIMIT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[0]]></DefaultValue>
+     <Descriptor><![CDATA[staff.inboxrefreshrate]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Inbox Refresh Rate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>190</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[INBOXREFRESHRATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportexport]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportexport]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Export Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>160</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTEXPORT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportprint]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportprint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Print Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>150</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTPRINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <DefaultValue><![CDATA[Q_defreportview]]></DefaultValue>
+     <Descriptor><![CDATA[staff.reportview]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report View Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>140</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[REPORTVIEW]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Staffid]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[STAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.tempdeskid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[LookupCombo]]></ItemType>
+     <Name><![CDATA[Default Tempdesk]]></Name>
+     <PickList><![CDATA[TEMPDESKALL]]></PickList>
+     <Sortable>0</Sortable>
+     <SortOrder>90</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPDESKID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.template]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[Unused]]></ItemType>
+     <Name><![CDATA[Template User]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[RIGHTVIEW]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPLATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[xxx]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(if wpkassignedrole.ownerid is null then 0 else 1 endif)]]></Descriptor>
+     <DisplaySize>6</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Assigned]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ASSIGNED@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[wpkrole.criteriagroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Search Criteria Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CRITERIAGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[D]]></DataType>
+     <Descriptor><![CDATA[wpkassignedrole.expires]]></Descriptor>
+     <DisplaySize>12</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Expires]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[EXPIRES@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.name]]></Descriptor>
+     <DisplaySize>26</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Role]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[M]]></DataType>
+     <Descriptor><![CDATA[wpkrole.notes]]></Descriptor>
+     <DisplaySize>18</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Notes]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NOTES]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{F_staffid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[wpkassignedrole.ownerid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[OwnerID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[OWNERID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.rolegroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ROLEGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.wpkroleid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[WPKRoleID]]></Name>
+     <Sortable>2</Sortable>
+     <SortExpression><![CDATA[wpkrole.rolegroup,wpkrole.sortorder,wpkrole.name]]></SortExpression>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKROLEID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <DefaultValue><![CDATA[{Q_wpkroleid}{!D}]]></DefaultValue>
+     <Descriptor><![CDATA[wpkassignedrole.wpkroleid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[WPKRoleID@1]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>5</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKROLEID@1]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <ComplexDataUpdateCommand><![CDATA[xxx]]></ComplexDataUpdateCommand>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[(if wpkassignedrole.ownerid is null then 0 else 1 endif)]]></Descriptor>
+     <DisplaySize>6</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[CheckBox]]></ItemType>
+     <Name><![CDATA[Assigned]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ASSIGNED]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[wpkrole.criteriagroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Search Criteria Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[CRITERIAGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.name]]></Descriptor>
+     <DisplaySize>35</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Role]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataType><![CDATA[M]]></DataType>
+     <Descriptor><![CDATA[wpkrole.notes]]></Descriptor>
+     <DisplaySize>35</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Notes]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NOTES]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1{!W}]]></CanView>
+     <Descriptor><![CDATA[!foreachrow
+!!setfieldvalue wizroles.assigned
+1
+]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Assign All]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1000</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBALL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1{!W}]]></CanView>
+     <Descriptor><![CDATA[!foreachrow
+!!setfieldvalue wizroles.assigned
+0
+]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>10</Indent>
+     <ItemType><![CDATA[Button]]></ItemType>
+     <Name><![CDATA[Un-assign All]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>1100</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[PBNONE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <BackColour><![CDATA[G_ccgrey]]></BackColour>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.rolegroup]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Group]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ROLEGROUP]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanEdit><![CDATA[0]]></CanEdit>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[wpkrole.wpkroleid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[WPKRoleID]]></Name>
+     <Sortable>2</Sortable>
+     <SortExpression><![CDATA[wpkrole.rolegroup,wpkrole.sortorder,wpkrole.name]]></SortExpression>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+     <WPKViewItemID><![CDATA[WPKROLEID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[(select name from agencydetails where agencyid=staff.agencyid)]]></Descriptor>
+     <DisplaySize>15</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[{G_branchname}]]></Name>
+     <Sortable>1</Sortable>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[AGENCY]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[mod(number(),2)]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Alternate]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>210</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[ALTERNATE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.agencyid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[AgencyID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFAGENCYID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>25</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.combovisibility]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Combo Box Filter]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFCOMBOVISIBILITY]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>2</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.defaultdepartid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DefaultDepartID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFDEPARTID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.departmentmaint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Departmentmaint]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFDEPARTMENTMAINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.divisionaccess]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Divisionaccess]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFDIVISIONACCESS]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.divisionid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[DivisionID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFDIVISIONID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>50</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.EMail]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[E-Mail Address]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>35</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFEMAIL]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.reportexport]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Export Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFREPORTEXPORT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.reportprint]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report Print Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFREPORTPRINT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataType><![CDATA[I]]></DataType>
+     <Descriptor><![CDATA[staff.reportview]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[SpinEdit]]></ItemType>
+     <Name><![CDATA[Report View Level]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFREPORTVIEW]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.staffid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <IDforVideoRecordType><![CDATA[U]]></IDforVideoRecordType>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Staffid]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>10</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFSTAFFID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.tempdeskid]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[TempDeskID]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFTEMPDESKID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>20</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.WPKMainFormID]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Override Form ID ]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFWPKMAINFORMID]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>100</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.wpkstartupform]]></Descriptor>
+     <DisplaySize>10</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Startup Form]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>200</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEFWPKSTARTUPFORM]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[(select name from department where departmentid=staff.defaultdepartid)]]></Descriptor>
+     <DisplaySize>15</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Department]]></Name>
+     <Sortable>1</Sortable>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DEPARTMENT]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[(select name from division where divisionid=staff.divisionid)]]></Descriptor>
+     <DisplaySize>15</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[{G_divisionname}]]></Name>
+     <Sortable>1</Sortable>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[DIVISION]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>60</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.name]]></Descriptor>
+     <DisplaySize>18</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Name]]></Name>
+     <Sortable>1</Sortable>
+     <SortOrder>30</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[NAME]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>30</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[(select name from tempdesk where tempdeskid=staff.tempdeskid)]]></Descriptor>
+     <DisplaySize>15</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Temp Desk]]></Name>
+     <Sortable>0</Sortable>
+     <SortOrder>80</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TEMPDESK]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[1]]></CanView>
+     <DataLength>40</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.title]]></Descriptor>
+     <DisplaySize>18</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[{G_jobtitlename}]]></Name>
+     <Sortable>1</Sortable>
+     <SortOrder>40</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[TITLE]]></WPKViewItemID>
+    </Record>
+    <Record>
+     <CanView><![CDATA[0]]></CanView>
+     <DataLength>25</DataLength>
+     <DataType><![CDATA[S]]></DataType>
+     <Descriptor><![CDATA[staff.userid]]></Descriptor>
+     <DisplaySize>12</DisplaySize>
+     <Indent>0</Indent>
+     <ItemType><![CDATA[DataField]]></ItemType>
+     <Name><![CDATA[Login Name]]></Name>
+     <Sortable>2</Sortable>
+     <SortOrder>20</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+     <WPKViewItemID><![CDATA[USERID]]></WPKViewItemID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpkviewitem (BackColour, ButtonGroup, CanEdit, CanView, CaptionBackColour, CaptionFontColour, CheckValues, ComboScript, ComplexDataUpdateCommand, DataLength, DataType, DefaultValue, Descriptor, DisplayFormat, DisplaySize, Expanded, FontColour, IDforVideoRecordType, Image, Indent, ItemType, Mask, Name, Notes, PickList, Required, Sortable, SortExpression, SortOrder, WPKFormID, WPKViewID, WPKViewItemID) values &#x0D;&#x0A;(:BackColour, :ButtonGroup, :CanEdit, :CanView, :CaptionBackColour, :CaptionFontColour, :CheckValues, :ComboScript, :ComplexDataUpdateCommand, :DataLength, :DataType, :DefaultValue, :Descriptor, :DisplayFormat, :DisplaySize, :Expanded, :FontColour, :IDforVideoRecordType, :Image, :Indent, :ItemType, :Mask, :Name, :Notes, :PickList, :Required, :Sortable, :SortExpression, :SortOrder, :WPKFormID, :WPKViewID, :WPKViewItemID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="CanSelect" type="S">
+    </Field>
+    <Field name="Image" type="S">
+    </Field>
+    <Field name="MenuWidth" type="S">
+    </Field>
+    <Field name="MiddleSplitPercent" type="S">
+    </Field>
+    <Field name="Name" type="S">
+    </Field>
+    <Field name="Notes" type="S">
+    </Field>
+    <Field name="ShowMenuImages" type="S">
+    </Field>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="TopLeftView" type="S">
+    </Field>
+    <Field name="TopRightView" type="S">
+    </Field>
+    <Field name="TopSplitPercent" type="S">
+    </Field>
+    <Field name="Wizard" type="N">
+    </Field>
+    <Field name="WizardFinishScript" type="S">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKLayoutID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <CanSelect><![CDATA[1]]></CanSelect>
+     <MenuWidth><![CDATA[92]]></MenuWidth>
+     <MiddleSplitPercent><![CDATA[28]]></MiddleSplitPercent>
+     <Name><![CDATA[Main]]></Name>
+     <TopLeftView><![CDATA[DETAILS]]></TopLeftView>
+     <TopRightView><![CDATA[RIGHTVIEW]]></TopRightView>
+     <TopSplitPercent><![CDATA[48]]></TopSplitPercent>
+     <Wizard>0</Wizard>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+    </Record>
+    <Record>
+     <Name><![CDATA[New]]></Name>
+     <Wizard>1</Wizard>
+     <WizardFinishScript><![CDATA[!save
+
+!sql insert into divisionaccess (staffid,divisionid) select '{F_staffid}',divisionid from divisionaccess where staffid=:Q_defstaffid
+
+!sql insert into deptmaintenance (staffid,departmentid) select '{F_staffid}',departmentid from deptmaintenance where staffid=:Q_defstaffid
+
+!foreachrow
+!!if Q_assigned
+!!!sql insert into wpkassignedrole (wpkroleid,ownerid) values (:Q_wpkroleid,:F_staffid)
+!!!if {!?Q_wpkroleid=MANAGER:1}
+!!!!sql update staff set manager=1 where staffid=:F_staffid
+
+!refresh
+]]></WizardFinishScript>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[NEW]]></WPKLayoutID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpklayout (CanSelect, Image, MenuWidth, MiddleSplitPercent, Name, Notes, ShowMenuImages, SortOrder, TopLeftView, TopRightView, TopSplitPercent, Wizard, WizardFinishScript, WPKFormID, WPKLayoutID) values &#x0D;&#x0A;(:CanSelect, :Image, :MenuWidth, :MiddleSplitPercent, :Name, :Notes, :ShowMenuImages, :SortOrder, :TopLeftView, :TopRightView, :TopSplitPercent, :Wizard, :WizardFinishScript, :WPKFormID, :WPKLayoutID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+  <XMLQuery>
+   <XMLSelect>
+    <XPath>
+     Data/Record
+    </XPath>
+    <Field name="SortOrder" type="N">
+    </Field>
+    <Field name="WPKFormID" type="S">
+    </Field>
+    <Field name="WPKLayoutID" type="S">
+    </Field>
+    <Field name="WPKViewID" type="S">
+    </Field>
+   </XMLSelect>
+   <Data>
+    <Record>
+     <SortOrder>60</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[BROADBEANBOARDS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>50</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[BROADBEANLOGIN]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>5</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[DEPARTMENTS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>4</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[DIVISIONS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>6</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[ESCALATE]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>70</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[EXTTEMPDESKACCESS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>2</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[LAYOUTROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>3</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[QUESTIONNAIRE]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[MAIN]]></WPKLayoutID>
+     <WPKViewID><![CDATA[ROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>2</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[NEW]]></WPKLayoutID>
+     <WPKViewID><![CDATA[DETAILS]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>3</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[NEW]]></WPKLayoutID>
+     <WPKViewID><![CDATA[QUESTIONNAIRE]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>4</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[NEW]]></WPKLayoutID>
+     <WPKViewID><![CDATA[WIZROLES]]></WPKViewID>
+    </Record>
+    <Record>
+     <SortOrder>1</SortOrder>
+     <WPKFormID><![CDATA[USER]]></WPKFormID>
+     <WPKLayoutID><![CDATA[NEW]]></WPKLayoutID>
+     <WPKViewID><![CDATA[WIZTEMPLATE]]></WPKViewID>
+    </Record>
+   </Data>
+   <ForEachRow>
+    <SQLExec ignoreerror="YES">
+     insert into wpklayoutview (SortOrder, WPKFormID, WPKLayoutID, WPKViewID) values &#x0D;&#x0A;(:SortOrder, :WPKFormID, :WPKLayoutID, :WPKViewID)
+    </SQLExec>
+   </ForEachRow>
+  </XMLQuery>
+ </IfYesDialog>
+</Job>

@@ -1,0 +1,106 @@
+<!--[onload;tplvars;tsr='NetProvTimesheetRates?ptempprovtimesheetid';ViewOnly='']-->
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+   	$('#tstotal').html(CalculateGrandTotal()); 
+   	if('[var.x_params.ViewOnly]'=='1'){
+   		$('#divButtons').hide();
+   	}else{
+   		$('#divButtons').show();
+   	}
+});
+
+function CalculateGrandTotal(){
+	var GrandTotal=0;
+	$('[class*=tstotal]').each(function(){
+		GrandTotal=GrandTotal+parseFloat($(this).text());
+		$(this).text(parseFloat($(this).text()).toFixed(2));
+	});
+	return GrandTotal.toFixed(2);					
+}
+	
+function processtimesheet(ts,Routine,Params,authorising){	
+	$.post('IQXPost.php?'+Routine,Params+'&pConfirmString=',function(data, textStatus){
+		 if (textStatus=='success') {
+		 	if (data == 'Ok') {
+		       	PageTransition('CandProvTimesheets');
+		    }else{
+		    	$('.localerrormessage').html('Error CA: '+data);
+			}
+		} else {
+			$('.localerrormessage').html('Error CB: '+data);
+		}
+	},'text');
+}
+
+function completetimesheet(instruction){
+	var ts='[var.x_params.ptempprovtimesheetid]';
+	var Routine="proc=NetProvTimesheetComplete";
+	var Params='ptempprovtimesheetid='+ts+'&pInstruction='+instruction;
+	processtimesheet(ts,Routine,Params,false);
+}
+
+function authorisetimesheet(){
+	var ts='[var.x_params.ptempprovtimesheetid]';
+	var Params='ID='+ts;
+	if ($('#TSType').val() == 'S') {
+		var Routine = 'service=PROVTSCOMPLETE';
+	}
+	else {
+		var Routine = 'service=PROVNONSHIFTTSCOMPLETE';
+	}
+	processtimesheet(ts,Routine,Params,true);
+}
+
+function PageTransition(NewPage){
+	jQuery.mobile.changePage('iqxnet.php?P='+NewPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+</script>
+
+<table class="tablesorter" id="tblrates">
+	[onload_PAYandCHARGE;block=table;default]
+	<thead>
+		<tr>
+			<th>Shift</th>
+			<th class="rightalign">Total</th>
+		</tr>
+	</thead>
+	<tbody id="tblratesbody">
+		<tr id="Rate_[tsr.TempProvTimesheetLineID;block=tr]" >
+			<td>
+				[tsr.ShiftDay;noerr]<br/>
+				[tsr.BandDescription]<br/>
+				[tsr.Units;ifempty='0']&nbsp;[tsr.UnitDescription;noerr] at £[tsr.Rate;ifempty='0.00']<br/>
+				<input id="TheirRef" type="hidden" value="[tsr.TheirRef;noerr]" />
+				<input id="TSID" type="hidden" value="[tsr.TimesheetID;noerr]" />
+				<input id="TSType" type="hidden" value="[tsr.TimesheetType;noerr]" />
+			</td>
+			<td id="trr[tsr.#]_pTotal" class="tstotal twodp rightalign">[tsr.Total]</td>
+		</tr>
+		<tr>
+			<td>Total</td>
+			<td id="tstotal" class="twodp rightalign"></td>	
+		</tr>
+	</tbody>
+</table>
+
+<div id="divButtons">
+    <button class="btnMenu" type="button" id="timesheetcomplete" class="fixed nonformbutton" onclick="completetimesheet('')">Complete</button>
+	<span>	[onload_AUTHORISETIMESHEETS;block=span;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+	   <button type="button" id="timesheetauthorise" class="fixed nonformbutton" onclick="authorisetimesheet()" >Complete and Authorise</button>
+	</span>
+</div>
+
+<a data-role="button" class="btnMenu" id="timesheetUncomplete" class="fixed nonformbutton" onclick="completetimesheet('REVERSE')">Undo</a>
+<a data-role="button" class="btnMenu" onclick="PageTransition('CandProvTimesheets')">Back to Timesheets</a>
+
+<div class="usertext">
+	[onload_AUTHORISETIMESHEETS1;block=div;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+	[onload;file=txt_timesheet_authorise.html;noerr]
+</div>
+

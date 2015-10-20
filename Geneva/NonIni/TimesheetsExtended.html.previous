@@ -1,0 +1,143 @@
+<!--[onload;tplvars;DateOffset='NetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20121107 change Fetch to Search -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	// set defaults from stored values
+	var StoredStartDate=$.data(document.body,'HistoricTimesheets').Start;
+	var StoredEndDate=$.data(document.body,'HistoricTimesheets').End;
+	var StoredSearchString=$.data(document.body,'HistoricTimesheets').Search;
+	var StoredSampleString=$.data(document.body,'HistoricTimesheets').Sample;
+	if(StoredSearchString!=''){$('#TSSearchString').val(StoredSearchString)};
+	$('#TSSampleSize option[value="'+StoredSampleString+'"]').attr('selected','selected');
+		
+	$('.divTSDetail').html('');
+	
+	if ($('#divTSDetail').html()==''){
+		if(StoredStartDate!='0'){
+			$('#TSFilterStart').val(StoredStartDate);
+			$('#TSFilterEnd').val(StoredEndDate);
+		}
+	}
+	
+	$('#TSFilterStart').datepicker({dateFormat:'dd/mm/yy'});
+	$('#TSFilterEnd').datepicker({dateFormat:'dd/mm/yy'});
+	
+	$('#TSFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#TSFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('#TSNavButtons').hide();
+	
+	LoadData('1');
+	
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(PageNo){
+	var StartDate=$('#TSFilterStart').val();
+	var EndDate=$('#TSFilterEnd').val();
+	var SearchString=$('#TSSearchString').val();
+	var SampleSize=$('#TSSampleSize').val();
+	
+	$('#TSOutDateStart').html(StartDate);
+	$('#TSOutDateEnd').html(EndDate);
+	$('#TSRowCount').html(PageNo);
+	$('.errormessage').html('');
+	
+	if(StartDate && EndDate){
+		IQXChain('#divTSDetail',{action:'load',page:'TimesheetsExtendedDetail&pStartDate='+StartDate+'&pEndDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+function setThisWeek(oTbl){
+	// populate dates into search boxes at top of form
+		
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+
+function MoveOnePage(Direction){
+	// move to next or previous data page
+	
+	var LastPage=$('#TSLastPage').html();
+	if(Direction=='Z')
+		{NextPage=LastPage}
+	else
+		{
+		var NextPage=parseInt($('#TSRowCount').html())+parseInt(Direction);
+		if(Direction==0){NextPage=0}
+		if(NextPage<=1){
+			NextPage=1;
+		}
+	}
+	if(NextPage>LastPage){return};
+	$('#TSRowCount').html(NextPage);
+	LoadData(NextPage);	
+}
+
+</script>
+
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+	
+<div id="divTimesheetsFilter" class="">
+	<div class="LoadPage" style="padding: 10px">
+		Search between
+		<input id="TSFilterStart" class="" onChange="StoreDateChange('TS')" value="[DateOffset.StartDate]">
+		and
+		<input id="TSFilterEnd" class="" onChange="StoreDateChange('TS')" value="[DateOffset.EndDate]">
+		filter:
+		<input id="TSSearchString" class="" onChange="StoreDateChange('TS')">
+		size:
+		<select id="TSSampleSize" name="TSSampleSize" class="" style="width:100" onChange="StoreDateChange('TS')" >
+			<option value="10">10</option>
+			<option value="25" selected="true">25</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+		</select>
+		<span style="padding:10px;"></span>
+		<button class="fixed dataTables_search" onClick="LoadData('1')" >Search</button>
+		<span style="padding:10px;"></span>
+		<span id="TSNavButtons">
+			<button onClick="MoveOnePage('0')">First</button>
+			<button onClick="MoveOnePage('-1')">Previous</button>
+			<span id="TSRowCount" style="padding:3px;">1</span> of <span id="TSLastPage" style="padding:3px;">0</span>
+			<button onClick="MoveOnePage('1')">Next</button>
+			<button onClick="MoveOnePage('Z')">Last</button>
+			
+		</span>
+		<span style="padding:10px;"></span>
+	</div>
+	
+	<div id="divTSDetail" class="divFilterTableDetail" ></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

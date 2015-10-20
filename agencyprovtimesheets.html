@@ -1,0 +1,150 @@
+<!--[onload;tplvars;DateOffset='NetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20130201 modify page counter --> 
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+// set defaults from stored values
+	var StoredStartDate=$.data(document.body,'CurrentTimesheets').Start;
+	var StoredEndDate=$.data(document.body,'CurrentTimesheets').End;
+	var StoredSearchString=$.data(document.body,'CurrentTimesheets').Search;
+	var StoredSampleString=$.data(document.body,'CurrentTimesheets').Sample;
+	if(StoredSearchString!=''){$('#PTSearchString').val(StoredSearchString)};
+	$('#PTSampleSize option[value="'+StoredSampleString+'"]').attr('selected','selected');
+	
+	$('.divPTTableDetail').html('');
+	
+	if ($('#PTDocDetails').html()==''){
+		if(StoredStartDate!='0'){
+			$('#PTFilterStart').val(StoredStartDate);
+			$('#PTFilterEnd').val(StoredEndDate);
+		}
+	}
+		
+	$('#PTFilterStart').datepicker({dateFormat:'dd/mm/yy'});
+	$('#PTFilterEnd').datepicker({dateFormat:'dd/mm/yy'});
+	
+	$('#PTFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#PTFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('#PTNavButtons').hide();
+	
+	LoadData('1');
+});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(PageNo){
+	var StartDate=$('#PTFilterStart').val();
+	var EndDate=$('#PTFilterEnd').val();
+	var SearchString=$('#PTSearchString').val();
+	var SampleSize=$('#PTSampleSize').val();
+	
+	$('#PTOutDateStart').html(StartDate);
+	$('#PTOutDateEnd').html(EndDate);
+	$('#PTRowCount').html(PageNo);
+	
+	if(StartDate && EndDate){
+		IQXChain('#divPTDetail',{action:'load',page:'AgencyprovtimesheetsDetail&pStartDate='+StartDate+'&pEndDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+function setThisWeek(oTbl){
+	// populate dates into search boxes at top of form
+	
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divPT').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divPT').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+
+function MoveOnePage(Direction){
+	// move to next or previous data page
+	
+	var LastPage=$('#PTLastPage').html();
+	if(Direction=='Z')
+		{NextPage=LastPage}
+	else
+		{
+		var NextPage=parseInt($('#PTRowCount').html())+parseInt(Direction);
+		if(Direction==0){NextPage=0}
+		if(NextPage<=1){
+			NextPage=1;
+		}
+	}
+	if(NextPage>LastPage){return};
+	
+	$('#PTRowCount').html(NextPage);
+	LoadData(NextPage);	
+}
+</script>
+
+<div class="usertext">[onload;file=txt_agency_requirements_top.html;noerr]</div>
+
+<div id="divPT">
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+	
+<div id="divPTFilter" class="">
+	<div class="LoadPage" style="padding: 10px">
+		Search between
+		<input id="PTFilterStart" class="" onChange="StoreDateChange('PT')" value="[DateOffset.StartDate]">
+		and
+		<input id="PTFilterEnd" class="" onChange="StoreDateChange('PT')" value="[DateOffset.EndDate]">
+		filter:
+		<input id="PTSearchString" class="" onChange="StoreDateChange('PT')">
+		size:
+		<select id="PTSampleSize" name="PTSampleSize" class="" style="width:100" onChange="StoreDateChange('PT')">
+			<option value="10">10</option>
+			<option value="25" selected="true">25</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+		</select>
+		<span style="padding:10px;"></span>
+		<button class="fixed dataTables_search" onClick="LoadData('1')" >Search</button>
+		<span style="padding:10px;"></span>
+		<span id="PTNavButtons">
+			<button onClick="MoveOnePage('0')">First</button>
+			<button onClick="MoveOnePage('-1')">Previous</button>
+			<span id="PTRowCount" style="padding:3px;">1</span> of <span id="PTLastPage" style="padding:3px;">0</span>
+			<button onClick="MoveOnePage('1')">Next</button>
+			<button onClick="MoveOnePage('Z')">Last</button>
+			
+		</span>
+		<span style="padding:10px;"></span>
+	</div>
+	
+	<div id="divPTDetail" class="divFilterTableDetail" > </div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+
+<div class="usertext">[onload;file=txt_agency_requirements_bottom.html;noerr]</div>
+
+<div id="PTDocDetails" class="ui-helper-hidden"></div>
+<input type="hidden" id="PTTempShiftDate" ></input>
+<div id="PTFormDiv" ></div>

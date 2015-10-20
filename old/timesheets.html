@@ -1,0 +1,38 @@
+<!--[onload;tplvars;ts='NetTimesheets']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divFtimesheetsHolder"));
+	loadTSRange(0);
+	});
+	
+function loadTSRange(nMove){
+	var nSlice=($("#divFtimesheetsHolder").data("currentSlice") || 0) + nMove;
+	nSlice=nSlice<0 ? 0 : nSlice;
+	$("#divFtimesheetsHolder").data("currentSlice",nSlice);
+	$('button.tslate','#divFtimesheetsHolder').toggle(nSlice?true:false).toggleClass('nonformbutton',nSlice?true:false);
+	IQXChain('#divFtimesheetsSlice',{action:'load',page:'timesheetrange&pslice=' + nSlice});
+	}
+
+</script>
+
+<div class="usertext">[onload;file=txt_timesheets_top.html;noerr]</div>
+<div id="divFtimesheetsHolder"> 
+<div id="divFtimesheetsSlice"></div>
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+<p>
+	<button type="button" id="timesheet_earlier" class="fixed nonformbutton" onclick="loadTSRange(1)">
+   		&lt; Earlier
+	</button>
+	<button type="button" id="timesheet_later" class="fixed nonformbutton tslate" onclick="loadTSRange(-1)">
+   		Later &gt;
+	</button>
+	<button type="button" id="timesheet_latest" class="fixed nonformbutton tslate" onclick="IQXRefreshTab()">
+   		Latest
+	</button>
+</p>
+</div>
+<div class="usertext">[onload;file=txt_timesheets_bottom.html;noerr]</div>
+

@@ -1,0 +1,84 @@
+<!--[onload;tplvars;ad='NetCandidateAssignmentDetails?pLineID']-->
+
+<!-- 20140725 remove Main Office Address -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var MonthList=['January','Febuary','March','April','May','June','July','August','September','October','November','December'];
+	var d=new Date();
+	da=d.getDate()+' '+MonthList[d.getMonth()]+' '+d.getFullYear();
+	$('#divDate').html(da);
+		
+	$('#ActualRateExtraText').html('Please remember that it is your responsibility to ensure that you get a timesheet signed for the hours you have worked. All timesheets <span class="AssignemtDocEmp">must</span> be returned to ASA office <span class="AssignemtDocEmp">by 09:00 on Monday morning</span> to ensure they can be processed. If we do not receive your time sheet by this time you will not be paid that week. This process may alter depending on the assignment as discussed with your consultant. If you are unsure of the process please confirm with your consultant.');
+	
+	document.title='ASA Assignment details';	
+});
+
+</script>
+
+<div class="printablePageAssignmentDoc">
+	<h4>ASA Recruitment</h4>
+	<p style="margin-left:1cm;">Assignment Details Form - Temporary Workers</p>
+</div>
+
+<div id="divCandidateAssignmentTable" class="printablePageAssignmentDoc" >
+	<table class="printablePageAssignmentDoc">
+		<tr id="[block=tr;ad.CandidateName;noerr]">
+			<td width="45%">Name and adress of Temporary Worker:</td>
+			<td>[ad.CandidateName;noerr]<br />[ad.CandidateAddress;noerr]</td>
+		</tr><tr>
+			<td>Name of the Client hirer:</td>
+			<td>[ad.CompanyName;noerr]</td>
+		</tr><tr>	
+			<td>Person to report to on arrival:</td>
+			<td>[ad.ReportTo;noerr]
+			</td>
+		</tr><tr>
+			<td>Start Date of assignment:</td>
+			<td>[ad.StartDate;noerr]</td>
+		</tr><tr>
+			<td>Likely duration of the assignment (subject to change):</td>
+			<td>Up to:&nbsp;[ad.Duration;noerr]</td>
+		</tr><tr>
+			<td>The Type of work:</td>
+			<td>[ad.Placement;noerr]</td>
+		</tr><tr>
+			<td>Hours of work:</td>
+			<td>[ad.HoursOfWork;noerr]<br/>(Check regularly for changes or cancellations)</td>
+		</tr><tr>
+			<td>Dress Code (including any uniform / equipment / ID required):</td>
+			<td>[ad.PhotoID;noerr]<br/>[ad.DressCode;noerr]</td>
+		</tr><tr>
+			<td>Location of work:</td>
+			<td>[ad.LocationOfWorkName;noerr]<br/>[ad.LocationOfWorkAddress;noerr]</td>
+		</tr><tr>
+			<td>Health and Safety:</td>
+			<td>[ad.Risks;noerr]</td>
+		</tr><tr>
+			<td>Any expenses payable:</td>
+			<td>[ad.ExpensesPayable;noerr]</td>
+		</tr><tr>
+			<td>Rate of remuneration:</td>
+			<td>Starting Pay Rate:&nbsp;&#163;[ad.PayRate;noerr]<br /><br /><span id="ActualRateExtraText"></span></td>
+		</tr><tr>
+			<td>Intervals of Payment:</td>
+			<td>[ad.IntervalsOfPay;noerr] (unless agreed otherwise)</td>
+		</tr><tr>
+			<td>Your recruitment consultant</td>
+			<td>[ad.ConsultantContact;noerr]</td>
+		</tr><tr>
+			<td>Contact Numbers</td>
+			<td>
+				<div style="width: 50%" >
+					<span style="float:left">Edinburgh</span><span style="float:right">0131&nbsp;226&nbsp;6222</span><br />
+					<span style="float:left">Glasgow</span><span style="float:right">0141&nbsp;221&nbsp;4166</span><br />
+					<span style="float:left">Aberdeen</span><span style="float:right">01224&nbsp;652600&nbsp;</span><br />
+					<span style="float:left">Kirkcaldy</span><span style="float:right">01592&nbsp;640&nbsp;440</span><br />
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<div class="printablePageAssignmentDoc" style="float: left">
+	<p id="divDate" style="margin-left: 1cm;"></p>
+</div>

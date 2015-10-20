@@ -1,0 +1,730 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+
+<!-- 2011-12-07 ref email Barbara 2011-12-06
+	 modified to allow reports to display with all detail lines open.
+	 Change 'E' in function header to 'F' -->
+	 
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+
+        <title>[var.x_title] - [var.x_username] - [var.x_params.title]</title>
+		
+		[onload;file=HeaderIncludes.html]
+
+    </head>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			IQXInitSection($("#divReport"));
+			$('#grfReport').hide();
+			$('#drawGraph').hide();
+			if (!'[var.x_errormessage]') {
+				if ('[var.x_params.source;noerr]') {
+					var jsonURL = 'IQXRawData.php?page=[var.x_params.source;noerr]&render=text_plain__IQXNetDataTable.xsl';
+					if ('[var.x_params.params;noerr]') {
+						generateParamsForm(jsonURL, '[var.x_params.params;noerr]', '['+'[var.x_combodata;noerr;htmlconv=js]'+']');
+					}
+					else {
+						$('#divLoadMessage').html(IQXLoadMessage());
+						$.getJSON(jsonURL, null, reportJSONloaded);
+					}
+				}
+				else {
+					$('#labError').text('Error: Report source not specified');
+				}
+			}
+			$('body').delegate('select','change',function(){
+				ExpandAllRows();
+				})
+			
+		});
+		
+		function getParamDefault(fx,fOther){
+			if ($.trim(fOther)=='') {
+				return '';
+			}
+			var d=new Date();  // Today's date
+					//Test dates
+					//d.setFullYear(2009,1,28);
+					//d.setFullYear(2008,1,29);
+					//d.setFullYear(2009,2,31);
+					//d.setFullYear(2008,4,31);
+			var dy=d.getDate();
+			var m=d.getMonth();
+			var y=d.getFullYear();
+			switch (fx){
+				case 'D':
+					switch (fOther){
+						case '0':  //Today
+							break;
+						case '0a': //Yesterday 
+							d.setDate(dy-1);
+							break;
+						case '0b': //1 week ago
+							d.setDate(dy-7);
+							break;
+						case '0c': //1 month ago
+							d.setMonth(m-1);
+							if (d.getMonth()==m) d.setDate(0);  // Late in long month back to shorter month
+							break;
+						case '0d': //1 year ago
+							d.setYear(y-1);
+							if (d.getMonth()!=m) d.setDate(0);  // Starting from 29/2 in leap year
+							break;
+						case '1': //1st of this month
+							d.setDate(1);
+							break;
+						case '1a': //1st of last month
+							d.setMonth(m-1,1);
+							break;
+						case '31': //end of this month
+						    d.setMonth(m+1,0);
+							break;
+						case '31a': //end of last month
+							d.setDate(0);  
+							break;
+						case '101': //start of this year
+							d.setMonth(0,1);
+							break;
+						case '101a': //start of last year
+							d.setFullYear(y-1,0,1);  
+							break;
+						case '3112': //end of this year
+							d.setMonth(11,31);
+							break;
+						case '3112a': //end of last year
+							d.setFullYear(y-1,11,31);
+							break;
+						default:
+							return '';
+					}
+					return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+					break;
+				case 'M':
+				    switch (fOther) {
+						case '0':
+							return m+1;
+							break;
+						case '0a':
+							m--;
+							if (m<0) m=11;
+							return m+1;
+							break;
+						default:
+						    return fOther;
+					}
+					break;
+				case 'Y':
+				    switch (fOther) {
+						case '0':
+							return y;
+							break;
+						case '0a':
+							y--;
+							return y;
+							break;
+						default:
+						    return fOther;
+					}
+					break;
+				case 'W':
+				case 'I':
+				case 'N':
+				case 'U':
+				case 'T':
+					return fOther;
+					break;
+			}
+		}
+		
+		function generateParamsForm(url,paramlist,combodata){
+			try {
+				var comboarray=eval('('+combodata+')');
+			} catch(err) {
+				var comboarray=new Array();
+			}
+			if (!$.isArray(comboarray)){
+				comboarray=new Array();
+			}
+			var paramarray=paramlist.split(','); 
+			var frm='<form id="frmReportParams" class="centreform" action="' + url + '" method="post" accept-charset="utf-8"><fieldset>';
+			$.each(paramarray,function(parami,param){
+				var ftag='input';
+				var fid='paramformfield'+parami;
+				var fname=param;
+				var flabel=param;
+				var fx='T';
+				var fOther='';
+				var ftype='type="text"';
+				var fclass='';
+				var fattrs='';
+				var fcontents='';
+				var p=param.indexOf('__');
+				var SelectedString='';
+				if(p>=0){
+					flabel=param.substr(0,p);
+					fx=param.substr(p+2,1);
+					fOther=param.substr(p+3);
+				}
+				flabel=flabel.replace(/[_]/g,' ');
+				if (fx.toUpperCase()==fx && fx!='C'){   // lowercase indicates optional, check box must be optional by definition
+					fclass+='required ';
+				}
+				fx=fx.toUpperCase();
+				switch (fx) {
+					case 'D':
+						fclass+='date ';
+						break;
+					case 'I':
+						fclass+='digits ';
+						break;
+					case 'N':
+						fclass+='number ';
+						break;
+					case 'U':
+						fclass+='uppercase ';
+						break;
+					case 'W':  //Week
+						fclass+'digits ';
+						fattrs+='min="1" max="53" ';
+						break; 
+					case 'M':  //Month
+						fclass+'digits ';
+						fattrs+='min="1" max="12" ';
+						break; 
+					case 'Y':  //Year
+						fclass+'digits ';
+						fattrs+='min="1960" max="2040" ';
+						break; 
+					case 'C':
+						ftype='type="checkbox"';
+						fclass+='checkbox ';
+						fattrs+='value="1" ';
+						if (fOther=='1'){
+							fattrs+='checked="checked" ';
+						}
+						break;
+					case 'K':
+					case 'X':
+						ftag='select';
+						ftype='';
+						if (fx=='X'){
+							fattrs+='multiple="multiple" ';
+							fname+='[]';
+							fclass+='SelectAllOption ';
+						}
+						fcontents='<option value=""></option>';
+						$.each(comboarray,function(opti,opt){
+							if(opt.id==fOther){
+								fcontents+='<option value="'+opt.value+'">'+opt.descrip+'</option>';
+							}
+						});
+						break;
+					}
+				var fDefault=getParamDefault(fx,fOther);
+				if (fDefault){
+					fattrs+='value="'+fDefault+'" ';
+				}
+				frm+='<p><label for="'+fid+'">'+flabel+'</label>';
+				frm+='<'+ftag+' id="'+fid+'" '+ftype+' name="'+fname+'" class="'+fclass+'" '+fattrs;
+				if (fcontents) {
+					frm += '>' + fcontents + '</' + ftag + '>';
+				}
+				else {
+					frm+=' />';
+				}
+				frm+='</p>';
+			});
+			frm+='<p><button type="submit" id="paramformfield_submit" class="fixed formbutton" >Generate Report</button></p>';
+			frm+='</fieldset></form>';
+			$('#divParamsForm').html(frm);
+			IQXInitSection($("#divParamsForm"));
+			IQXEnableForm('#frmReportParams',{successhandler:reportJSONloaded,loadmessagetarget:'#divLoadMessage',responsetype:'json'});
+		}
+		
+		function setReportTitle(s){
+			document.title=document.title+' '+s;
+			$('#reportTitle').text($('#reportTitle').text()+' '+s);
+		}
+		
+		function prepareReportJSON(data,bGraphable){
+			data.bAutoWidth=false;
+			var arSort=new Array();
+			var arTotal=new Array();
+			var GraphXaxisCol=-1;
+			var GraphSeriesCols=new Array();
+			var VisibleColIndex=-1;
+			var GrandTotalIndicator=-1;
+			var SubTotalIndicator=-1;
+			var bShowExport=true;
+			var bShowSearch=true;
+			var bShowRowCount=true;
+			var SummaryCols=new Array();
+			$.each(data.aoColumns,function(coli,col){
+				var newcol={};
+				var cname=col.sTitle;
+				var bTitleColumn=false;
+				if (cname.match(/^Title__H/)){
+					bTitleColumn=true;
+					$.each(data.aaData,function(rowi,row){
+						if (row[coli]){  // Find first row with data in this column
+							setReportTitle(row[coli]);
+							return false;
+						}
+					});
+				}
+				var opts='';
+				var p=cname.indexOf('__');
+				if (p>=0){
+					opts=cname.substr(p+2);
+					cname=cname.substr(0,p);
+				}
+				newcol.sTitle=cname.replace(/[_]/g,' ');
+				newcol.bVisible=true;  
+				VisibleColIndex++;
+				var optarray=opts.split('');
+				$.each(optarray,function(opti, opt){
+					switch (opt){
+						case '1':
+						case '2':
+						case '3':
+						case '4':
+						case '5':
+						case '6':
+						case '7':
+						case '8':
+						case '9':
+						    var sortDir='asc';
+							if ($.inArray('Z',optarray)>=0){
+								sortDir='desc';
+							}
+						    arSort[opt-1]=new Array(coli,sortDir);
+							break;
+						case 'M':
+						    $.each(data.aaData,function(rowi,row){
+								var num = new Number(row[coli]);
+								row[coli]=num.toFixed(2);
+							});
+							break;
+						case 'T':
+							if ($.inArray('H',optarray) < 0) {
+								arTotal.push([VisibleColIndex, coli, (($.inArray('M',optarray) >= 0) ? 2 : 0), null]);
+							}
+							break;
+						case 'D':
+						    newcol.sType='iqx_long_date';
+							break;
+						case 'C':
+						    newcol.sClass='center';
+							break
+						case 'R':
+						    newcol.sClass='rightalign';
+							break;
+						case 'H':
+							newcol.bVisible=false;
+							newcol.bSearchable=false;
+							VisibleColIndex--;
+							break;
+						case 'X':
+						    GraphXaxisCol=coli;
+							break;
+						case 'G':
+							GraphSeriesCols.push({
+								label: newcol.sTitle,
+								colno: coli
+							});
+							break;
+						case 'S':
+							SummaryCols.push([newcol.sTitle,coli]);
+							break;
+						case 'A':
+						    if (GrandTotalIndicator<0){
+								GrandTotalIndicator=coli;
+							}
+							break;
+						case 'B':
+						    if (SubTotalIndicator<0){
+								SubTotalIndicator=coli;
+							}
+							break;
+						case 'E':
+							// F is the same as E, but expanded
+						    $.each(data.aaData,function(rowi,row){
+								var tx = row[coli];
+								row[coli]='<img class="dataTableExpand" src="css/images/details_open.png" title="Show '+newcol.sTitle+'" onclick="tblExpansion(this,'+'\''+tx+'\',\''+opts+'\')" />';
+							});
+							newcol.bSortable=false;
+							newcol.bSearchable=false;
+							newcol.sClass='center dataTableExpand';
+							break;
+						case 'F':
+							// F is the same as E, but expanded
+						    $.each(data.aaData,function(rowi,row){
+								var tx = row[coli];
+								row[coli]='<img class="dataTableExpand" src="css/images/details_open.png" title="Show '+newcol.sTitle+'" onclick="tblExpansion(this,'+'\''+tx+'\',\''+opts+'\')" />';
+							});
+							newcol.bSortable=false;
+							newcol.bSearchable=false;
+							newcol.sClass='center dataTableExpand';
+							break;
+						case 's':
+							if (bTitleColumn) bShowSearch=false;
+							break;
+						case 'x':
+							if (bTitleColumn) bShowExport=false;
+							break;
+						case 'r':
+							if (bTitleColumn) bShowRowCount=false;
+							break;
+					}
+				});
+				data.aoColumns[coli]=newcol;
+			});
+			if (arSort.length>0){
+				data.aaSorting=arSort;
+			}
+			
+			if (arTotal.length > 0 || GrandTotalIndicator >= 0 || SummaryCols.length>0) {
+				var ft = '<tfoot><tr>';
+				
+				for (var i = 0; i < data.aoColumns.length; i++) {
+					if (data.aoColumns[i].bVisible) {
+						ft += '<th';
+						if (data.aoColumns[i].sClass) {
+							ft += ' class="' + data.aoColumns[i].sClass + '"';
+						}
+						ft += '></th>';
+					}
+				}
+				ft += '</tr></tfoot>';
+				data.iqFooter = ft;
+				var bStaticFooter = (GrandTotalIndicator >= 0 || SummaryCols.length>0);
+				if (bStaticFooter) {
+					arTotal = new Array(); // Ignore any T directives
+					$.each(data.aaData, function(rowi, row){
+						if ((GrandTotalIndicator >= 0 && row[GrandTotalIndicator] == '') || 
+						         (SummaryCols.length>0 && dataTable_grandTotalRow(row,SummaryCols))) {
+							$.each(row, function(celli, cell){
+								if (data.aoColumns[celli].bVisible) {
+									if (cell.match(/<img/i))
+										cell='';
+									arTotal.push(cell);
+								}
+							});
+							return false;  // Exit after first matching row
+						}
+					});
+					data.fnFooterCallback = function(nRow, aaData, iStart, iEnd, aiDisplay){
+						if (!nRow) {  // nRow is not reliably set when the footer is generated dynamically
+							nRow=$("#tblReport tfoot tr").get(0);
+						}
+						if (!nRow) 
+							return;
+						var nCells = nRow.getElementsByTagName('th');
+						for (var j = 0; j < arTotal.length; j++) {
+							nCells[j].innerHTML = arTotal[j];
+						}
+					};
+				}
+				else {
+					data.fnFooterCallback = function(nRow, aaData, iStart, iEnd, aiDisplay){
+						if (!nRow) {  // nRow is not reliably set when the footer is generated dynamically
+							nRow=$("#tblReport tfoot tr").get(0);
+						}
+						if (!nRow) 
+							return;
+						for (var j = 0; j < arTotal.length; j++) {
+							arTotal[j][3] = 0;
+						}
+						for (var i = 0; i < aiDisplay.length; i++) {
+							for (var j = 0; j < arTotal.length; j++) {
+								arTotal[j][3] += aaData[aiDisplay[i]][arTotal[j][1]] * 1;
+							}
+						}
+						var nCells = nRow.getElementsByTagName('th');
+						for (var j = 0; j < arTotal.length; j++) {
+							var n = new Number(arTotal[j][3]);
+							nCells[arTotal[j][0]].innerHTML = n.toFixed(arTotal[j][2]);
+						}
+					};
+			}
+			}
+			data.sDom= 'l' + (SummaryCols.length>0?'S':'') + (bShowSearch?'f':'') + 'rt' + (bShowRowCount?'i':'') + 'p' + (bShowExport?'<"clear">T':'');  
+			
+			if (SummaryCols.length>0){
+				if (SubTotalIndicator >= 0) SummaryCols.push(['',SubTotalIndicator]);  // Does not show on the combo, but allows distinction of detail rows where only one summary column is specified
+				$("#tblReport").data('IQXdtSummaryFilter',{
+					'columns': SummaryCols
+				});
+			}
+
+			if (bGraphable && GraphXaxisCol>=0 && GraphSeriesCols.length>0){
+				if (SubTotalIndicator>=0){
+					var graphableData=$.grep(data.aaData,function(row,rowi){
+						return (row[SubTotalIndicator] == '' && row[GraphXaxisCol] != '') ? true : false;    
+					});
+				} else {
+					var graphableData=data.aaData;
+				}
+				graphData=MakeFlotData2(graphableData,GraphXaxisCol,GraphSeriesCols);
+				if (graphData){
+					$('body').data('GraphData',graphData);
+				}
+			}
+			if (GrandTotalIndicator >=0 || SubTotalIndicator >= 0 || SummaryCols.length > 0){
+				data.aaData=$.grep(data.aaData,function(row,rowi){
+					if (SummaryCols.length > 0 && dataTable_grandTotalRow(row,SummaryCols)){
+						return false;
+					}
+					if (GrandTotalIndicator >= 0 && row[GrandTotalIndicator]==''){
+						return false;
+					}
+					else if (SummaryCols.length == 0 && SubTotalIndicator >= 0 && row[SubTotalIndicator]==''){
+						return false;  // Keep the sub-total rows if summary totals are in use (see above)
+					}
+					return true;
+				});
+			}
+		}
+		
+		function MakeFlotData2(GraphData,XaxisCol,SeriesCols){
+			dataSeries=new Array();
+			for (var i in SeriesCols){
+				dataSeries.push({label:SeriesCols[i].label,data:new Array()});
+			}
+			$.each(GraphData.sort(function(a,b){return ($.sortable_iqx_long_date(a[XaxisCol])-$.sortable_iqx_long_date(b[XaxisCol]));}),function(rowi,row){
+				var dt=UKtoJSdate(row[XaxisCol]);
+				if (dt){
+					for (var i=0;i<SeriesCols.length;i++){
+						dataSeries[i].data.push([dt, parseFloat(row[SeriesCols[i].colno])]);
+					}
+				}
+				});
+			return dataSeries;
+		}
+
+		function enableParamsForm(){
+			if ($('#frmReportParams').length>0) {
+				IQXEnableForm('#frmReportParams',{successhandler:reportJSONloaded,loadmessagetarget:'#divLoadMessage',responsetype:'json'});
+				}
+		}
+		
+		function reportJSONloaded(data, textStatus) {
+			if (textStatus=='success'){
+				if (data.aoColumns == undefined) {
+					$('#labError').text('No matching data to report on');
+					enableParamsForm();
+				}
+				else {
+					$('#labError').text('');
+					$('#divParamsForm').text(''); // Get rid of the form, if any
+					prepareReportJSON(data, true);
+					var dt = $("#tblReport").dataTable(data);
+					$("#tblReport").data('iqDataTable', dt);
+					ExpandAllRows();	// if Column suffix is F then expand detail rows
+					
+					if (data.iqFooter) {
+						$("#tblReport").append(data.iqFooter);
+						dt.fnDraw(); // Calculate the footer totals
+					}
+					if ($('body').data('GraphData')) {
+						$('#drawGraph').show();
+					}
+				}
+			} else {
+				$('#labError').text('Error: '+textStatus);	
+				}
+			$('#divLoadMessage').text('');
+		}
+		
+		function ExpandAllRows(){
+			// picks up on Column suffix 'F' and expands the detail row
+			
+			var RowText;
+			var StartPos;
+			var VacID;
+			var Args;
+			var Img;
+			var LoopCounter=0;
+			var RowCount=$("#tblReport img").length;
+			for(LoopCounter=1;LoopCounter <= RowCount;LoopCounter++){
+				Img=$('img').get(LoopCounter);
+				if(Img){
+					var bOpen=Img.src.match(/details_open/);	// skip over lines already expanded
+					if (bOpen=='details_open'){
+						RowText=$(Img).attr('onClick');
+						
+						var RT=String(RowText);
+						if (RT.indexOf('}') > -1){}
+						
+						var ActionF=RT.substr(RT.indexOf(')')-4,1);
+						var SubReportSource=RT.substr(RT.indexOf(',')+2,RT.length-RT.indexOf(',')-10);
+						
+						if(ActionF == 'F'){
+							StartPos=RT.indexOf('pVacancyID');
+							
+							VacID=SubReportSource;
+							
+							VacID=VacID.replace('&amp;','&');
+							Args='E'+RT.substr(RT.indexOf(')')-3,2);	// Take off the 'F' and replace with original 'E'
+							tblExpansion(Img,VacID,Args);
+						
+						}
+					}	
+				}
+			};
+		}
+		
+		function tblExpansion(img,txt,opts){
+			var dtbl=$("#tblReport").data('iqDataTable');
+			if (dtbl) {
+				var bOpen=img.src.match(/details_open/);
+				var row=$(img).closest('tr').get(0);
+				dtbl.fnClose(row);  // In case it's already open with different details
+				$('img.dataTableExpand',row).each(function() {
+					this.title = this.title.replace(/^Hide/, 'Show');
+					this.src = 'css/images/details_open.png';
+				});
+				if (bOpen) {
+					openFunc=function(data,textStatus){
+						if (textStatus=='success'){
+							if(img){
+								img.title = img.title.replace(/^Show/, 'Hide');
+								img.src = 'css/images/details_close.png';
+							}
+							if (opts.indexOf('t') >= 0) { // table (AJAX or literal)
+								data=generateTableDetail(data);
+							}
+							dtbl.fnOpen(row, data, 'details');
+						}
+					}
+					if (opts.indexOf('a') >= 0) { // AJAX 
+						var dataType='html';
+						if (opts.indexOf('t') >= 0) { // table
+							txt = 'IQXRawData.php?page=' + txt + '&render=text_plain__IQXNetDataSubTable.xsl';
+							dataType='text';
+						}
+						else 
+							if (opts.indexOf('p') >= 0) { // page
+								txt = 'IQXPage.php?page=' + txt;
+							}
+						$.get(txt, null, openFunc, dataType);
+					}
+					else {  // Literal data
+						openFunc(txt, 'success');
+					}
+				}
+			}
+		}
+		
+		function generateTableRow(ar,tag,styles){
+			var rv='';
+			if ($.isArray(ar)) {
+				rv+='<tr>';
+				$.each(ar,function(i,val){
+					var cls='';
+					if (tag=='th'){
+						var style='';
+						var j=val.indexOf('__');
+						if (j>=0){
+							style=val.substr(j+2);
+							val=val.substr(0,j);
+						}
+						styles.push(style);
+						val=val.replace(/[_]/g,' ');
+					} else {
+						var style=styles[i];
+						if (style.indexOf('M')>=0) {
+							var n=new Number(val);
+							val=n.toFixed(2);
+						}
+					}
+					if (style.indexOf('C') >= 0) {
+						cls = ' class="center"';
+					}
+					else 
+						if (style.indexOf('R') >= 0) {
+							cls = ' class="rightalign"';
+						}
+					rv+='<'+tag+cls+'>'+val+'</'+tag+'>';
+				});
+				rv+='</tr>';
+			}
+			return rv;
+		}
+		
+		function generateTableDetail(jsontxt){
+			jsontxt=jsontxt.replace(/[`]/g,'"');
+			try {
+				var ar=eval('('+jsontxt+')');
+			} catch(err) {
+				return jsontxt;
+			}
+			if ($.isArray(ar)) {
+				var tbl='<table class="dataTableDetails">';
+				var hasBody=false;
+				var styles=new Array();
+				$.each(ar,function(i,val){
+					if (i==0){
+						tbl+='<thead>'+generateTableRow(val,'th',styles)+'</thead>';
+					} else {
+						if (i==1){
+							tbl+='<tbody>';
+							hasBody=true;
+						}
+						tbl+=generateTableRow(val,'td',styles);
+					}
+				});
+				if (hasBody) {
+					tbl+='</tbody>';
+				}
+				tbl+='</tbl>';
+				return tbl;
+			} else if (typeof(ar)=='string') {
+				return ar;
+			} else {
+				return ''
+			}
+		}
+		
+		function drawGraph(){
+			$('#drawGraph').hide();
+			$('#grfReport').show();  
+			if ($('body').data('GraphData')) {   // Graph not yet drawn
+				$.plot($('#grfReport'), $('body').data('GraphData'), {xaxis: {mode: 'time'}	});
+				$('body').removeData('GraphData');
+			}
+		}
+		
+		function hideGraph(){
+			if ($('#divLoadMessage:visible').length>0) {   // Do not obey if in 'printing' view because don't want 'button'
+				$('#grfReport').hide();
+				$('#drawGraph').show();
+			}
+		}
+
+	</script>
+
+    <body>
+    	
+		<h3 class="reportHeader">[var.x_title] - [var.x_username]</h3>
+		<h4 id="reportTitle" class="reportHeader">[var.x_params.title]</h4>
+    	
+		<div id="divParamsForm"></div>
+		<div id="divLoadMessage"></div>
+
+		<div id="divReport" class="reportBody">
+			
+			<table id="tblReport" class="display" cellspacing="0" cellpadding="0" border="0" > </table>
+		
+			<div class="cleardiv" > </div>
+			<div id="drawGraph" class="graphButton" onclick="drawGraph()" title="Draw Graph"></div>
+			<div id="grfReport" class="printable" onclick="hideGraph()" style="width:800px;height:400px;margin-left:auto;margin-right:auto;"></div>
+		
+		</div>
+		
+		<span class="errormessage" id="labError">[var.x_errormessage]</span>
+    </body>
+</html>
+

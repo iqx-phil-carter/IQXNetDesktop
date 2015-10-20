@@ -1,0 +1,96 @@
+<!--[onload;tplvars;cands='NetAgencyCandidates']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divagcand"));
+	});
+
+function addcand() {
+	$('#divagcand').hide();
+	IQXChain('#divagaddcand',{action:'load',page:'agencyaddcandidate'});
+}
+
+function unaddcand() {
+	IQXDisableForm();
+	$('#divagaddcand').text('');
+	$('#divagcand').show();
+}
+
+function dumpexpansion(row){
+	if ($(row).hasClass("rowexpanded")) {
+		$(row).next('tr.rowexpansion').remove();
+		$(row).find('button.historybutton').text('History');
+		$(row).find('button.documentsbutton').text('Documents');
+		$(row).removeClass();
+		}
+	
+}
+
+function showcandhistory(row,persid) {
+	if ($(row).hasClass("historyrow")) {
+		dumpexpansion(row);
+		}
+	else {
+		dumpexpansion(row);  // Dump any expansion on the current row
+	    $(row).rowafter({rowclass:'rowexpansion',divs:[{divclass:'zoomeddiv'}]});
+		$(row).addClass("rowexpanded historyrow");
+		$(row).find('button.historybutton').text('Hide History');
+		IQXChain($(row).next('tr.rowexpansion').find("div.zoomeddiv"),{action:'load',page:'agencycandidatehistory&pPersonID='+encodeURIComponent(persid)});
+		}
+	}
+
+function showcanddocuments(row,persid) {
+	if ($(row).hasClass("documentsrow")) {
+		dumpexpansion(row);
+		}
+	else {
+		dumpexpansion('tr.rowexpanded');   // Dump all expansions
+	    $(row).rowafter({rowclass:'rowexpansion',divs:[{divclass:'zoomeddiv'}]});
+		$(row).addClass("rowexpanded documentsrow");
+		$(row).find('button.documentsbutton').text('Hide Documents');
+		IQXChain($(row).next('tr.rowexpansion').find("div.zoomeddiv"),{action:'load',page:'candidatedocuments&pPersonID='+encodeURIComponent(persid)});
+		}
+	}
+
+</script>
+
+<div class="usertext">[onload;file=txt_agency_candidates_top.html;noerr]</div>
+
+<span id="agcanderror" class="errormessage">[var.x_errormessage]</span>
+<div class="ButtonGroup" align="right" >
+	<button type="button" id="clivac_add" class="fixed nonformbutton" onclick="addcand()">
+		Add Candidate [onload_add;block=button;when [var.x_rights.ADDCANDIDATES;noerr]=1]
+	</button>
+	<button type="button" id="agcand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+		Refresh
+	</button>
+</div>
+<span id="agcanderror" class="errormessage">[var.x_errormessage]</span>
+
+<div id="divagcand">
+<table class="tablesorter" id="tblagcand">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Reference Code</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[cands.CandidateName;block=tr;noerr]</td>
+	    <td>[cands.CandidateReference;noerr]</td>
+		<td>
+			<button type="button" class="historybutton tablebutton nonformbutton" onclick="showcandhistory(this.parentNode.parentNode,'[cands.PersonID]')">History</button>
+			<button type="button" class="documentsbutton tablebutton nonformbutton" onclick="showcanddocuments(this.parentNode.parentNode,'[cands.PersonID]')">Documents[onload_DOCCANDDOWNLOAD;block=button;when [var.x_rights.DOCCANDDOWNLOAD;noerr]=1]</button>
+		</td>	
+		</tr>
+		
+	</tbody>
+</table>
+</div>
+<div id="divagaddcand">
+	
+</div>
+<div class="usertext">[onload;file=txt_agency_candidates_bottom.html;noerr]</div>
+

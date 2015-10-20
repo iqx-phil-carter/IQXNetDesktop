@@ -1,0 +1,259 @@
+<!--[onload;tplvars;ts='NetTimesheetsAllFilteredExtended?pStartDate&pEndDate&pPageNo&SearchString&SampleSize']-->
+
+<!-- 20131115 Query modified to include Chat Client -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("#divFtimesheets"));
+	$('#TSNavButtons').hide();
+	
+	$('#tblFtimesheets').data('IQXdtDateFilter',{dateColumn:0});
+
+	var dtts=$('#tblFtimesheets').dataTable({
+		"sPaginationType": "full_numbers",
+		"sDom": '<"clear">rt',
+		"iDisplayLength":100,
+		"aaSorting": [ [0,'desc'], [1,'desc'], [2,'desc'], [3,'desc'], [4,'desc'], [5,'desc'], [6, 'desc'] ],
+		"aoColumns": [{},{},{},{},{},{},{},{},{},{},{bLengthChange:true,bSortable:true,bSearchable:false},{bVisible:false}]
+	});
+	
+	
+	$("#divTSheets").data('dataTable',dtts);
+	IQXDeepLink("T",dtts);
+	// To place the date range put D between l and f in the sDom
+		
+	var RecordCount=$('#TSRecordCount').val();
+	var SampleSize=$('#TSSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1;}
+	PageCount=Root+Mantissa;
+	
+	$('#TSLastPage').html(PageCount);
+	if($('#TSLastPage').html() != 'NaN'){
+		$('#TSNavButtons').show();
+		} 
+	
+	if('[var.x_userclass;noerr]'=='AGENCY'){
+		if('[var.x_local.Agency.TotalColumnTitle;noerr]' !=''){$('#th8').html('[var.x_local.Agency.TotalColumnTitle;noerr]');}
+		if('[var.x_local.Agency.PaymentReceivedTitle;noerr]' !=''){$('#th9').html('[var.x_local.Agency.PaymentReceivedTitle;noerr]');}
+		if('[var.x_local.Agency.ShowRefColumn;noerr]'!='1'){$('[id*=th3]').hide();$('[id*=td3]').hide();}
+		if('[var.x_local.Agency.ShowInvoiceColumn;noerr]'!='1'){$('[id*=th7]').hide();$('[id*=td7]').hide();}
+		if('[var.x_local.Agency.ShowPaymentReceivedColumn;noerr]'!='1'){$('[id*=th9]').hide();$('[id*=td9]').hide();}
+		if('[var.x_local.Agency.ShowShiftListColumn;noerr]'!='1'){$('[id*=th10]').hide();$('[id*=td10]').hide();}
+	}
+	if('[var.x_userclass;noerr]'=='CLIENT'){
+		if('[var.x_local.Client.TotalColumnTitle;noerr]' !=''){$('#th8').html('[var.x_local.Client.TotalColumnTitle;noerr]');}
+		if('[var.x_local.Client.PaymentReceivedTitle;noerr]' !=''){$('#th9').html('[var.x_local.Client.PaymentReceivedTitle;noerr]');}
+		if('[var.x_local.Client.ShowRefColumn;noerr]'!='1'){$('[id*=th3]').hide();$('[id*=td3]').hide();}
+		if('[var.x_local.Client.ShowInvoiceColumn;noerr]'!='1'){$('[id*=th7]').hide();$('[id*=td7]').hide();}
+		if('[var.x_local.Client.ShowPaymentReceivedColumn;noerr]'!='1'){$('[id*=th9]').hide();$('[id*=td9]').hide();}
+		if('[var.x_local.Client.ShowShiftListColumn;noerr]'!='1'){$('[id*=th10]').hide();$('[id*=td10]').hide();}
+	}
+	if('[var.x_userclass;noerr]'=='CANDIDATE'){
+		if('[var.x_local.Candidate.TotalColumnTitle;noerr]' !=''){$('#th8').html('[var.x_local.Candidate.TotalColumnTitle;noerr]');}
+		if('[var.x_local.Candidate.PaymentReceivedTitle;noerr]' !=''){$('#th9').html('[var.x_local.Candidate.PaymentReceivedTitle;noerr]');}
+		if('[var.x_local.Candidate.ShowRefColumn;noerr]'!='1'){$('[id*=th3]').hide();$('[id*=td3]').hide();}
+		if('[var.x_local.Candidate.ShowInvoiceColumn;noerr]'!='1'){$('[id*=th7]').hide();$('[id*=td7]').hide();}
+		if('[var.x_local.Candidate.ShowPaymentReceivedColumn;noerr]'!='1'){$('[id*=th9]').hide();$('[id*=td9]').hide();}
+		if('[var.x_local.Candidate.ShowShiftListColumn;noerr]'!='1'){$('[id*=th10]').hide();$('[id*=td10]').hide();}
+	}
+		
+	// add faultfinding routines
+	if('[var.x_global.debug.FaultFind;noerr]'==1){
+		AddFFEventHandlers('TimesheetsExtendedDetail.html','[var.x_global.debug.FaultFind;noerr]');
+	}
+				
+	});
+
+function loadshifts(row){
+	var ts=$(row).data("zoomedts");
+	if (ts.type=='C'){
+		loadrates(row);
+	} else {
+		var shiftpage;
+		if (ts.type == 'S') {
+			shiftpage = 'timesheetshifts';
+		}
+		else {
+			shiftpage = 'timesheettimes';
+		} 
+		var shiftsDiv=$(row).next('tr').find('div.divFtimesheetshifts').get(0);
+		var nxt={action:'func',func: function(){
+			loadrates(row);
+		}};
+		IQXChain(shiftsDiv,{action:'load',page:shiftpage + '&ptemptimesheetid=' + encodeURIComponent(ts.id),nextlink:nxt});
+	}
+}
+
+function loadrates(row){
+	var tsid=$(row).data("zoomedts").id;
+	var ratesDiv=$(row).next('tr').find('div.divFtimesheetrates').get(0);
+	IQXChain(ratesDiv,{action:'load',page:'timesheetrates&ptemptimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function openmessage(btn){
+
+	var row=$(btn).closest('tr').prev('tr').get(0);	
+	var dat=$(row).data("zoomedts");
+	var Subject=encodeURIComponent('Query Timesheet '+dat.serialnumber);
+	var stit='pTitle=' + Subject;
+	var sid='pTempProvTimesheetID=' + encodeURIComponent(dat.id);
+	var plid='pPlacementID=' + encodeURIComponent(dat.placementid);
+	var pvacid='pVacancyID=' + encodeURIComponent(dat.vacancyid);
+	
+	if('[var.x_local.Switches.NonInteractive;noerr]'=='1'){
+		IQXChain('#divmessage',{action:'load',page:'messageNonInteractive&pTimesheetID=' + encodeURIComponent(dat.id)+'&'+stit+'&'+pvacid});
+		return;
+	}
+	
+	var AllowChatClient=0;
+	if('[var.x_userclass;noerr]'=='AGENCY'){AllowChatClient='[var.x_local.Agency.AllowChatClient;noerr]';}
+	if('[var.x_userclass;noerr]'=='CLIENT'){AllowChatClient='[var.x_local.Client.AllowChatClient;noerr]';}
+	if('[var.x_userclass;noerr]'=='CANDIDATE'){AllowChatClient='[var.x_local.Candidate.AllowChatClient;noerr]';}
+			
+	if('[var.x_global.general.TimerRefreshInterval;noerr]'=='' || AllowChatClient!=1){
+		IQXChain('#divmessage',{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid});
+		return;
+	}
+	$.post('IQXPost.php?proc=NetChatInitiate','pSearchKey='+dat.serialnumber+'&pSearchType='+'T&pSubject='+Subject,function(data, textStatus){
+		if (textStatus == 'success') {
+			var retval=data;
+			if(retval!=''){
+				if(retval=='No One'){
+					IQXChain('#divmessage',{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid});
+				}else{
+					ChatRemoteUser='ChatRemoteUser=' + encodeURIComponent(retval);
+					IQXChain('#divmessage',{action:'load',page:'messageChat&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid+'&'+ChatRemoteUser});
+				}
+			}
+		} else {
+			$('#errormessage').html(data);
+		}
+	},'text');
+	
+} 
+
+function zoomtimesheet(img,tstype,tsid,serialnumber,VacancyID){
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#divFtimesheets").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	var ColumnCount=$('#tblFtimesheets').find('tr')[0].cells.length;
+		
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		$(row).next('tr').remove();
+		return;
+	}
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).data("zoomedts",{
+		type: tstype,
+		id: tsid,
+		serialnumber: serialnumber,
+		expandImage: img,
+		vacancyid: VacancyID
+	});
+		
+	$(row).rowafter(
+		{dataTable:dt,alldivsclass:"zoomeddiv",divs:[{divclass:"divFtimesheetshifts"},
+		{divclass:"divFtimesheetrates"},
+		{divclass:"divFtimesheetbuttons"},
+		{divclass: "divFmessage"}]}
+		);
+	$('[class*= divFtimesheetshifts]').parent('td').attr('colspan',ColumnCount);
+	
+	var newrow=$(row).next('tr');		
+	$("div.divFtimesheetbuttons",newrow).html('<button type="button" class="fixed nonformbutton" onclick="abandontimesheet(this)">Close</button>'+
+	    '<button type="button" class="fixed nonformbutton" onclick="openmessage(this)">Query</button>'+	
+	    '<button type="button" class="fixed nonformbutton" onclick="IQXopenInNewWindow(\'IQXNetEx.php?page=TimesheetSingle&wrapper=bare&tsnumber='+encodeURIComponent(serialnumber)+'&ptemptimesheetid=' + encodeURIComponent(tsid)+'&ptstype='+tstype+'\')">Printable Version</button>');	
+	IQXInitSection(newrow);
+
+	loadshifts(row);
+}
+
+function ChangeInvoicedTick(TickBoxID){
+	
+	var TBChecked=$('#'+TickBoxID).attr('checked');
+	var TBid=TickBoxID.substring(2);
+	
+	if(TBChecked=='checked'){
+		$('#pTickValue').val('1');
+	}else{
+		$('#pTickValue').val('0');
+	}
+	$('#pTimesheetID').val(TBid);
+	
+	  
+	$('#FInvoiced').ajaxSubmit(
+		{
+		success: function(data, textStatus){	
+			if (textStatus != 'success') {
+				$('.errormessage').html(data);
+				}
+			},
+		error: function(data,textStatus){
+			$('.errormessage').html(data);
+			},
+		dataType: "text"
+		});
+	
+}
+
+function abandontimesheet(btn){
+	var row=$(btn).closest('tr').prev('tr').get(0);
+	var img=$(row).data('zoomedts').expandImage;
+	zoomtimesheet(img);
+}
+	
+</script>
+
+<span id="agTSerror" class="errormessage">[var.x_errormessage]</span>
+
+
+<div id="divTSheets">
+	<table class="tablesorter" id="tblFtimesheets">
+		<thead>
+			<tr>
+				<th>Period End Date</th>
+				<th>Number</th>
+				<th id="th3">Ref</th>
+				<th>Temp</th>
+				<th>Client</th>
+				<th>Position</th>
+				<th id="th7">Invoice No</th>
+				<th id="th8">Total</th>
+				<th id="th9">Payment Received</th>
+				<th id="th10">Shift List</th>
+				<th>Details</th>
+				<th style="display:none">ID</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="[ts.temptimesheetid;block=tr]" >
+			    <td>[ts.weekenddate;noerr]</td>
+				<td>[ts.serialnumber;noerr]</td>
+				<td id="td3">[ts.theirref;noerr]</td>
+				<td>[ts.tempname]</td>
+				<td>[ts.companyname]</td>
+			    <td>[ts.position;noerr]</td>
+			    <td id="td7">[ts.InvoiceNo;noerr]</td>
+				<td id="td8" class="number twodp rightalign">[ts.timesheettotal;noerr]</td>
+				<td id="td9"><input type="checkbox" id="TB[ts.temptimesheetid]" onchange="ChangeInvoicedTick('TB[ts.temptimesheetid]')" [ts.ExternalStatus;if [val]='1'; then 'checked="checked"'; else ''] /></td>
+				<td id="td10">[ts.ShiftList;noerr]</td>
+				<td class="center"><img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="zoomtimesheet(this,'[ts.timesheettype]','[ts.temptimesheetid]','[ts.serialnumber;noerr]','[ts.VacancyID;noerr]')" /><input id="TSRecordCount" type="hidden" value="[ts.RowCount;noerr]" /></td>
+				<td style="display:none">[ts.temptimesheetid]</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div id="divmessage"></div>
+
+<div style="visibility: hidden">
+	<form id="FInvoiced" action="IQXPost.php?proc=NetTimesheetsTickInvoiced" method="post" accept-charset="utf-8">
+		<input id="pTickValue" name="pTickValue" value="" /><input id="pTimesheetID" name="pTimesheetID" value="" />
+	</form>
+</div>

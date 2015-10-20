@@ -1,0 +1,232 @@
+<!--[onload;tplvars;diary='NetCandidateDiary']-->
+		
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		IQXInitSection("#tblcanddiary");
+		$('#diaryAddFields').hide();
+		
+		$('#selDiaryAdd').multiSelect({
+				noneSelected: 'Add to Diary...'
+			}, diaryAddCallback);
+
+		$("input.longdate", '#divDiaryAdd').datepicker({dateFormat: 'D dd/mm/yy',firstDay:'[var.x_global.general.DatePickerStartday]'});
+		
+		$("#diaryGraph").bind("plotselected", diaryDragCallback);
+		
+		$('#tblcanddiary tr.deleteable_shift td.ShiftAction').statebutton(['Delete','']);
+		$('#tblcanddiary tr.confirmable_shift td.ShiftAction').statebutton(['Confirm','Reject','']);
+		$('#tblcanddiary tr.cancelled_shift td.ShiftAction').statebutton(['Acknowledge','']);
+
+		$('button','#diaryGraphButtons,#divDiaryAdd,#tblcanddiary').mouseoverclass();
+
+		// add faultfinding routines
+		if('[var.x_global.debug.FaultFind;noerr]'==1){
+			AddFFEventHandlers('candidatediary.html','[var.x_global.debug.FaultFind;noerr]');
+		}
+	
+    	setTimeout("drawGraph()",100);
+		});
+		
+	function diaryAddCallback(){
+		var tp = '';
+		var tpx = $("#frmDiaryAdd input:checked[name='pshifttype']").get(0);
+		if (tpx) {
+			tp = $(tpx).val();
+		}
+		if (tp){
+			$('#diaryAddFields').show();
+			if (tp.substr(1)=='P'){
+				$('#diaryTimeFields').show();	
+			} else {
+				$('#diaryTimeFields').hide();	
+			}
+		} else {
+			$('#diaryAddFields').hide();
+		}
+	}
+	
+	function diaryAddSave(){
+		var frdate=$('#diaryDateFrom').val();
+		if (frdate) {
+			$('#frmDiaryAdd').ajaxSubmit({
+					success: function (data, textStatus){
+						if (data=='Ok') {
+							IQXRefreshTab();
+						} else {
+							$('#diaryMessage').html(data);
+						}
+					},
+					dataType: "text"
+				});
+		}
+	}
+	
+	function SaveDiaryActions(){
+		var actionlist = [];
+		$("tr > td > button.statebutton",$("#tblcanddiary")).each(function(){
+			var a=$(this).text();
+			if (a){
+				actionlist.push(this.parentNode.parentNode.id + '=' + a);
+				}
+		});
+		if (actionlist.length>0) {
+			IQXChain('#diaryMessage', {
+				action: 'send',
+				proc: 'NetCandidateDiaryActionSave',
+				postdata: {
+					pActions: actionlist.toString()
+				},
+				nextlink: {
+					action: 'func',
+					func: IQXRefreshTab
+				}
+			});
+		}
+	}
+	
+	function ClearDiaryActions(){
+		$("tr > td > button.statebutton",$("#tblcanddiary")).each(function(){
+			$(this).text('');
+		});
+	}
+	
+	function diaryDragCallback(event, ranges){
+		// This function will need to change if display is other than 7 days
+   		var Days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+		var startDate=$('body').data('diaryBaseDate');
+		function xdate(n){
+ 			n=Math.floor(n);
+			if (n==7) n=6;
+			var d=new Date((startDate + (6-n)) * 24 * 60 * 60 * 1000);
+			return Days[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+		}
+		$('#diaryTimeFrom').val(Math.round(ranges.xaxis.from)+':00');
+		$('#diaryTimeTo').val(Math.round(ranges.xaxis.to)+':00');
+		$('#diaryDateFrom').val(xdate(ranges.yaxis.to));
+		$('#diaryDateTo').val(xdate(ranges.yaxis.from));
+	}
+	
+	function diaryReverseTimes(){
+		var tmp=$('#diaryTimeFrom').val();
+		$('#diaryTimeFrom').val($('#diaryTimeTo').val());
+		$('#diaryTimeTo').val(tmp);
+	}
+	
+	function drawGraph(scroll){
+		var numDays=7;
+		var startDate=$('body').data('diaryBaseDate');
+		if (scroll==0 || !startDate){
+			var d=new Date(); // today
+			startDate=getDayDate(d)-((d.getDay()+6)%7);  // Go back to Monday
+		}
+		if (scroll){
+			startDate=startDate + scroll*numDays
+		}
+		$('body').data('diaryBaseDate',startDate);
+		var ar=makeFlotDiaryData('#tblcanddiary','Type','From','To',startDate,numDays);
+		var avail = {
+			label: 'Available',
+			data: extractFlotDiaryDataClass(ar,'Available'),
+			lines: { show: false },
+	    	bars: { show: true, barWidth:1, horizontal:true},
+			color: "rgb(0, 255, 0)"
+		}
+		var working = {
+			label: 'Working',
+			data: extractFlotDiaryDataClass(ar,'Working'),
+			lines: { show: false },
+	    	bars: { show: true, barWidth:1, horizontal:true},
+			color: "rgb(0, 0, 255)"
+		}
+		var unavail = {
+			label: 'Holiday / Unavailable',
+			data: $.merge(extractFlotDiaryDataClass(ar,'Unavailable'),extractFlotDiaryDataClass(ar,'Holiday')),
+			lines: { show: false },
+	    	bars: { show: true, barWidth:1, horizontal:true},
+			color: "rgb(255, 0, 0)"
+		}
+		var theDateAxis=makeFlotDateAxis(startDate,numDays)
+    	$.plot($("#diaryGraph"), [ avail, working, unavail ],
+			{
+			yaxis:{min:0,max:numDays,ticks:theDateAxis,labelHeight:45},
+			xaxis:{min:0,max:24,ticks:FlotTimeTickGenerator},
+			legend:{container:'#diaryGraphLegend'},
+			selection:{mode:'xy'}
+		});
+	}
+	
+	function doBlur(b){
+		$(b).trigger("blur");
+	}
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_diary_top.html;noerr]</div>
+<div id="divcanddiary">
+<div id="graphContainer" class="ui-corner-all" style="width:700px;height:280px;border-width:2px;border-color:#CDCDCD;border-style:solid;margin-left:auto;margin-right:auto;">
+<div id="diaryGraph" style="width:600px;height:250px;float:left;margin-left:5px;"></div>
+<div id="diaryGraphLegend" style="width:85px; height:100px; float:left; margin-top: 90px;"></div>
+<div id="diaryGraphButtons" style="clear:both; margin-left:250px;">
+	<button type="button" class="fixed" onclick="drawGraph(-1);" onfocus="doBlur(this);">&lt;&lt;</button>
+	<button type="button" class="fixed" onclick="drawGraph(0);" onfocus="doBlur(this);">This Week</button>
+	<button type="button" class="fixed" onclick="drawGraph(1);" onfocus="doBlur(this);">&gt;&gt;</button>
+</div>
+</div>
+
+<div id="divDiaryAdd" class="DiaryAdd ui-corner-all">
+<form id="frmDiaryAdd" name="diaryadd" action="IQXPost.php?proc=NetCandidateDiaryAdd" method="POST" accept-charset="utf-8">
+	<select id="selDiaryAdd" name="pshifttype">
+		<option value="">Add to Diary...</option>
+		<option value="AW">Available - whole days</option>
+		<option value="AP">Available - part days</option>
+		<option value="UW">Unavailable - whole days</option>
+		<option value="UP">Unavailable - part days</option>
+		<option value="HW">Holiday - whole days</option>
+		<option value="HP">Holiday - part days</option>
+	</select>
+	<span id="diaryAddFields">
+	Dates
+	<input class="longdate" id="diaryDateFrom" name="pdatefrom" />
+	to
+	<input class="longdate" id="diaryDateTo" name="pdateto" />
+	<span id="diaryTimeFields">
+	Times
+	<input class="time" id="diaryTimeFrom" name="ptimefrom" />
+	<button type="button" class="fixed" onclick="diaryReverseTimes();" onfocus="doBlur(this);">&lt; to &gt;</button>
+	<input class="time" id="diaryTimeTo" name="ptimeto" />
+	</span>
+	<button type="button" class="fixed" onclick="diaryAddSave();" >Save</button>
+	<br/>Drag the mouse on the diary to select dates and times. Click the '&lt; to &gt;' button to swap times (for night shifts).
+	</span>
+</form>
+</div>
+
+<label class="errormessage" id="diaryMessage">[var.x_errormessage]</label>
+
+<table class="tablesorter" id="tblcanddiary">
+	<thead>
+		<tr>
+		<th>Type</th>
+		<th>Details</th>
+		<th>From</th>
+		<th>To</th>
+		<th>Status</th>
+		<th>Actions
+			<button type="button" class="fixed" onclick="SaveDiaryActions()">Save</button>
+			<button type="button" class="fixed" onclick="ClearDiaryActions()">Clear</button>
+		</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[diary.DiaryID;block=tr]" class="diary[diary.DiaryClass] [diary.ActionType;noerr]">
+		<td>[diary.DiaryClass]</td>
+	    <td>[diary.Description;noerr]</td>
+	    <td>[diary.DateFrom;noerr] [diary.TimeFrom;noerr]</td>
+	    <td>[diary.DateTo;noerr] [diary.TimeTo;noerr]</td>
+		<td>[diary.DiaryStatus;noerr]</td>
+		<td class="ShiftAction"></td>
+		</tr>
+	</tbody>
+</table>
+</div>
+<div class="usertext">[onload;file=txt_candidate_diary_bottom.html;noerr]</div>

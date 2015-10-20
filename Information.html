@@ -1,0 +1,63 @@
+<script>
+	
+function submitProspect(){
+	
+	$('.localerrormessage').html('');
+	$('#ReturnMessage').html('');
+	$('#frmInformation').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					$('#ReturnMessage').html('Your friend has been referred, thank you.');
+				}else{
+					$('.localerrormessage').html('Error A: '+data);	
+				}
+			} else {
+				$('.localerrormessage').html('Error B: '+data);
+			}
+		},
+		error: function(data,textStatus){
+			$('.localerrormessage').html('Error C: '+data);
+		},
+		dataType: "html"
+	});
+	
+}
+</script>
+
+<div class="usertext">
+	[onload;file=txt_candidate_Information.html;noerr]
+</div>
+
+<div>
+<form id="frmInformation" class="centreform" method="post" action="IQXPost.php?proc=NetCandidateReferAFriend" accept-charset="utf-8" >
+    <fieldset>
+    	<div style="width:100%;float:left;overflow:auto;padding:3px;">
+			<label for="pProspectName" >Name</label>
+			<div style="float:right;padding-right: 150px;" >
+				<input id="pProspectName" name="pProspectName" ></input>
+			</div>
+		</div>
+		<div style="width:100%;float:left;overflow:auto;padding:3px;">
+			<label for="pProspectEmail" >Email address</label>
+			<div style="float:right;padding-right: 150px;" >
+				<input id="pProspectEmail" name="pProspectEmail"></input>
+			</div>
+		</div>
+		<div style="width:100%;float:left;overflow:auto;padding:3px;">
+			<label for="pProspectPhone" >Phone number</label>
+			<div style="float:right;padding-right: 150px;" >
+				<input id="pProspectPhone" name="pProspectPhone"></input>
+			</div>
+		</div>
+	</fieldset>
+</form>
+<div style="width:100%;text-align: center">
+	<button onclick="submitProspect()" >Refer a friend</button>
+</div>
+	
+		
+<div id="ReturnMessage" style="width:100%;float:left;overflow:auto;padding:3px;"></div>
+<div id="UploaderError" class="localerrormessage"></div>
+
+</div>

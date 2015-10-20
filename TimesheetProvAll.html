@@ -1,0 +1,38 @@
+<!--[onload;tplvars;ts='NetClientProvTimesheets?pSampleSize']-->
+
+<!-- 20131203 create an empty page to link many TimesheetProvSingles to provide a printable list -->
+
+<script type="text/javascript">
+
+	var DivCounter=0;
+	
+	$(document).ready(function(){
+			
+		$('div[id*=TS]').each(function(){
+			var DivID=$(this).attr('id');
+			var tsID=DivID.substring(2);
+			var PageString='TimesheetProvSingle&wrapper=bare&tsnumber=&ptempprovtimesheetid=' + encodeURIComponent(tsID)+')';
+			var NextOperation={action:'func',func:ChainPageBreak()};
+
+			IQXChain('#PrintDiv'+DivCounter, {action: 'load', page: PageString,nextlink: NextOperation});
+		});
+	});
+	
+	function ChainPageBreak(){
+			
+		window.DivCounter=window.DivCounter+1;
+		var DivCounterPrev=window.DivCounter-1;
+		$('#PrintDiv'+DivCounterPrev).after('<div id="PrintDiv'+DivCounter+'" style="page-break-after: always"></div>');
+
+		}
+			
+</script>
+
+
+<table style="display: none">
+	<tr id="[ts.tempprovtimesheetid;block=tr]">
+		<td><div id="TS[ts.tempprovtimesheetid]"></div></td>
+	</tr>
+</table>
+
+<div id="PrintDiv0" style="display: none"></div>

@@ -1,0 +1,9 @@
+<!-- Mobile IQXNet
+NB data-ajax="false" in various places is to allow browsers' remember password functionality to work-->
+  
+<form id="loginform" action="iqxnet.php" method="POST" data-ajax="false" >
+ <input type="hidden" name="iqxnet_action" value="logout" />
+ <p>Log out?</p>
+ <input type="submit" class="btnMenu" name="doLogout" value="Yes" data-ajax="false" />
+ <a data-rel="back" class="btnMenu" data-role="button">No</a> 
+</form>

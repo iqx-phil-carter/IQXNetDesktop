@@ -1,0 +1,49 @@
+<!-- modified per email from Viola 2011-11-15 -->
+<!-- Release date 2011-11-30 Current Requirements and Current Status pages merged into Current Shift Staus tab -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#clienttabs");
+	$('a').click(function(){
+		if($(this).attr('href') == '#tabcontent-1'){
+			$('#divheading').show();
+			$('#divheadingSmall').hide();
+		}else{
+			$('#divheading').hide();
+			$('#divheadingSmall').show();
+		}
+	})
+});
+</script>
+    
+<div id="clienttabs" >
+    <ul>
+        <li><a href="#tabcontent-1"><span>Welcome</span></a></li>
+        <!--li><a href="IQXPage.php?page=clientprofile"><span>Contact Details</span></a></li-->
+        <!--li id="R"><a href="IQXPage.php?page=clientvacancies"><span>Current Requirements</span></a></li-->
+        <li id="P"><a href="IQXPage.php?page=clientprovtimesheets"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheets"><span>Historic Timesheets</span></a></li>
+        <!--li><a href="IQXPage.php?page=clientpreviousemployees"><span>Previous Temps</span></a></li-->
+        <!--li><a href="IQXPage.php?page=companycontacts"><span>Contacts[onload_conts;block=li;when [var.x_rights.MAINTAINCONTACTS;noerr]=1]</span></a></li-->
+        <li><a href="IQXPage.php?page=reports"><span>Reports[onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+	</ul>
+    <div id="tabcontent-1">
+    	<div class="usertext">[onload;file=txt_client_welcome_top.html;noerr]</div>
+		<div id="Clientnonstandardtext" class="usertext">[onload;file=txt_client_nonstandard_welcome.html;noerr;]</div>
+		<div id="Clientstandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title] Client Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Update your contact details and password</li>
+				<li>View and enter job requirements</li>
+				<li>Complete and authorise temporary workers' timesheets</li>
+				<li>View historical details and management information</li>
+			</ul>
+			<p>Please explore the options, and if you have queries, contact [var.x_title].</p>
+		</div>
+    	<div class="usertext">[onload;file=txt_client_welcome_bottom.html;noerr]</div>
+    </div>
+    <div id="tabcontent-blank">
+    </div>
+</div>

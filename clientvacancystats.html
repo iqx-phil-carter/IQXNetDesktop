@@ -1,0 +1,64 @@
+<!--[onload;tplvars;vacancystats='NetClientStats']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	IQXInitSection($("#grfContext"));
+	$('#grfCliVacStats').hide();
+//	$("#tblclivacstats").tablesorter({sortList:[[0,1]],dateFormat:'uk'});
+    $grfData=makeFlotData('#tblclivacstats','Week Ending',[{label:'New Vacancies'},{label:'New Placements'}]);
+	$("#tblclivacstats").dataTable({
+        "bAutoWidth": false
+    });
+	
+//	IQXDeepLink("vacstat");
+	});
+	
+	function drawGraph(){
+		$('#drawGraph').hide();
+		$('#grfCliVacStats').show();  
+		$.plot($('#grfCliVacStats'), $grfData, {xaxis:{mode:'time'}});
+		$grfData=null;  // Free the memory
+	}
+</script>
+
+<div class="usertext">[onload;file=txt_client_stats_top.html;noerr]</div>
+
+<div id="grfContext">
+	
+<table id="tblclivacstats" class="display" cellspacing="0" cellpadding="0" border="0" >
+	<thead>
+		<tr>
+		<th>Week Beginning</th>
+		<th>Week Ending</th>
+		<th>New Vacancies</th>
+		<th>Temp</th>
+		<th>Perm</th>
+		<th>New Placements</th>
+        <th>Temp</th>
+        <th>Perm</th>
+		</tr>
+	</thead>
+	<tbody>
+	    <tr id="[vacancystats.Serial]">
+	    <td>[vacancystats.WeekStartDate;block=tr;noerr]</td>
+	    <td>[vacancystats.WeekEndDate;noerr]</td>
+	    <td>[vacancystats.NewVacanciesAll;noerr]</td>
+	    <td>[vacancystats.NewVacanciesTemp;noerr]</td>
+	    <td>[vacancystats.NewVacanciesPerm;noerr]</td>
+	    <td>[vacancystats.NewPlacementsAll;noerr]</td>
+	    <td>[vacancystats.NewPlacementsTemp;noerr]</td>
+	    <td>[vacancystats.NewPlacementsPerm;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+
+<div class="cleardiv" ></div>
+
+<button type="button" id="drawGraph" class="fixed nonformbutton" onclick="drawGraph()">Graph</button>
+<div id="grfCliVacStats" style="width:800px;height:400px;margin-left:auto;margin-right:auto;"></div>
+
+</div>
+
+<label class="errormessage">[var.x_errormessage]</label>
+
+<div class="usertext">[onload;file=txt_client_stats_bottom.html;noerr]</div>

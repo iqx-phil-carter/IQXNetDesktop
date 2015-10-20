@@ -1,0 +1,124 @@
+<Job title="check database procedure" dateformat="ddd dd/mm/yyyy" autoclose="YES">
+	<Library>
+		<Setup>
+			<SetVariable name="bp" value="NO" />	<!-- Flag for breakpoint -->
+				<!-- IQXNetRequestAction.xml, IQXNetSetPassword.xml, IQxNetSetPhones.xml, IQXNetUserLink -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUser (IQXNetUserID,IQXNetUserClassID,Name,LoginID,Password,PasswordSet) VALUES ('TESTUSER1','CLIENT','TESTUSER1','TESTUSER1','x',1)</SQLExec>
+				<!-- IQxNetSetPhones.xml -->
+			<SQLExec breakpoint="{bp}">insert into company (companyid, name, keyname) values ('TESTX1','Test Company 1','TESTCO1')</SQLExec>
+			<SQLExec breakpoint="{bp}">insert into person (personid, name, keyname) values ('TESTX1','Test Emp 1','TESTEMP1')</SQLExec>
+			<SQLExec breakpoint="{bp}">insert into employment (employmentid,companyid,personid) values ('TESTX1','TESTX1','TESTX1')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUserLink (IQXNetUserLinkId,IQXNetUserID,PersonID,EmploymentID) VALUES ('TESTLINK1','TESTUSER1','TESTX1','TESTX1')</SQLExec>
+				<!-- tagvalue -->
+			<SQLExec breakpoint="{bp}">INSERT INTO tagvalue (taglocation,tagid,tagchoiceid,id,value) VALUES ('ACN','QL','Q1','TESTX1',1)</SQLExec>
+				<!-- IQXNetAction -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetAction (IQXNetActionID,IQXNetUserID,ActionType,TargetType,ActionState,WhenRequested,TargetID) VALUES ('TESTACTION1','TESTUSER1','ClientFill','SHIFT','0','2010-10-27 10:47:01.443','XX01471027102010000C')</SQLExec>
+				<!-- IQXNetEmailDetails -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetEmailDetails (IQXNetEmailDetailsID,WebAddress,AgencyName,EmailRoot,SMTPHost,SMTPUserID,SMTPPassword,DefaultUserPassword,WebSiteFolder) VALUES ('TESTEMAIL','http://localhost/iqxnet/iqxnet.php','TESTAGENCY','iqx.co.uk','127.0.0.1','TESTUSER1','password','password','c:\\inetpub\\wwwroot\\iqxnet')</SQLExec>
+				<!-- IQXNetMessageCompanyReceipient, IQXNetMessageRecipient -->
+			<SQLExec breakpoint="{bp}">INSERT INTO staff (staffid,name,defaultdepartid,shortid,userid) VALUES ('TESTWEBUSER','TESTWEBUSER','AA','XX','TESTWEBUSER')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetMessageCompanyRecipient (RecipientID,CompanyID,StaffID,MessageType) VALUES ('TESTRECEIPT','TESTX1','TESTWEBUSER','TESTMESSAGE')</SQLExec>
+			<SqlExec breakpoint="{bp}">INSERT INTO IQXNetMessageRecipient (MessageType) VALUES ('TESTMESSAGE')</SqlExec>
+				<!-- IQXNetNotificationCascade -->
+			<SqlExec breakpoint="{bp}">insert into vacancy (vacancyid,employmentid,departmentid) values ('TESTX1','TESTX1','AA')</SqlExec>
+			<SqlExec breakpoint="{bp}">INSERT INTO placement (placementid,placedate,employmentid,vacancyid,departmentid,staffid) VALUES ('TEMPPLACEMENT','2010-01-01','TESTX1','TESTX1','AA','TESTWEBUSER')</SqlExec>
+			<SqlExec breakpoint="{bp}">INSERT INTO diary (diaryid,staffid,personid,vacancyid,employmentid,placementid,diaryfrom,diaryto,description,notes,DurationType,Duration,WhoEntered,RecurDays,priority) VALUES ('TESTDIARYENTRY','TESTWEBUSER','TESTX1','TESTX1','TESTX1','TEMPPLACEMENT','2010-10-28 12:42:52.794','2010-10-28 12:42:52.794','TEST ENTRY','TEST ENTRY','R',0,'TESTWEBUSER',0,5)</SqlExec>
+			<SqlExec breakpoint="{bp}">INSERT INTO IQXNetNotificationCascade (CascadeType,DiaryID,WhenCascaded,Address) VALUES ('TESTCASCADE','TESTDIARYENTRY','2010-10-28 12:42:52.794','TESTADDRESS')</SqlExec>
+				<!-- IQXNetPageText -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetPageText (IQXNetPageTextID,PageText) VALUES ('TESTPAGE','TEST PAGE')</SQLExec>
+				<!-- IQXNetReport -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetReport (IQXNetReportID,Description,DBProcedure,IQXNetUserClassID,SortOrder) VALUES ('TESTREPORT','TEST REPORT','TESTPROCEDURE','CLIENT',120)</SQLExec>	
+				<!-- IQXNetRight -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetRight (IQXNetRightID,Description,SortOrder) VALUES ('TESTRIGHT','TEST RIGHT',999)</SQLExec>
+				<!-- IQXNetUserClass -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetUserClass (IQXNetUserClassID,Name,SelfRegistrationAllowed,Services,Calls,Jobs,Selects) VALUES ('TESTUSERCLASS','TESTUSERCLASS',1,'%','%','%',1)</SQLExec>
+				<!-- IQXNetRightAllowed -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID,MaintainOnWeb) VALUES ('TESTRIGHT','TESTUSERCLASS','*',1)</SQLExec>
+				<!-- IQXNetRightAssigned -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetRightAssigned (IQXNetUserID,IQXNetRightID,Assigned) VALUES ('TESTUSER1','TESTRIGHT',1)</SQLExec>
+				<!-- IQXNetRightDefault -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetRightDefault (IQXNetRightID,IQXNetUserClassID,ID) VALUES ('TESTRIGHT','TESTUSERCLASS','*')</SQLExec>
+				<!-- IQXNetSettings -->
+			<SQLExec breakpoint="{bp}">INSERT INTO IQXNetSettings (IQXNetSettingsID,DefaultStaffId,DefaultReportsFolder,DefaultDatabaseUser,PortNumber,SecurePortNumber,SecurePassword,AuthenticationRealm,LoggingOn,CVUploadBehaviour,PhotoUploadBehaviour,NonAuthenticatedCalls) VALUES ('TESTSETTING','TESTWEBUSER','C:\test','DB',15,16,'dummy','http://a.com',1,1,1,'dummy')</SQLExec>
+				<!-- IQXNetPopup -->
+			<SQLExec breakpoint="{bp}">INSERT INTO progress(progressid,vacancyid,status,staffid,personid,placementid,) VALUES ('TESTPROGRESS','TESTX1','X','TESTWEBUSER','TESTX1','TEMPPLACEMENT')</SQLExec>
+				<!-- IQXNetSaveQuestionnaire -->
+			<SQLExec breakpoint="{bp}">INSERT INTO tag (taglocation,tagid,tagtype,description,sortorder) VALUES ('P','XXX','A','TESTTAG',999)</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO dictionary (dictionaryid,dictionarylocation,itemtype,databaseitem,description) VALUES ('XXX','P','C','TESTITEM','TESTITEM')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tagchoice (taglocation,tagid,tagchoiceid,description) VALUES ('P','XXX','A','TEST1')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO tagchoice (taglocation,tagid,tagchoiceid,description) VALUES ('P','XXX','B','TEST2')</SQLExec>
+			<SQLExec breakpoint="{bp}">INSERT INTO criterion (searchlocation,id,critid,dictionaryid,sourcelocation,tagid,tagchoiceid) VALUES ('XXX','TESTCRITERION','XXX','XXX','P','XXX','A')</SQLExec>
+			
+		</Setup>
+		
+		<TearDown>
+			 	<!-- IQXNetRequestAction.xml, IQXNetSetPassword.xml, IQxNetSetPhones.xml -->
+			<SQLExec>DELETE FROM IQXNetUser WHERE IQXNetUserID = 'TESTUSER1'</SQLExec>
+				<!-- tagvalue -->
+			<SQLExec>DELETE FROM tagvalue WHERE id='TESTX1'</SQLExec>
+				<!-- IQXNetAction -->
+			<SQLExec>DELETE FROM IQXNetAction WHERE IQXNetUserID='TESTUSER1'</SQLExec>
+				<!-- IQXNetEmailDetails -->
+			<SQLExec>DELETE FROM IQXNetEmailDetails WHERE AgencyName='TESTAGENCY'</SQLExec>
+				<!-- IQXNetPopup -->	
+			<SQLExec>DELETE FROM progress WHERE progressid='TESTPROGRESS'</SQLExec>
+				<!-- IQXNetNotificationCascade -->
+			<SQLExec>DELETE FROM IQXNetNotificationCascade WHERE DiaryID='TESTDIARYENTRY'</SQLExec>
+			<SQLExec>DELETE FROM diary WHERE staffid='TESTWEBUSER'</SQLExec>
+			<SQLExec>DELETE FROM placement WHERE placementid='TEMPPLACEMENT'</SQLExec>
+			<SQLExec>DELETE FROM vacancy WHERE vacancyid='TESTX1'</SQLExec>
+				<!-- IQXNetMessageCompanyRecipient, IQXNetMessageRecipient -->
+			<SQLExec>DELETE FROM IQXNetMessageCompanyRecipient WHERE CompanyID='TESTX1'</SQLExec>
+			<SQLExec>DELETE FROM staff WHERE staffid='TESTWEBUSER'</SQLExec>
+			<SQLExec>DELETE FROM IQXNetMessageRecipient WHERE MessageType='TESTMESSAGE'</SQLExec>
+				 <!-- IQxNetSetPhones.xml -->
+			<SQLExec>DELETE FROM IQXNetUserLink WHERE IQXNetUserID = 'TESTUSER1'</SQLExec>
+			<SQLExec>delete from employment where employmentid like 'TESTX%'</SQLExec>
+			<SQLExec>delete from person where personid like 'TESTX%'</SQLExec> 
+			<SQLExec>delete from company where companyid like 'TESTX%'</SQLExec>
+			<SQLExec>DELETE FROM Phone WHERE whoid = 'TESTX1'</SQLExec>
+				<!-- IQXNetPageText -->
+			<SQLExec>DELETE FROM IQXNetPageText WHERE IQXNetPageTextID='TESTPAGE'</SQLExec>
+				<!-- IQXNetReport -->
+			<SQLExec>DELETE FROM IQXNetReport WHERE IQXNetReportID='TESTREPORT'</SQLExec>
+				<!-- IQXNetRight -->
+			<SQLExec>DELETE FROM IQXNetRight WHERE IQXNetRightID='TESTRIGHT'</SQLExec>
+				<!-- IQXNetUserClass -->
+			<SQLExec>DELETE FROM IQXNetUserClass WHERE IQXNetUserClassID='TESTUSERCLASS'</SQLExec>
+				<!-- IQXNetRightAllowed -->
+			<SQLExec>DELETE FROM IQXNetRightAllowed WHERE IQXNetRightID='TESTRIGHT'</SQLExec>
+				<!-- IQXNetRightAssigned -->			
+			<SQLExec>DELETE FROM IQXNetRightAssigned WHERE IQXNetUserID='TESTUSER1'</SQLExec>
+				<!-- IQXNetRightDefault -->
+			<SQLExec>DELETE FROM IQXNetRightDefault WHERE IQXNetRightID='TESTRIGHT'</SQLExec>
+				<!-- IQXNetSettings -->
+			<SQLExec>DELETE FROM IQXNetSettings WHERE IQXNetSettingsID='TESTSetting'</SQLExec>
+				<!-- IQXNetSaveQuestionnaire -->			
+			<SQLExec>DELETE FROM tag WHERE taglocation='P' AND tagid='XXX'</SQLExec>
+			<SQLExec>DELETE FROM criterion WHERE searchlocation='XXX'</SQLExec>
+			<SQLExec>DELETE FROM dictionary WHERE dictionaryid='XXX'</SQLExec>
+			<SQLExec>DELETE FROM tagchoice WHERE tagid='XXX'</SQLExec>
+		</TearDown>
+	</Library>
+	<SetVariable name="TestDir" value="C:\TestFiles\IQXNet\" />
+	<Call>TearDown</Call>
+	<Call>Setup</Call>
+	<ChangeDirectory path="{TestDir}Tables\" />
+	<DirectoryQuery>
+		<ForEachRow>
+			<If x1="{FileExtension}" x2="xml" comparison="=">
+				<RunJob breakpoint="{bp}" job="{TestDir}Tables\{FileName}" />
+			</If>
+		</ForEachRow>
+	</DirectoryQuery>
+	<ChangeDirectory path="{TestDir}Procedures\" />
+	<DirectoryQuery>
+		<ForEachRow>
+			<If x1="{FileExtension}" x2="xml" comparison="=">
+				<RunJob breakpoint="{bp}" job="{TestDir}Procedures\{FileName}" />
+			</If>
+		</ForEachRow>
+	</DirectoryQuery>
+	<Call>TearDown</Call>
+	<MessageDialog text="Complete" />
+</Job>

@@ -1,0 +1,227 @@
+<Job xml:space="preserve">
+
+<!-- 20140619 generate email when a timesheet is completed. -->
+
+<Parameters>
+	<Parameter name="pSerialNo" value="Not-Found" />
+	<Parameter name="pWebUserID" value="Not-Found" />
+	<Parameter name="Action" value="Ok" />
+	<Parameter name="ProcessingError" value="OK" />
+</Parameters>
+
+<!-- User variables -->
+	<SetVariable value="YES" name="SMTPTLS" type="S"/>
+	<SetVariable name="SenderEmailAddress" value="noreply@visionforeducation.co.uk" type="S"/> 				<!-- email address of sender -->
+	<SetVariable name="EmailSubject" value="Timesheet {Action}" type="S"/>
+	<SetVariable name="EmailSubjectError" value="Timesheet Error" type="S"/>
+	<SetVariable name="TestEmailAddress" value="phil.carter@iqx.co.uk" /> 						<!-- insert an email address here, to override database address -->
+	<SetVariable name="ContactEventCode" value="15" /> 											<!-- code to create Timesheet Contact -->
+<!-- User variables -->
+
+<!-- Style variables -->
+	<SetVariable type="S" name="EmailStyleA" value="font-family:sans-serif;" />
+    <SetVariable type="S" name="EmailStyleAB" value="font-family:sans-serif;font-weight:bold;" />
+    <SetVariable type="S" name="EmailStyleB" value="color:#989898;font-family:sans-serif;" />
+    <SetVariable type="S" name="EmailStyleBB" value="color:#989898;font-family:sans-serif;font-weight:bold;" />
+    <SetVariable type="S" name="EmailStyleT" value="text-align:left;border-style:solid;border-width:1px;width:500px;" />
+    <SetVariable type="S" name="EmailStyleTH" value="background-color:#AED0EA;color:#872075" />
+    <SetVariable type="S" name="EmailStyleTD" value="background-color:#F0F0F6;color:#000000" />
+    <SetVariable type="S" name="EmailStyleError" value="color:#FF0000;" />
+<!-- Style variables -->
+
+<SQLQuery>
+	<SQLSelect>select agencyname,webaddress,emailroot,smtphost,smtpuserid,smtppassword from iqxnetemaildetails where iqxnetemaildetailsid='DEFAULT'</SQLSelect>
+
+	<SQLQuery>
+		<SQLSelect>
+SELECT 
+	t.tempprovtimesheetid as TSID,
+    t.SerialNumber as SerialNumber, 
+    p.name as PersName, 
+    v.position as Position, 
+    c.name as CName, 
+    t.period as Period, 
+	if NetVacancyHasRateScript(t.tempjobtypeid,t.vacancyid) = 0 then 'C' else if tempdesk.desktype = 'S' then 'S' else if tempdesk.desktype = 'W'
+    		and exists(select * from placement where placementid = t.placementid and worknormalhours is not null and workstarttime is not null
+   		 	and(isnull(workmonday,0) = 1 or isnull(worktuesday,0) = 1 or isnull(workwednesday,0) = 1 or isnull(workthursday,0) = 1 or isnull(workfriday,0) = 1
+   		 	or isnull(worksaturday,0) = 1 or isnull(worksunday,0) = 1)) then 'T'
+   		 	else 'C'
+   		 	endif
+   		 	endif
+    endif as timesheettype,
+    (select first number from phone ph where ph.whoid=e.employmentid and phonetypeid like '%E') as ContactEmail,
+    (select first email from staff s where s.staffid=v.staffid) as StaffEmail,
+    v.staffid as StaffID,
+    v.vacancyid as VacancyID,
+    e.employmentid as EmpID,
+    p.personid as Persid
+FROM 
+    tempprovtimesheet t 
+    key join person p, 
+    tempprovtimesheet t 
+    key join vacancy v 
+    key join employment e  
+    key join company c,
+	employment e
+	key join person ps,
+    tempprovtimesheet t 
+    key join tempdesk 
+where 
+    t.SerialNumber=:pSerialNo
+UNION
+SELECT
+	t.temptimesheetid as TSID, 
+    t.SerialNumber as SerialNumber, 
+    p.name as PersName, 
+    v.position as Position, 
+    c.name as CName, 
+    t.period as Period, 
+    'z' as timesheettype,
+    (select first number from phone ph where ph.whoid=e.employmentid and phonetypeid like '%E') as ContactEmail,
+    (select first email from staff s where s.staffid=v.staffid) as StaffEmail,
+    v.staffid as StaffID,
+    v.vacancyid as VacancyID,
+    e.employmentid as EmpID,
+    p.personid as Persid 
+FROM 
+    temptimesheet t 
+    key join person p, 
+    temptimesheet t 
+    key join placement
+    key join vacancy v 
+    key join employment e
+    key join company c, 
+	employment e
+	key join person ps,
+    temptimesheet t 
+    key join tempdesk 
+where 
+    t.SerialNumber=:pSerialNo
+		</SQLSelect>
+	
+		<If x1="{timesheettype}" x2="z" > 								<!-- create SQL for rates block -->
+			<SetVariable name="SQLStringRates" value="SELECT BandDescription, UnitDescription, cast(cast(isnull(Units,0) as decimal(10,2)) as char(20)) as Units, cast(cast(isnull(Rate,0) as decimal(10,2)) as char(20)) as Rate, cast(cast(isnull(Total,0) as decimal(10,2)) as char(20)) as Total,ShiftDay FROM nettimesheetrates(pWebUserID='{pWebUserID}',ptemptimesheetid='{TSID}')" />
+		</If>
+		<Else>
+			<SetVariable name="SQLStringRates" value="SELECT BandDescription, UnitDescription, cast(cast(isnull(Units,0) as decimal(10,2)) as char(20)) as Units, cast(cast(isnull(Rate,0) as decimal(10,2)) as char(20)) as Rate, cast(cast(isnull(Total,0) as decimal(10,2)) as char(20)) as Total,ShiftDay FROM netprovtimesheetrates(pWebUserID='{pWebUserID}',ptempprovtimesheetid='{TSID}')" />
+		</Else>
+				
+		<SetVariable name="DestEmailAddress" value="{ContactEmail}" /> 		<!-- if normal, send to client -->
+		<If x1="{ProcessingError}" x2="OK" comparison="!=" > 				<!-- if Processing error, send to Consultant -->
+			<SetVariable name="EmailSubject" value="{EmailSubjectError}" />
+			<SetVariable name="DestEmailAddress" value="{StaffEmail}" />
+		</If>
+		<If x1="{TestEmailAddress}" x2="" comparison="!=" > 				<!-- if test email address is present, send to test email -->
+			<SetVariable name="DestEmailAddress" value="{TestEmailAddress}" />
+		</If>
+		
+		<Block>	
+		<SendEmail subject="{EmailSubject}" smtpport="{SMTPPort}" smtppassword="{smtppassword}" smtpuserid="{smtpuserid}" smtpsender="{SenderEmailAddress}" smtphost="{smtphost}" html="yes">
+			<EmailRecipients>
+				<WriteLn>{DestEmailAddress}</WriteLn>
+			</EmailRecipients>
+			<EmailBody>
+				<If x1="{ProcessingError}" x2="OK" comparison="!=" > 	<!-- if an error is reported from proceeing timesheet, add headline here -->
+					<Write><![CDATA[<p style='{EmailStyleError}' >ERROR - {ProcessingError}</p>]]></Write>
+				</If>
+				<Write><![CDATA[<table><tr>]]></Write>
+				<Write><![CDATA[<td><span style='{EmailStyleA}' >Timesheet number:</span></td><td><span style='{EmailStyleA}' >]]>{SerialNumber}<![CDATA[</span></td></tr>]]></Write>
+				<Write><![CDATA[<td><span style='{EmailStyleA}' >Candidate:</span></td><td><span style='{EmailStyleA}' >]]>{PersName}<![CDATA[</span></td></tr>]]></Write>
+				<Write><![CDATA[<td><span style='{EmailStyleA}' >Position:</span></td><td><span style='{EmailStyleA}' >]]>{Position}<![CDATA[</span></td></tr>]]></Write>
+				<Write><![CDATA[<td><span style='{EmailStyleA}' >Client:</span></td><td><span style='{EmailStyleA}' >]]>{Cname}<![CDATA[</span></td></tr>]]></Write>
+				<Write><![CDATA[</table>]]></Write>
+			
+				<Write><![CDATA[<br />]]></Write>
+				
+				<If x1="{timesheettype}" x2="S"> <!-- shift -->
+					<Write><![CDATA[<table style='{EmailStyleT}'><tr style='{EmailStyleTH}'>]]></Write>
+					<Write><![CDATA[<th>Date</th>]]></Write>
+					<!--Write><![CDATA[<th>From</th>]]></Write>
+					<Write><![CDATA[<th>To</th>]]></Write>
+					<Write><![CDATA[<th>Break (Minutes)</th>]]></Write-->
+					<Write><![CDATA[<th>Description</th>]]></Write>
+					<Write><![CDATA[</tr>]]></Write>
+					<SQLQuery>
+					<SQLSelect>
+						select shiftdate,timefrom,timeto,breakminutes,description from NetProvTimesheetShifts(pWebUserID='{pWebUserID}',ptempprovtimesheetid='{TSID}') union select shiftdate,timefrom,timeto,breakminutes,description from NetTimesheetShifts(pWebUserID='{pWebUserID}',ptemptimesheetid='{TSID}')
+					</SQLSelect>
+						<ForEachRow>
+							<Write><![CDATA[<tr  style='{EmailStyleTD}'><td>]]>{shiftdate}<![CDATA[</td>]]></Write>
+							<!--Write><![CDATA[<td>]]>{timefrom}<![CDATA[</td>]]></Write>
+							<Write><![CDATA[<td>]]>{timeto}<![CDATA[</td>]]></Write>
+							<Write><![CDATA[<td>]]>{breakminutes}<![CDATA[</td>]]></Write-->
+							<Write><![CDATA[<td>]]>{description}<![CDATA[</td></tr>]]></Write>
+						</ForEachRow>
+					</SQLQuery>
+					<Write><![CDATA[</table>]]></Write>
+				</If>
+				<Else> 	<!-- contract -->
+					<!-->
+					<Write><![CDATA[<table style='{EmailStyleT}'><tr style='{EmailStyleTH}'>]]></Write>
+					<Write><![CDATA[<th>Date</th>]]></Write>
+					<Write><![CDATA[<th>Hours</th>]]></Write>
+					<Write><![CDATA[<th>From</th>]]></Write>
+					<Write><![CDATA[</tr>]]></Write>
+					<SQLQuery>
+						<SQLSelect>
+							select shiftdate,hours,timefrom from NetProvTimesheettimes(pWebUserID='{pWebUserID}',ptempprovtimesheetid='{TSID}') union select shiftdate,hours,timefrom from NetTimesheettimes(pWebUserID='{pWebUserID}',ptemptimesheetid='{TSID}')
+						</SQLSelect>
+						<ForEachRow>
+							<Write><![CDATA[<tr style='{EmailStyleTD}'><td>]]>{shiftdate}<![CDATA[</td>]]></Write>
+							<Write><![CDATA[<td>]]>{hours}<![CDATA[</td>]]></Write>
+							<Write><![CDATA[<td>]]>{timefrom}<![CDATA[</td>]]></Write>
+						</ForEachRow>
+					</SQLQuery>
+					<Write><![CDATA[</table>]]></Write>
+				-->
+				</Else>
+				<Write><![CDATA[<br />]]></Write> <!-- rates -->
+				<![CDATA[<table style='{EmailStyleT}'><tr style='{EmailStyleTH}'>]]>
+				<![CDATA[<th>Day</th>]]>
+				<![CDATA[<th>Band</th>]]>
+				<![CDATA[<th>Unit</th>]]>
+				<![CDATA[<th>Units</th>]]>
+				<![CDATA[<th>Rate (&#163;)</th>]]>
+				<![CDATA[<th>Total (&#163;)</th>]]>
+				<![CDATA[</tr>]]>
+				
+				<SQLQuery>
+					<SQLSelect>{SQLStringRates}</SQLSelect>
+					<ForEachRow>
+						<Write><![CDATA[<tr style='{EmailStyleTD}'><td>]]>{ShiftDay}<![CDATA[</td>]]></Write>
+						<Write><![CDATA[<td>]]>{BandDescription}<![CDATA[</td>]]></Write>
+						<Write><![CDATA[<td>]]>{UnitDescription}<![CDATA[</td>]]></Write>
+						<Write><![CDATA[<td>]]>{Units}<![CDATA[</td>]]></Write>
+						<Write><![CDATA[<td>]]>{Rate}<![CDATA[</td>]]></Write>
+						<Write><![CDATA[<td>]]>{Total}<![CDATA[</td></tr>]]></Write>
+						<SetVariable name="RunningTotal" sql="select cast(cast({RunningTotal}+{Total} as decimal(10,2)) as char(10)) from dummy" />
+					</ForEachRow>	
+					
+				</SQLQuery>
+				<Write><![CDATA[<tr style='{EmailStyleTD}'><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>]]>{RunningTotal}<![CDATA[</td></tr>]]></Write>
+				<![CDATA[</table>]]>	
+			</EmailBody>
+		</SendEmail>
+		<If x1="{ProcessingError}" x2="OK" comparison="!=" > 	<!-- create popup for error -->
+			<SetVariable name="PK" sql="select uniquekey('x') from dummy"/>
+			<SetVariable name="SQLString" value="insert into diary(diaryid,staffid,personid,employmentid,vacancyid,placementid,progressid,diaryfrom,description,notes,durationtype,popupminutes) values('{PK}','{StaffID}','{PersID}','{EmpID}','{VacancyID}',null,null,current timestamp,'Error in Timesheet {pSerialNo}','An error appeared during an attempt to authorise timesheet {pSerialNo} with an error message of: {ProcessingError}','R',0)" />
+			<SQLExec>{SQLString}</SQLExec>
+		</If>
+		<If x1="{ProcessingError}" x2="OK" > 					<!-- create contact event for success -->
+			<SetVariable name="PK" sql="select uniquekey('x') from dummy"/>
+			<SetVariable name="DefaultUser" sql="select defaultstaffid from iqxnetsettings where iqxnetsettingsid='default'" />
+			<SetVariable name="SQLString" value="insert into contactevent (contacteventid,personid,staffid,vacancyid,contactdate,contacttime,description,classcode,notes,whenentered,whoentered) values ('{PK}','{PersID}','{StaffID}','{VacancyID}',dateformat(now(),'yyyy-mm-dd'),dateformat(now(),'hh:nn:ss.sss'),'ETS Timesheet Completed','{ContactEventCode}','ETS Timesheet Completed via website',now(),'{DefaultUser}')" />
+			<SQLExec>{SQLString}</SQLExec>
+		</If>
+		</Block>
+		<Catch>
+			<SetVariable name="PK" sql="select uniquekey('x') from dummy"/> 	<!-- create popup for general failure -->
+			<SetVariable name="SQLString" value="insert into diary(diaryid,staffid,personid,employmentid,vacancyid,placementid,progressid,diaryfrom,description,notes,durationtype,popupminutes) values('{PK}','{StaffID}','{PersID}','{EmpID}','{VacancyID}',null,null,current timestamp,'Error in Timesheet {pSerialNo}','An error appeared during an attempt to authorise timesheet {pSerialNo} with an error message of: {Exception}. Please notify IQX Support','R',0)" />
+			<SQLExec>{SQLString}</SQLExec>
+		</Catch>
+	</SQLQuery>
+</SQLQuery>
+</Job>
+
+
+

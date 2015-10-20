@@ -1,0 +1,52 @@
+﻿<!--[onload;tplvars;DiaryList='MobileNetOwnerDiary?pCalendarLineID&pEventType&pDaysInFuture']-->
+
+<script type="text/javascript">
+
+    window.HelpRoot = '../../iqxhelp/doku.php?id=';
+
+    $(document).ready(function () {
+        $('#btnDiaryHelp').attr('href', window.HelpRoot + 'hat_1');
+        var EventType = $('tr').attr('tag');
+        if (EventType == 'D') { $('#spanHeader').html('Diary'); }
+        if (EventType == 'C') { $('#spanHeader').html('Contact Event'); }
+        if (EventType == 'P') { $('#spanHeader').html('Progress'); }
+    });
+
+    function LoadDiaryPage(line,EventType,DaysInFuture) {
+
+        var DestPage = 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + $(line).attr('id') + '&pEventType=' + EventType+'&pDaysInFuture='+DaysInFuture;
+        jQuery.mobile.changePage(DestPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+
+</script>
+
+
+<nav role="navigation" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnDiaryHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    <span class="btnNavLeft"><a id="btnDiaryNew" href="iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=new&pEventType=D&pDaysInFuture=[DiaryList.pDaysInFuture]" data-role="button" data-icon="star" data-iconpos="notext">New appointment</a></span>
+</nav>
+<span id="spanHeader"></span>
+<nav style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnDiaryHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new" >Help</a></span>
+</nav>
+
+<div id="divDiary">
+    <table id="tblDiary" data-role="table" data-mode="reflow" class="tablesorter">
+        <tr id="[DiaryList.LineID;block=tr;]" onclick="LoadDiaryPage(this, '[DiaryList.EventType;noerr]', '[DiaryList.pDaysInFuture]')" tag="[DiaryList.EventType;noerr]">
+            <td>
+                <div style="float:left;">
+                    <span style="font-weight:bold">[DiaryList.Position]</span>
+                    <br />
+                    <span style="font-weight:normal">[DiaryList.Status]</span>
+                </div>
+                <div style="float:right">
+                    <span class="Priority[DiaryList.Priority;noerr]">[DiaryList.Priority;noerr]</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

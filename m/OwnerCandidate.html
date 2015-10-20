@@ -1,0 +1,128 @@
+﻿<!--[onload;tplvars;CandidateList='MobileNetOwnerCandidate?pCandidateID']-->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (window.pEventType == 'F') {
+            $('#NavFavouriteButtons').show();
+            $('#NavButtons').hide();
+        } else {
+            $('#NavFavouriteButtons').hide();
+            $('#btnCandidateDiaryHome').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType);
+            $('#btnCandidateDiaryDetailHome').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        }
+        $('#btnCandidateHelp').attr('href', window.HelpRoot + 'hat_2');
+        $('#TaskButtons').hide();
+        $('form').keypress(function (event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                CandidateSave();
+            }
+        })
+    });
+
+    
+    function CreateCandidateContactEvent(line, ContactType) {
+        window.pMethod = ContactType;
+        window.pAddress = $(line).html();
+        
+        var DestPage = 'iqxnet.php?P=OwnerContactEvent&pCalendarLineID=' + window.pContactEventLineID + '&pEventType=' + window.pEventType;
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
+    
+    function CandidateEdit(line) {
+        CandidateShowNav();
+        $('#CandidateNoteArea').html('<textarea id="CandidateNoteText" name="pNote" style="width:100%" value="" />');
+        $('#divOwnerCandidateError').html('');
+        $('#CandidateNoteText').focus();
+    }
+
+    function CandidateSave() {
+        var NoteText = '';
+        if ($('#CandidateNoteText').val() != '') { NoteText = $('#CandidateNoteText').val(); }
+        if (NoteText == '') {
+            $('#CandidateNoteArea').html('[CandidateList.Note;noerr]');
+        } else {
+            $('#frmCandidateDetails').ajaxSubmit({
+                success: function (data, textStatus) {
+                    if (textStatus == 'success' && data == 'Ok') {
+                        $('#CandidateNoteArea').html(NoteText);
+                    } else {
+                        $('#divOwnerCandidateError').html(data);
+                    }
+                },
+                error: function (data, textStatus) {
+                    $('#divOwnerCandidateError').html(data);
+                },
+                dataType: "html"
+            });
+        }
+        $('#CandidateTaskButtons').fadeOut();
+    }
+
+    function CandidateShowNav() {
+        $('#TaskButtons').fadeIn();
+        $('#TaskButtons').fadeOut();
+        $('#TaskButtons').fadeIn();
+    }
+
+    </script>
+
+<div id="CandidateNav">
+    <nav role="navigation" id="NavHelpButtons" style="display:block;float:left">
+        <span class="btnNavLeft"><a id="btnCandidateHelp" href="" data-role="button" data-icon="info" data-iconpos="notext">Help</a></span>
+    </nav>
+    <nav role="navigation" id="NavButtons" style="display:block;float:left">
+        <span class="btnNavLeft"><a id="btnCandidateHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+        <span class="btnNavLeft"><a id="btnCandidateDiaryHome" href="" data-role="button" data-icon="grid" data-iconpos="notext">Diary</a></span>
+        <span class="btnNavLeft"><a id="btnCandidateDiaryDetailHome" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Detail</a></span>
+    </nav>
+    <nav role="navigation" id="NavFavouriteButtons" style="display:block;float:left;">
+        <span class="btnNavLeft"><a id="btnCandidateHome" href="iqxnet.php?P=OwnerFavourites" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    </nav>
+    <span>Candidate</span>
+    <nav id="TaskButtons" style="display:block;float:right">
+        <span class="btnNavRight"><a id="btnCandidateSave" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="CandidateSave()">Complete</a></span>
+    </nav>
+</div>
+    <br />
+
+<div id="divOwnerCandidateError" class="errormessage"></div>
+
+    <div>
+        <form id="frmCandidateDetails" action="IQXPost.php?proc=MobileNetOwnerEditCandidate" method="post">
+            <table class="tablesorter">
+                <tr>
+                    <td>Name</td>
+                    <td>[CandidateList.PersonName]</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>[CandidateList.State;noerr]</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><a href="mailto:[CandidateList.Email;noerr]" onclick="CreateCandidateContactEvent(this,'Email')">[CandidateList.Email;noerr]</a></td>
+                </tr>
+                <tr>
+                    <td>Mobile</td>
+                    <td><a href="tel:+[CandidateList.MobileLink;noerr]" onclick="CreateCandidateContactEvent(this, 'Phone')">[CandidateList.MobileView;noerr]</a></td>
+                </tr>
+                <tr>
+                    <td>Home Phone</td>
+                    <td><a href="tel:+[CandidateList.HomePhoneLink;noerr]" onclick="CreateCandidateContactEvent(this, 'Phone')">[CandidateList.HomePhoneView;noerr]</a></td>
+                </tr>
+            </table>
+            <table class="tablesorter">
+                <tr onclick="CandidateEdit()" >
+                    <td id="CandidateNoteArea">[CandidateList.Notes;noerr]</td>
+                </tr>
+            </table>
+            <input type="hidden" name="pCandidateID" value="[CandidateList.PersonID;noerr]" />
+        </form>
+    </div>
+

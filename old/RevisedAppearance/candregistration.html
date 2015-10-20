@@ -1,0 +1,66 @@
+<!--[onload;tplvars;candreg='NetCandidateRegistrations']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#divcandreg");
+	});
+	
+	function regdepartment(row,persid,deptid,deptname,isperm,istemp){
+		$('button.tablebutton').hide();
+	    $(row).rowafter({rowclass:'rowexpansion',rowid:'registerInDept',divs:[{divclass:'widezoomeddiv ui-widget-content'}]});
+		IQXChain($(row).next('tr.rowexpansion').find("div.widezoomeddiv"),{action:'load',page:'CandDepartmentRegistration'+
+		    '&pDepartmentID='+encodeURIComponent(deptid)+
+		    '&pDepartmentName='+encodeURIComponent(deptname)+
+		    '&pTaglocation=A'+encodeURIComponent(deptid)+
+		    '&pPersonID='+encodeURIComponent(persid)+'&pPerm='+isperm+'&pTemp='+istemp});
+		}
+		
+	function undoregdepartment(){
+		IQXDisableForm();
+		$('#registerInDept').remove();
+		$('button.tablebutton').show();
+	}
+	
+</script>
+<div class="usertext">[onload;file=txt_candidate_registration_top.html;noerr]</div>
+<div id="ID1" style="visibility:visible">No records were returned. If you feel there should be, then please contact your agency.</div>
+<span class="errormessage">[var.x_errormessage]</span>
+<div class="ButtonGroup" align="right" >
+	<button type="button" id="candreg_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+</div>
+
+<div id="divcandreg" style="overflow:auto ">
+<table class="tablesorter" id="tblcandreg" style="visibility:hidden">
+	<thead>
+		<tr>
+		<th>Section</th>
+		<th>Registration</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+		<td>[candreg.DepartmentName;noerr;block=tr]</td>
+		<td>[candreg.Details;noerr]</td>
+	    <td><button id="B1" type="button" class="tablebutton" onclick="regdepartment(this.parentNode.parentNode,'[candreg.PersonID;noerr]','[candreg.DepartmentID]','[candreg.DepartmentName]',[candreg.PermJobs],[candreg.TempJobs])">Change Registration</button></td>
+		</tr>
+	</tbody>
+</table>
+
+</div>
+<div>
+
+<script language="JavaScript">
+	try {	//if B1 is invisble then there are no rows in table, so hide table div and show error div 
+		if ($('#B1').attr('type')) {
+			$('#ID1').hide();
+			$('#tblcandreg').css('visibility','visible');
+		}
+	}
+	catch(err){
+		//do nothing	
+	}
+</script>
+</div>
+<div class="usertext">[onload;file=txt_candidate_registration_bottom.html;noerr]</div>
+

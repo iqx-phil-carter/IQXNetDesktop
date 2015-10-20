@@ -1,0 +1,700 @@
+/* Font */
+body {
+	font-family: "Trebuchet MS",Trebuchet,Verdana,Helvetica,Arial,sans-serif;
+}
+
+/* Over-ride certain settings in the jquery ui theme */
+.ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+	font-family: "Trebuchet MS",Trebuchet,Verdana,Helvetica,Arial,sans-serif;
+	font-size: 12px;
+	font-weight:normal;
+}
+
+input,select,textarea {
+	color: black;
+	background-color: #FFF;
+	border-width:1px;
+	border-color:black;
+	border-style:solid;
+}
+
+/* Any styling for user maintained page content */
+div.usertext {   
+}
+
+/* Default style for the page heading banner - should be over-ridden in custom.css */
+#divheading {
+height: 100px;
+margin-bottom: 10px;
+background-color: #27537a;
+text-align:center;
+color: white;
+background-image: url(images/sitelogo.png);
+background-repeat: no-repeat;
+background-position:right;
+}  
+ 
+#divheading h1 {
+color:red;
+margin-bottom:2px;
+}
+
+#divheading h2 {
+font-size:18px;
+margin-top:2px;
+margin-bottom:2px;
+}
+
+#divheading h3 {
+margin-top:10px;
+}
+
+/* General formatting */
+div.cleardiv {
+	clear: both;
+}
+
+#divzoom, .zoomeddiv {
+	width: 600px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+}
+
+.outerzoomeddiv {
+	width: 650px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+}
+
+.widezoomeddiv {
+	width: 100%;
+}
+
+#divfooter {
+float:left;
+}
+
+legend { 
+font-size:14px;
+}
+
+label { 
+width: 10em; 
+float: left; 
+font-size:14px;
+}
+
+#frmchangepassword label {
+width: 11em; 
+}
+
+.errormessage, .localerrormessage {
+	color:Red;
+}
+
+.readonly {
+	background-color: #E6EEEE;
+}
+
+label.errormessage {
+	width: 100%;
+}
+
+label.error { 
+float: none; 
+color: red; 
+padding-left: .5em; 
+vertical-align: top; 
+}
+
+fieldset {       /* Greatly improves form appearance in IE6  */
+	padding:10px;
+}
+
+form {
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+fieldset > p { 
+clear: both; 
+margin: 1px;
+}
+
+.uppercase {
+	text-transform: uppercase;
+}
+
+.rightalign {
+	text-align: right;
+}
+.center {
+	text-align: center;
+}
+
+button {
+	cursor: pointer;
+}
+
+button.fixed {
+	font-size:10pt;
+}
+
+button.tablebutton {
+	font-size:8pt;
+}
+
+button.statebutton {
+	height:23px;
+	width:60px;
+	font-size: 8pt;
+}
+
+fieldset.regular {
+	width: 625px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+}
+
+fieldset input, fieldset select {
+	width:250px;
+}
+
+fieldset input.narrow, fieldset select.narrow {
+	width:50px;
+}
+
+fieldset input.medium, fieldset select.medium {
+	width:125px;
+}
+
+/* End of General */
+
+/* ui-dialog */
+div.ui-dialog {
+	border-width: 3px;
+	border-color: #CDCDCD;
+}
+/* end of ui-dialog */
+
+/* ui-datepicker  - Use z-index to make sure that datepickers appear in ui-dialogs */
+.ui-datepicker {
+	z-index:4000;
+}
+/* end of ui-datepicker */
+
+/* Login page and Report Params form */
+
+form.centreform {
+	width: 540px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+}
+
+form.centreform input {
+	width: 160px;
+}
+
+form.centreform input.checkbox {
+	width: auto;
+}
+
+form.centreform .multiSelectOptions label {
+	text-align:left;
+}
+
+form.centreform .multiSelectOptions input {
+	width: auto;
+}
+
+form.centreform label {
+/*	font-family:"Trebuchet MS",Trebuchet,Verdana,Helvetica,Arial,sans-serif;*/	
+    font-size:14px;
+	text-align: right;
+	padding-right: .5em; 
+}
+
+#login_submit {
+  margin-left: 200px ;
+}
+
+#paramformfield_submit {
+  margin-left: 150px ;
+}
+
+/* End of Login page */
+
+/* Questionnaire */
+
+.questionnaire {
+	width: 600px;
+	border-width:1px;
+	border-collapse: collapse;
+	border-color: #CDCDCD;
+}
+
+/* div based questionnaire */
+
+div.questionnaire {
+	width:620px;
+	border-style: solid;
+	float:left;
+}
+
+div.qquestrow {
+	float:left;
+	width: 615px;
+	border-width:1px;
+	border-color: #CDCDCD;
+	border-style: solid;
+	padding: 2px;
+}
+
+div.qhead {
+}
+
+div.qquestion {
+	width: 200px;
+	clear:left;
+	float:left;
+}
+
+div.qanswer {
+	width: 400px;
+	float:left;
+	color: black;
+	background-color: #FFF;
+}
+
+/* Shared by div and table questionnaire */
+
+tr.qquestrow {
+	height: 25px;
+}
+
+td.qquestion, td.qanswer {
+	border-width:2px;
+	border-style:solid;
+	border-color: #CDCDCD;
+	font-weight:normal;
+}
+
+.qhead {
+	text-align: center;
+	font-size: 12px;	
+	font-weight: bold;
+	border-width:2px;
+	border-style:solid;
+	border-color: #CDCDCD;
+	padding: 4px;
+}
+
+.qquestion {
+	width: 200px;  
+	text-align:right;
+	vertical-align: top;
+	font-size: 14px;	
+	padding-right: 10px;
+}
+
+div.qquestion {
+	border:none;
+	font-weight:normal;
+}
+
+button.qmultidropdown {
+	height:20px;
+	width:16px;
+	margin: 0px;
+	padding: 0px;
+	border-style: none;
+	cursor: default; 
+	background: url(images/dropdown.gif) right center no-repeat;
+	position: relative;
+	left: 4px;
+	top: -4px;
+}
+
+input.qmultisummary {
+	width: 400px;  
+	border-style: none;
+	cursor: default;
+	text-align: left;
+	background: url(images/dropdown.gif) right center no-repeat;
+	color: black;
+	background-color: #FFF;
+}
+input.qmultisummary:hover {
+	background: url(images/dropdown_hover.gif) right center no-repeat;
+	color: black;
+	background-color: #FFF;
+}
+input.qmultisummary.active {
+	background: url(images/dropdown_active.gif) right center no-repeat;
+	color: black;
+	background-color: #FFF;
+}
+
+input.qmultisummary.disabled {
+	background-image: none;
+	}
+
+#qexpandedsummarytext {
+    background-color:#c0c0c0;
+	width: 400px;
+	z-index: 100;
+}
+
+.qsingleentry, .qpseudoquestanswer {
+	width: 400px;  
+	text-align: left;
+	border-style: none;
+	color: black;
+	background-color: #FFF;
+}
+
+.qpseudoquestanswer {
+	width: 380px;
+}
+
+div.qmultientry {
+	text-align:right;
+	color: black;
+	background-color: #FFF;
+	max-height: 250px;
+	overflow:auto;
+}
+
+div.qmultientry label {
+	width: 400px;    
+	color: black;
+	background-color: #FFF;
+}
+
+div.qmultientry .noncheckbox {
+	margin-left: 5px;
+	width: 122px;
+	margin-right: 18px;
+}
+
+div.qmultientry .checkbox {    /* Includes radio buttons in single selects */
+	margin-left: 5px;
+	margin-right:130px;
+	width:15px;
+}
+
+/* End of Questionnaire */
+
+/* Tables */
+
+table.Xtablesorter {
+	width:100%;
+}
+
+table.Xtablesorter tbody {
+	color:black;
+}
+
+table.Xtablesorter thead {
+	color:black;
+	background-color:white;
+}
+
+div.dataTables_paginate.paging_full_numbers {
+	color:black;
+}
+
+table.tablesorter {
+	/*	font-family:arial;*/	
+    background-color: #CDCDCD;
+	/*margin:10px 0pt 15px;*/
+	margin:1px 0px 1px 0px;
+	padding: 0px;
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+}
+
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+	border: 1px solid #FFF;
+	font-size: 8pt;
+	padding: 4px;
+}
+
+table.tablesorter thead tr .header {
+	background-image: url(images/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+
+table.tablesorter tbody td {
+	color: black;
+	padding: 4px;
+	background-color: #FFF;
+	vertical-align: top;
+}
+
+table.tablesorter tbody tr.odd td {
+	background-color:#F0F0F6;
+}
+
+table.tablesorter thead tr .headerSortUp {
+	background-image: url(images/asc.gif);
+}
+
+table.tablesorter thead tr .headerSortDown {
+	background-image: url(images/desc.gif);
+}
+
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+}
+
+table.tablesorter tbody tr.requestedObject td {
+	background-color:yellow;
+}
+
+
+/* End of Tables */
+
+
+/* Upload box */
+
+div.Uploader {
+	width: 400px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border:solid;
+	border-width: 2px;
+	border-color: #CDCDCD;
+	padding: 10px;
+	/*	font-family: Arial, Nimbus Sans L, sans-serif;*/
+}
+
+h3.Uploader {
+	text-align: center;
+	font-size: 12pt;
+	font-weight: normal;
+	}
+	
+label.Uploader {
+	font-size: 10pt;
+	font-weight: normal;
+	}
+	
+input.Uploader {
+	width: 250px;
+}
+
+div.Uploader .multiSelect {
+	width: 230px;
+}
+
+div.UploaderButtons {
+	text-align: center;
+}
+
+/* End of Upload box */
+
+/* Message dialog */
+
+form.Message input, form.Message textarea {
+	width: 250px;
+}
+
+/* End of Message dialog */
+
+/* Diary Adder */
+
+div.DiaryAdd {
+	width:700px;
+	border-width:2px;
+	border-color:#CDCDCD;
+	border-style:solid;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:5px;
+	padding:3px;	
+}
+
+div.DiaryAdd .multiSelect {
+	width: 160px;
+}
+
+div.DiaryAdd input.longdate{
+	width:95px;
+	}
+	
+div.DiaryAdd input.time{
+	width:35px;
+	}
+	
+table.tablesorter tbody tr.diaryWorking td {
+	background-color: #9999FF;
+}
+
+table.tablesorter tbody tr.diaryAvailable td {
+	background-color: #99FF99;
+}
+
+table.tablesorter tbody tr.diaryUnavailable td {
+	background-color: #FF9999;
+}
+
+table.tablesorter tbody tr.diaryHoliday td {
+	background-color: #FF9999;
+}
+
+/* End of Diary Adder */
+
+/* Reports and dataTables */
+h3.reportHeader, h4.reportHeader {
+	text-align: center;
+}
+
+.reportHeader, .reportBody {
+	/*	font-family: "Trebuchet MS",Trebuchet,Verdana,Helvetica,Arial,sans-serif;	*/
+}
+
+.reportBody {
+	font-size: 12px;
+}
+
+div.graphButton {
+	width:85px;
+	height:40px;
+	margin-left:auto;
+	margin-right:auto;
+	cursor: pointer;
+	background:url(images/graph.png) right center no-repeat;
+}
+
+div.graphButton:hover {
+	background:url(images/graph_hover.png) right center no-repeat;
+}
+
+img.dataTableExpand {
+	cursor: pointer;
+}
+
+table.dataTableDetails {
+	margin-left:auto;
+}
+
+.dataTables_length {
+	width: 33%;
+}
+
+.dataTables_dateRange {
+	width: 33%;
+	float: left;
+}
+.dataTables_dateRange input {
+	width: 6em;
+}
+.dataTables_dateRange button {
+	width: 4em;
+	font-size: 10px;
+}
+
+.dataTables_filter {
+	width: 33%;
+}
+
+/* End of Reports and dataTables */
+
+/* Job Search  */
+div.JobSearchDetail {
+	width: 650px;
+  	margin-left: auto ;
+  	margin-right: auto ;
+	border-width: 2px;
+	border-color: #CDCDCD;
+	border-style: solid;
+	padding: 6px;
+}
+
+div.JobSearchDetailDescription {
+	width: 49%;
+  	float: right;
+}
+
+div.JobSearchDetailInfo {
+	width: 49%;
+  	float: left;
+}
+
+div.JobSearchDetail label {
+	font-size: 12px;
+	font-weight: bold;
+	float: none;
+	margin-right:4px;
+}
+
+div.JobSearchDetail p {
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+/* End of Job Search  */
+
+/* FullCalendar */
+.calendarAvailable,
+.fc-agenda .calendarAvailable .fc-event-time,
+.calendarAvailable a,
+.calendarUnfilled,
+.fc-agenda .calendarUnfilled .fc-event-time,
+.calendarUnfilled a {
+    background-color: green; /* background color */
+    border-color: green;     /* border color */
+    }
+
+.calendarUnavailable,
+.fc-agenda .calendarUnavailable .fc-event-time,
+.calendarUnavailable a {
+    background-color: red; /* background color */
+    border-color: red;     /* border color */
+    }
+/* End of FullCalendar */
+
+/* printablePage */
+div.printablePage {
+	width: 16cm;
+	font-size: 10pt;
+}
+div.printableSection {
+	border-width:1px;
+	border-style:solid;
+	margin-top:5px;
+}
+div.printablePage p {
+	margin-left: 3cm;
+}
+div.printablePage label, div.printablePage table th {
+	font-weight:bold;
+}
+div.printablePage h3 {
+	text-align:center;
+}
+div.printablePage h4 {
+	text-align:center;
+	margin-top:20px;
+	margin-bottom:0px;
+	text-decoration: underline;
+}
+div.printablePage table {
+	width: 90%;
+	border-width: 1px;
+	border-collapse: collapse;
+	border-style: outset;
+	margin:10px auto 10px auto;
+}
+div.printablePage table th, div.printablePage table td {
+	border-width: 1px;
+	border-style: inset;
+}
+/* End of printablePage */
+
+

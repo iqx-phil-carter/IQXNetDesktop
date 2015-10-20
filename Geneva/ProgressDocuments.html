@@ -1,0 +1,148 @@
+<!--[onload;tplvars;docs='NetOLEDocuments?pOwnerType=R&pOwnerID';doctypes='NetUploadTypes?pOwnerType=R']-->
+
+<!-- 20120817 change to generic document list -->
+	
+<script type="text/javascript" src="lib/jquery/ajaxupload.js" ></script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("#tblcanddocs");
+		$("#tblcanddocs").tablesorter({dateFormat:'uk'});
+		if ($('#divCandDocUpload').get(0)) {
+			$('#doctypecombo').multiSelect({
+				noneSelected: 'First select the document type...'
+			}, docTypeCallback);
+			$('div.UploaderButtons button').mouseoverclass();
+			var auInstance = new AjaxUpload('#SelectFileButton', {
+				action: 'IQXPostFile.php',
+				autoSubmit: true,
+				onSubmit: auSubmit,
+				onComplete: auComplete
+			});
+			auInstance.disable();
+			$('#divCandDocUpload').data('au', {
+				auInstance: auInstance,
+				auStatus: 0
+			});
+		}
+	});
+	
+	function uploadDocType(){
+		var rv = '';
+		var selectedTypeRB = $("#UploadTypeSelector input:checked[name='type']").get(0);
+		if (selectedTypeRB) {
+			rv = $(selectedTypeRB).val();
+		}
+		return rv;
+	}
+	
+	function mess(smess){
+		$('#UploaderError').text(smess);
+		return false;
+	}
+	
+	function checkextension(doctype,extension){
+		if (doctype == 'primary_cv' && extension != 'doc') {
+			return mess('CV must be a .doc file');
+		}
+		if (doctype=='primary_photo' && !(extension=='jpg' || extension=='jpeg')) {
+			return mess('Photo must be a .jpg file');
+		}
+		return true;
+	}
+	
+	function docTypeCallback(){
+		var au=$('#divCandDocUpload').data('au');
+		if (uploadDocType()) {
+			au.auInstance.enable();
+		} else {
+			au.auInstance.disable();
+		}
+	}
+	
+	function auSubmit(file, extension){
+		
+		var au=$('#divCandDocUpload').data('au');
+		
+		if (au.auStatus==1) {
+			return false;
+		}
+		var doctype=uploadDocType();
+		if (!doctype){
+			return mess('Please select Document Type');
+		}
+		if (!checkextension(doctype,extension)){
+			return false;
+		}
+		var desc=$('#docdescription').val();
+		if ((!(doctype=='primary_cv' || doctype=='primary_photo')) && !desc){
+			desc=file;
+			$('#docdescription').val(desc);
+		}
+		mess('');
+		au.auInstance.disable();
+		au.auStatus=1;  // Block further calls
+		au.auInstance.setData({type: doctype, progressid: '[var.x_params.pOwnerID;noerr]', description: desc});  
+		$('#SelectFileButton').text('Uploading...');
+		return true;
+	}
+	
+	function auComplete(file, response){
+		if (response=='Ok'){
+			IQXRefreshTab();
+		} else {
+			mess(response);
+			var au=$('#divCandDocUpload').data('au');
+			au.auStatus=0;
+			au.auInstance.enable();
+			$('#SelectFileButton').text('Select the file...');
+		}
+	}
+	
+</script>
+
+
+<div class="usertext">[onload;file=txt_candidate_documents_top.html;noerr]</div>
+<table class="tablesorter" id="tblcanddocs">
+	<thead>
+		<tr>
+		<th>Type</th>
+		<th>Description</th>
+		<th>Last Updated</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+		<td>[docs.DocType;block=tr;noerr]</td>
+	    <td>[docs.DocDescription;noerr]</td>
+	    <td>[docs.LastUpdate;noerr]</td>
+	    <td><a href="IQXRawData.php?page=S_FileDownload&binary=1&type=[docs.SpecialType;noerr]&id=[docs.DocumentID;noerr]&personid=[docs.PersonID;noerr]" target="_blank">Download</a></td>
+		</tr>
+	</tbody>
+</table>
+
+<div id="divCandDocUpload" class="Uploader ui-corner-all">[onload_DOCCANDUPLOAD;block=div;when [var.x_rights.DOCCANDUPLOAD;noerr]=1]
+
+	<h3 class="Uploader">Upload Document</h3>
+	<p id="UploadTypeSelector">
+		<label class="Uploader" for="doctypecombo">Document Type</label>
+		<select id="doctypecombo" name="type">
+			<option value="">First select the document type...</option>
+			[doctypes.UploadTypes;block=p;ope=iqx;select;htmlconv=no;noerr]
+		</select>
+	</p>
+	<p>
+		<label class="Uploader" for="docdescription">Description</label>
+		<input class="Uploader" id="docdescription" name="description" type="text"/>
+	</p>
+	<div class="UploaderButtons">
+		<p>
+			<button type="button" id="SelectFileButton" class="fixed nonformbutton">Select the file...</button>
+		</p>
+		<p id="UploaderError" class="localerrormessage"></p>
+	</div>
+</div>
+
+<p class="errormessage">[var.x_errormessage]</p>
+<div class="usertext">[onload;file=txt_candidate_documents_bottom.html;noerr]</div>

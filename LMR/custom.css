@@ -1,0 +1,25 @@
+#divheading {
+	height: 200px;
+	margin-bottom: 10px;
+	background-color: black;
+	text-align:center;
+	color: white;
+	font-family: Arial, Nimbus Sans L, sans-serif;
+	background-image: url(images/sitelogo.png);
+	background-repeat: no-repeat;
+	background-position: top;
+}
+
+#divheading h1 {
+	display:none;
+}
+
+#divheading h2 {
+	display:none;
+}
+
+#divheading h3 {
+	position:relative;
+	top:170px;
+}
+

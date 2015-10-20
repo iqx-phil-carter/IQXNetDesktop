@@ -1,0 +1,343 @@
+<!-- RC6 20130801 If no codes are returned by GenevaNetCandidateShiftTemplatesOuter then use defaults for dropdown-->
+
+<script type="text/javascript">
+
+$(document).ready(function()
+	{
+	var dlg=$('#frmClientNewEventWeek').dialog(
+		{
+		title:'Availability',   
+		modal:true,
+		width:550,
+		position:[window.width/2,100],
+		close: function(){
+				$("#pDateFromInput").datepicker('hide');
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+		buttons:
+			{
+			"Cancel": function()
+				{
+				$('#pState').val('');
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+				},
+			"Save": function()
+				{
+					$('#frmClientNewEventWeek').submit();
+				}
+			}
+		}
+	);
+	
+	IQXInitSection($("#frmClientNewEventWeek"));
+	makeTableRow();
+	
+	IQXEnableForm("#frmClientNewEventWeek",{wholeformvalidator:shiftsFormValid,successhandler:function(){
+		IQXDisableForm();
+		IQXcloseUIdialog(dlg);
+		refreshCalendar();
+		}});
+	GetShiftTemplateList();
+	
+	});
+
+function shiftsFormValid()
+	{	//Validate Availability popup
+	var rv='';
+	var cnt=0;
+	$('#cli_newsh_daytable').find('tr').each(function(i,e){
+		var tds=$(this).children('td');
+		var shiftdate=tds.eq(1).find('input').val();
+		var shiftid=tds.eq(0).find('select').val();
+		var timefrom=tds.eq(2).find('input').val();
+		var timeto=tds.eq(3).find('input').val();
+		if (shiftdate && shiftid) { // Unless event date and type selected, no booking will be made
+			if ((timefrom && !timeto)||(!timefrom && timeto)) {  
+				rv='Missing time for '+shiftdate;
+				return false; // Terminate the 'each' loop
+			}
+		}
+		cnt++;
+	});
+	if (cnt==0 && !rv) rv= 'Check event type and date';
+	return rv;
+}
+	
+
+function makeTableRow()
+	{	// Create layout for Availability popup
+	var Col1Split='40';	// Width of label column
+	var Col2Split='10';	// Width of tickbox column
+	var Col3Split='50';	// Width of time column
+	var ButtonWidth;	// Equalise all block buttons to width of top button
+	var TimeFormat='[var.x_local.Candidate.TimeFormat;noerr]'; // import time format from ini file
+	var s='';
+	s+='<tr><td width="80%"><table>';
+	if('[var.x_local.Candidate.BoxOrder;noerr]'=='Date'){
+		s+='<tr>';
+		s+='<td width="'+Col1Split+'%">Week starting</td>';
+		s+='<td width="'+Col2Split+'%" colspan="2"><input id="pDateFromInput" name="pDateFrom" autocomplete="off" class="required medium longdate" onChange="calDateSelected()" /><span id="errorMessage3" class="errormessage"></span></td>';
+		s+='</tr>';
+	}
+	s+='<tr>';
+	s+='<td width="'+Col1Split+'%">Availability</td>';
+	s+='<td width="'+Col2Split+'%" colspan="2"><select id="selDiaryAdd" name="pShiftType" onChange="GetTemplateValues(this.value);" >';
+	s+='</select></td>';
+	s+='</tr>';
+	if('[var.x_local.Candidate.BoxOrder;noerr]'!='Date'){
+		s+='<tr>';
+		s+='<td width="'+Col1Split+'%">Week starting</td>';
+		s+='<td width="'+Col2Split+'%" colspan="2"><input id="pDateFromInput" name="pDateFrom" autocomplete="off" class="required medium longdate" onChange="calDateSelected()" /><span id="errorMessage3" class="errormessage"></span></td>';
+		s+='</tr>';
+	}
+	s+='<tr>';
+	s+='<td width="'+Col1Split+'%">Specific times:</td>';
+	s+='<td width="'+Col2Split+'%"><input id="MainTick" [var.x_local.Candidate.TickMasterTime;noerr] type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Main\') " >';
+	s+='</td><td width="'+Col3Split+'%">';
+	s+='<div id="TimeDivMain" ><input id="TimeFromMain" class="'+TimeFormat+'" onBlur="CopyTimes(\'From\')" />';
+	s+=' To: ';
+	s+='<input id="TimeToMain"  class="'+TimeFormat+'" onBlur="CopyTimes(\'To\')" /></div></td></tr>';
+	s+='<tr><td width="'+Col1Split+'%"><span>Monday </span><span id="LblMon"></span></td><td width="'+Col2Split+'%"><input id="pMonTick" name="pMonTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Mon\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivMon"><input id="pTimeFromMon" name="pTimeFromMon" class="'+TimeFormat+'" /> To: <input id="pTimeToMon" name="pTimeToMon" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Tuesday</span><span id="LblTue"></span></td><td width="'+Col2Split+'%"><input id="pTueTick" name="pTueTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Tue\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivTue"><input id="pTimeFromTue" name="pTimeFromTue" class="'+TimeFormat+'" /> To: <input id="pTimeToTue" name="pTimeToTue" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Wednesday</span><span id="LblWed"></span></td><td width="'+Col2Split+'%"><input id="pWedTick" name="pWedTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Wed\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivWed"><input id="pTimeFromWed" name="pTimeFromWed" class="'+TimeFormat+'" /> To: <input id="pTimeToWed" name="pTimeToWed" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Thursday</span><span id="LblThu"></span></td><td width="'+Col2Split+'%"><input id="pThuTick" name="pThuTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Thu\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivThu"><input id="pTimeFromThu" name="pTimeFromThu" class="'+TimeFormat+'" /> To: <input id="pTimeToThu" name="pTimeToThu" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Friday</span><span id="LblFri"></span></td><td width="'+Col2Split+'%"><input id="pFriTick" name="pFriTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Fri\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivFri"><input id="pTimeFromFri" name="pTimeFromFri" class="'+TimeFormat+'" /> To: <input id="pTimeToFri" name="pTimeToFri" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Saturday</span><span id="LblSat"></span></td><td width="'+Col2Split+'%"><input id="pSatTick" name="pSatTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Sat\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivSat"><input id="pTimeFromSat" name="pTimeFromSat" class="'+TimeFormat+'" /> To: <input id="pTimeToSat" name="pTimeToSat" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='<tr><td height="20px" width="'+Col1Split+'%"><span>Sunday</span><span id="LblSun"></span></td><td width="'+Col2Split+'%"><input id="pSunTick" name="pSunTick" type="Checkbox" style="width:40px;height:22px" onClick="ShowTimeDiv(\'Sun\')" checked="true"></td><td width="'+Col3Split+'%"><div id="TimeDivSun"><input id="pTimeFromSun" name="pTimeFromSun" class="'+TimeFormat+'" /> To: <input id="pTimeToSun" name="pTimeToSun" class="'+TimeFormat+'" /></div></td></tr>';
+	s+='</table></td><td width="20%" align="center">';
+	s+='<div id="BtnMF" onClick="TickDays(\'BtnMF\')" class="button fc-button-iqrefresh ui-state-default ui-corner-left ui-corner-right"><span>Monday to Friday</span></div>';
+	s+='<br />';
+	s+='<div id="BtnED" onClick="TickDays(\'BtnED\')" class="button fc-button-iqrefresh ui-state-default ui-corner-left ui-corner-right"><span>Every Day</span></div>';
+	s+='<br />';
+	s+='<div id="BtnCL" onClick="TickDays(\'BtnCL\')" class="button fc-button-iqrefresh ui-state-default ui-corner-left ui-corner-right"><span>Clear</span></div>';
+	s+='</td></tr>';
+	$('#cli_newsh_daytable').append(s);
+	ShowTimeDiv('Main');	// Hide time division by default
+	ButtonWidth=$('#BtnMF').width();	// You don't know how wide a button is going to be until after it has been rendered
+	$('#BtnED').width(ButtonWidth);
+	$('#BtnCL').width(ButtonWidth);
+	$('div.button','#cli_newsh_daytable').hover(function(){$(this).addClass('ui-state-hover');}, 
+      function(){$(this).removeClass('ui-state-hover');});
+	}
+
+function ShowTimeDiv(DayName)
+	{	// allow bulk hide or show of all days on ticking main time entry
+	if (DayName == 'Main' && $('#MainTick').attr('checked') == false) {
+		$('*[id^=TimeDiv]').animate({opacity: 0.0 }, 0);	//animate to opaque avoids the resizing associated with hide/show
+		CopyTimes('From');
+		CopyTimes('To');
+	}
+	if (DayName == 'Main' && $('#MainTick').attr('checked') == true) {
+		$('*[id^=TimeDiv]').animate({opacity: 1.0 }, 0);
+	}
+	else {
+		if ($('#p' + DayName + 'Tick').attr('checked') == true && $('#MainTick').attr('checked') == true) {
+			$('#pTimeFrom' + DayName).val($('#TimeFromMain').val());
+			$('#pTimeTo' + DayName).val($('#TimeToMain').val());
+			}
+		else {
+			$('#pTimeFrom' + DayName).val('');
+			$('#pTimeTo' + DayName).val('');
+			}
+		}
+	}
+	
+function CopyTimes(ColumnName)
+	{	// Copy times from master time box to day boxes
+		var NewValue='';
+		if($('#Time' + ColumnName + 'Main').val()){NewValue=$('#Time' + ColumnName + 'Main').val();}
+		if($('#pMonTick').attr('checked')) {$('#pTime' + ColumnName + 'Mon').val(NewValue);} else {$('#pTime' + ColumnName + 'Mon').val('');}
+		if($('#pTueTick').attr('checked')) {$('#pTime' + ColumnName + 'Tue').val(NewValue);} else {$('#pTime' + ColumnName + 'Tue').val('');}
+		if($('#pWedTick').attr('checked')) {$('#pTime' + ColumnName + 'Wed').val(NewValue);} else {$('#pTime' + ColumnName + 'Wed').val('');}
+		if($('#pThuTick').attr('checked')) {$('#pTime' + ColumnName + 'Thu').val(NewValue);} else {$('#pTime' + ColumnName + 'Thu').val('');}
+		if($('#pFriTick').attr('checked')) {$('#pTime' + ColumnName + 'Fri').val(NewValue);} else {$('#pTime' + ColumnName + 'Fri').val('');}
+		if($('#pSatTick').attr('checked')) {$('#pTime' + ColumnName + 'Sat').val(NewValue);} else {$('#pTime' + ColumnName + 'Sat').val('');}
+		if($('#pSunTick').attr('checked')) {$('#pTime' + ColumnName + 'Sun').val(NewValue);} else {$('#pTime' + ColumnName + 'Sun').val('');}
+		if(!NewValue){	// clear all time boxes
+			$('*[id^=pTime' + ColumnName + ']%').val('');
+		}
+	}
+
+function TickDays(ButtonName)
+	{	// tick days according to which bulk button is clicked.
+		// CL= CLear, MF= Monday to Friday, ED= Every Day
+		var NewValue=true;
+		if (ButtonName=="BtnCL"){
+			NewValue=false;
+		}	
+		if(ButtonName=='BtnCL' || ButtonName=='BtnMF' || ButtonName=='BtnED')
+			{
+			if(!$('#pMonTick').attr('disabled')){$('#pMonTick').attr('checked',NewValue);}
+			if(!$('#pTueTick').attr('disabled')){$('#pTueTick').attr('checked',NewValue);}
+			if(!$('#pWedTick').attr('disabled')){$('#pWedTick').attr('checked',NewValue);}
+			if(!$('#pThuTick').attr('disabled')){$('#pThuTick').attr('checked',NewValue);}
+			if(!$('#pFriTick').attr('disabled')){$('#pFriTick').attr('checked',NewValue);}
+			$('#pSatTick').attr('checked',false);
+			$('#pSunTick').attr('checked',false);
+		}
+		if(ButtonName=='BtnCL' || ButtonName=='BtnED')
+			{
+			if(!$('#pSatTick').attr('disabled')){$('#pSatTick').attr('checked',NewValue);}
+			if(!$('#pSunTick').attr('disabled')){$('#pSunTick').attr('checked',NewValue);}
+			}
+		if(ButtonName=='BtnCL')
+			{
+			$('#TimeFromMain').val('');
+			$('#TimeToMain').val('');	
+			}
+		CopyTimes('From');
+		CopyTimes('To');
+	}
+	
+	function calDateSelected()
+		{	//default datePicker back to previous Monday and calculate day label text
+		var dateText=$("#pDateFromInput").val();
+		if (dateText) {
+			var ddat = new Date(UKtoJSdate(dateText));
+			var cdat = new Date();
+			
+			var day = 1000 * 60 * 60 * 24;
+			var dayIncrement;
+			var Suf;
+			while (ddat.getDay() != 1) {
+				ddat.setTime(ddat.getTime() - day);
+			}
+			while (cdat.getDay() != 1) {
+				cdat.setTime(cdat.getTime() - day);
+			}
+			cdat.setHours(0,0,0,0);
+			ddat.setHours(0,0,0,0);
+			if (Date.parse(ddat) < Date.parse(cdat)){
+				$("#errorMessage3").html('Please choose a date in the future');
+				$("input:checkbox").attr('checked', false);
+				$("input:checkbox").attr('disabled', true);
+				$("#pDateFromInput").val('');
+				return;
+			}
+			$("#errorMessage3").html('');
+			
+			dateText=$("#pDateFromInput").val( $.datepicker.formatDate('D dd/mm/yy', ddat));
+			dayIncrement=ddat.getDate();
+			$("#LblMon").text(GetSuffix(ddat));
+			LockTableRow('Mon',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblTue").text(GetSuffix(ddat));
+			LockTableRow('Tue',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblWed").text(GetSuffix(ddat));
+			LockTableRow('Wed',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblThu").text(GetSuffix(ddat));
+			LockTableRow('Thu',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblFri").text(GetSuffix(ddat));
+			LockTableRow('Fri',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblSat").text(GetSuffix(ddat));
+			LockTableRow('Sat',ddat);
+			ddat.setDate(ddat.getDate() + 1);
+			$("#LblSun").text(GetSuffix(ddat));
+			LockTableRow('Sun',ddat);
+		}
+	}
+	
+	function LockTableRow(RowDay,ddat){
+		var cdat = new Date();
+		cdat.setHours(0,0,0,0);
+		if (Date.parse(ddat) < Date.parse(cdat)) {
+			$('#p' + RowDay + 'Tick').attr('checked', false);
+			$('#p' + RowDay + 'Tick').attr('disabled', true);
+			$('#pTimeFrom' + RowDay).attr('disabled', true);
+			$('#pTimeTo' + RowDay).attr('disabled', true);
+			$('#pTimeFrom' + RowDay).val('');
+			$('#pTimeTo' + RowDay).val('');
+		}
+		else{
+			$('#p' + RowDay + 'Tick').attr('checked', true);
+			$('#p' + RowDay + 'Tick').attr('disabled', false);
+			$('#pTimeFrom' + RowDay).attr('disabled', false);
+			$('#pTimeTo' + RowDay).attr('disabled', false);
+		}
+	}
+	
+	function GetSuffix(ddat)
+		{   // Create date string for suffix labels
+			var dayIncrement=ddat.getDate();
+			var shortMonths = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+			switch (dayIncrement){
+			case 1:	Suf = "st";break;
+			case 21: Suf = "st";break;
+			case 31: Suf = "st";break;
+			case 2: Suf = "nd";break;
+			case 22: Suf = "st";break;
+			case 3: Suf = "rd";break;
+			case 23: Suf = "rd";break;
+			default: Suf="th";break;
+			}
+		return ', ' + dayIncrement + Suf + " " + shortMonths[ddat.getMonth()];
+		}
+		
+	function GetShiftTemplateList(){
+		// draw template list from table, for Shift ComboBox
+		var ResultString;
+
+		$.get('IQXRawData.php?page=GenevaNetCandidateShiftTemplatesOuter', function(data,textStatus){
+			ResultString = data; // below: lose xml headers and add option tags
+			var StartPoint = ResultString.indexOf('![CDATA[');
+			var Endpoint = ResultString.indexOf(']]><');
+			ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+			if(ResultString.length > 7){
+				ResultString = "<option value=''></option>" + ResultString + "</option>";
+				ResultString += '<option id="A" value="A" name="pEvent">Available</option>';
+				ResultString += '<option id="H" value="H">Holiday</option>';
+			}else{
+				ResultString = "<option value=''></option></option>";
+				ResultString += '<option id="A" value="A" name="pEvent">Available</option>';
+				ResultString += '<option id="U" value="U">Unavailable</option>';
+				ResultString += '<option id="H" value="H">Holiday</option>';
+			}
+			$('#selDiaryAdd').html(ResultString);
+		});
+		
+		
+	}
+	
+	function GetTemplateValues(Shift){
+		// select starting and finishing times from AvailabilityTemplate
+		
+		var StartTime='0000';
+		var FinishTime='2400';
+		var OptionText=$("#selDiaryAdd option:selected").text();
+		$('#pAvailTemplate').val($("#selDiaryAdd option:selected").attr('id'));
+		var ColonPos=OptionText.indexOf(':');
+		if(ColonPos > 0){
+			StartTime=OptionText.substring(ColonPos-2,ColonPos+3).replace(':','');
+			FinishTime=OptionText.substring(ColonPos+6,ColonPos+11).replace(':','');
+		}
+		if (StartTime.length>0){$('#TimeFromMain').val(StartTime);} else{$('#TimeFromMain').val('');}
+		if (FinishTime.length>0){$('#TimeToMain').val(FinishTime);} else{$('#TimeToMain').val('');}
+		CopyTimes('From');
+		CopyTimes('To');
+		}
+		
+</script>
+
+
+
+<div id="divClientNewEventWeek">
+<form id="frmClientNewEventWeek" action="IQXPost.php?proc=GenevaNetCandidateDiaryMultiAdd" method="post" accept-charset="utf-8">
+	<fieldset>
+		
+        <table id="cli_newsh_daytable" width="100%">
+				
+		</table>
+		<input id="pAvailTemplate" name="pAvailTemplate"  style="visibility:hidden;" />
+     	<p>
+		    <span id="errorMessage2" class="errormessage">[var.x_errormessage]</span>
+		</p>
+	</fieldset>	
+	
+</form>
+</div>

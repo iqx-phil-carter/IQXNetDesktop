@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Job vacancy file uploader
+	 use in conjunction with uploadvacancies.xml
+	 20120309 RC1 -->
+
+<Job autoclose="yes">
+	
+	<Parameters>
+		<Parameter name="UploadFileLocation" /> 				<!-- upload file placed in temp directory by parent routine -->
+		<Parameter name="ExportFileName" /> 					<!-- name of file to be transferred -->
+		<Parameter name="Verbose" />
+	</Parameters>
+	
+	<!--User variables-->
+	<SetVariable name="UploadDestinationPath" value="wv" /> 	<!-- remote directory of file to be transferred -->
+	<SetVariable name="HostName" value="www.pcga.co.uk" /> 		<!-- host domain or IP address -->
+	<SetVariable name="HostUserName" value="phil" /> 			<!-- user name to log in to host -->
+	<SetVariable name="HostPassword" value="mtwtfss7" /> 		<!-- password for above -->
+	<!--User variables-->
+					
+	<If x1="{Verbose}" x2="yes" ><MessageDialog text="FTP from {UploadFileLocation}{ExportFileName}
+to {HostName} {UploadDestinationPath}" /></If>
+	
+	<Block>
+		<FTPConnection host="{HostName}" username="{HostUserName}" password="{HostPassword}" passive="NO">
+			<ChangeDirectory ftppath="{UploadDestinationPath}" />
+			<CopyFile source="{UploadFileLocation}{UploadFile}" ftptarget="{UploadFile}" />
+		</FTPConnection>
+	</Block>
+	<Catch>
+		<MessageDialog text="An error occurred in the file upload routine:
+			
+{Exception}" />
+	</Catch>
+	<If x1="{Verbose}" x2="yes" ><MessageDialog text="FTP complete" /></If>
+	
+</Job>

@@ -1,0 +1,68 @@
+<script type="text/javascript" src="[var.x_local.Candidate.LogoutScriptPathway;noerr]" ></script>
+
+<!-- 20140429 Mobile layout -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#candtabs");
+		
+	
+	// Reduce height of header
+	if('[var.x_global.Layout.ReducedHeightHeader;noerr]'=='1'){
+		$('a').click(function(){
+			if($(this).attr('href') == '#tabcontent-1'){
+				$('#divheading').show();
+				$('#divheadingSmall').hide();
+			}else{
+				$('#divheading').hide();
+				$('#divheadingSmall').show();
+			}
+		});
+	}
+
+});
+
+
+</script>
+  
+<style>
+p {font-size:30px;}
+label {font-size:30px;}
+input {font-size:30px;}
+button {font-size:30px;}
+li {font-size:30px;}
+</style>
+    
+<div id="candtabs" >
+    
+        <li>[onload_IP1;block=li;when [var.x_local.Switches.WelcomeTab;noerr]!='']<a ondblclick="FFInfo(this)" href="#tabcontent-1"><span>[var.x_local.Switches.WelcomeTab;noerr]</span></a></li>
+        <li id="D" >[onload_IP6;block=li;when [var.x_local.Switches.CalendarTabMoved;noerr]!='']<a href="IQXPage.php?page=candidatecalendar"><span>[var.x_local.Switches.CalendarTabMoved;noerr]</span></a></li>
+        <li>[onload_IP2;block=li;when [var.x_local.Switches.ProfileTab;noerr]!='']<a href="IQXPage.php?page=candprofile"><span>[var.x_local.Switches.ProfileTab;noerr]</span></a></li>
+		<li>[onload_IP3;block=li;when [var.x_local.Switches.PayrollTab;noerr]!='']<a href="IQXPage.php?page=candAdmin"><span>[var.x_local.Switches.PayrollTab;noerr][onload_CANDBANKDETAILS;block=li;when [var.x_rights.CANDBANKDETAILS;noerr]=1]</span></a></li>
+        <li>[onload_IP4;block=li;when [var.x_local.Switches.RegistrationTab;noerr]!='']<a href="IQXPage.php?page=candregistration"><span>[var.x_local.Switches.RegistrationTab;noerr]</span></a></li>
+		<li>[onload_IP5;block=li;when [var.x_local.Switches.DocumentsTab;noerr]!='']<a href="IQXPage.php?page=candidatedocuments"><span>[var.x_local.Switches.DocumentsTab;noerr][onload_DOCCANDDOWNLOAD;block=li;when [var.x_rights.DOCCANDDOWNLOAD;noerr]=1]</span></a></li>
+		<li id="D" >[onload_IP6;block=li;when [var.x_local.Switches.CalendarTab;noerr]!='']<a href="IQXPage.php?page=Mobilecandidatecalendar"><span>[var.x_local.Switches.CalendarTab;noerr]</span></a></li>
+		<li>[onload_IP7;block=li;when [var.x_local.Switches.StatementsTab;noerr]!='']<a href="IQXPage.php?page=candfiles"><span>[var.x_local.Switches.StatementsTab;noerr]</span></a></li>
+        <li id="P">[onload_IP8;block=li;when [var.x_local.Switches.CurrentTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=candprovtimesheets"><span>[var.x_local.Switches.CurrentTimesheetsTab;noerr]</span></a></li>
+        <li id="T">[onload_IP9;block=li;when [var.x_local.Switches.HistoricTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=timesheets"><span>[var.x_local.Switches.HistoricTimesheetsTab;noerr]</span></a></li>
+        <li id="T">[onload_IP10;block=li;when [var.x_local.Switches.HistoricTimesheetsExtendedTab;noerr]!='']<a href="IQXPage.php?page=TimesheetsExtended&pGroupID=N&pFormName=T"><span>[var.x_local.Switches.HistoricTimesheetsExtendedTab;noerr]</span></a></li>
+        <li>[onload_IP11;block=li;when [var.x_local.Switches.ExpensesTab;noerr]!='']<a href="IQXPage.php?page=CandExpenses"><span>[var.x_local.Switches.ExpensesTab;noerr]</span></a></li>
+        <li>[onload_IP12;block=li;when [var.x_local.Switches.JobSearchTab;noerr]!='']<a href="IQXPage.php?page=jobsearch"><span>[var.x_local.Switches.JobSearchTab;noerr]</span></a></li>
+        <li>[onload_IP13;block=li;when [var.x_local.Switches.ReportsTab;noerr]!='']<a href="IQXPage.php?page=reports"><span>[var.x_local.Switches.ReportsTab;noerr][onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+		<li>[onload_IP14;block=li;when [var.x_local.Switches.TestTab;noerr]!='']<a href="IQXPage.php?page=test"><span>[var.x_local.Switches.TestTab;noerr][onload_TESTONLY;block=li;when [var.x_rights.TESTONLY;noerr]=1]</span></a></li>
+   
+
+	<div style='color:red;'>[onload_UT1;block=div; when [var.x_global.general.VisualUpdateWarningText;noerr]!=''][var.x_local.Switches.VisualUpdateWarningText;noerr]</div>
+    <div id="tabcontent-1">[onload_IP17;block=div;when [var.x_local.Switches.WelcomeTab;noerr]!='']
+    	<div class="usertext">[onload;file=txt_candidate_welcome_top.html;noerr]</div>
+		<div id="Candidatenonstandardtext" class="usertext">[onload;file=txt_candidate_nonstandard_welcome.html;noerr;]</div>
+    	<div class="usertext">[onload;file=txt_candidate_welcome_bottom.html;noerr]</div>
+    </div>
+ </div>
+
+<p>[onload_IP18;block=p;when [var.x_local.Candidate.ShowLogOutButton;noerr]='1']
+<button type="button" id="button_logout" class="fixed" onclick="IQXLogout()">
+   	Logout
+</button>
+</p>

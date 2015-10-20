@@ -1,0 +1,138 @@
+<!--[onload;tplvars;ts='NetTimesheetsAll']-->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("#divFtimesheets"));
+	$('#tblFtimesheets').data('IQXdtDateFilter',{dateColumn:0});
+	var dt=$('#tblFtimesheets').dataTable({
+		"sPaginationType": "full_numbers",
+		"sDom": 'lDf<"clear">rtip',
+		"bJQueryUI": false,
+		"aaSorting": [ [0,'desc'], [1,'desc'] ],
+		"aoColumnDefs": [{
+			aTargets: [4],
+			fnRender: function(oObj){
+				if (oObj.aData[9]) {
+					return oObj.aData[4] + '<br/>' + oObj.aData[9];
+				}
+				else {
+					return oObj.aData[4];
+				}
+			}
+		},{aTargets:[7],bSortable:false,bSearchable:false},{aTargets:[8,9],bVisible:false}]
+	});
+	$("#divFtimesheets").data('dataTable',dt);
+	IQXDeepLink("T",dt);
+	// To place the date range put D between l and f in the sDom
+	});
+
+function loadshifts(row){
+	var ts=$(row).data("zoomedts");
+	if (ts.type=='C'){
+		loadrates(row);
+	} else {
+		var shiftpage;
+		if (ts.type == 'S') {
+			shiftpage = 'timesheetshifts';
+		}
+		else {
+			shiftpage = 'timesheettimes';
+		} 
+		var shiftsDiv=$(row).next('tr').find('div.divFtimesheetshifts').get(0);
+		var nxt={action:'func',func: function(){
+			loadrates(row);
+		}};
+		IQXChain(shiftsDiv,{action:'load',page:shiftpage + '&ptemptimesheetid=' + encodeURIComponent(ts.id),nextlink:nxt});
+	}
+}
+
+function loadrates(row){
+	var tsid=$(row).data("zoomedts").id;
+	var ratesDiv=$(row).next('tr').find('div.divFtimesheetrates').get(0);
+	IQXChain(ratesDiv,{action:'load',page:'timesheetrates&ptemptimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function openmessage(btn){
+	var row=$(btn).closest('tr').prev('tr').get(0);
+	var ts=$(row).data("zoomedts");
+	var stit='pTitle=' + encodeURIComponent('Query Timesheet '+ts.serialnumber);
+	var sid='pTempTimesheetID=' + encodeURIComponent(ts.id);
+	var msgDiv=$(row).next('tr').find('div.divFmessage').get(0);
+	IQXChain(msgDiv,{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid});
+} 
+
+function zoomtimesheet(img,tstype,tsid,serialnumber){
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#divFtimesheets").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		dt.fnClose(row);
+		return;
+	}
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).data("zoomedts",{
+		type: tstype,
+		id: tsid,
+		serialnumber: serialnumber,
+		expandImage: img
+	});
+	$(row).rowafter({dataTable:dt,alldivsclass:"zoomeddiv",divs:[{divclass:"divFtimesheetshifts"},
+		{divclass:"divFtimesheetrates"},
+		{divclass:"divFtimesheetbuttons"},
+		{divclass: "divFmessage"}]});
+
+	var newrow=$(row).next('tr');		
+	$("div.divFtimesheetbuttons",newrow).html('<button type="button" class="fixed nonformbutton" onclick="abandontimesheet(this)">Close</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="openmessage(this)">Query</button>');	
+	IQXInitSection(newrow);
+	loadshifts(row);
+}
+
+function abandontimesheet(btn){
+	var row=$(btn).closest('tr').prev('tr').get(0);
+	var img=$(row).data('zoomedts').expandImage;
+	zoomtimesheet(img);
+}
+	
+</script>
+
+<div id="divFtimesheets">
+	
+<span class="errormessage">[var.x_errormessage]</span>
+	
+<table class="Xtablesorter" id="tblFtimesheets">
+	<thead>
+		<tr>
+		<th>Period End Date</th>
+		<th>Number</th>
+		<th>Client Ref.</th>
+		<th>Temp</th>
+		<th>Client</th>
+		<th>Position</th>
+		<th>Total</th>
+		<th>Details</th>
+		<th>ID</th>
+		<th>Address</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[ts.temptimesheetid;block=tr]" >
+	    <td>[ts.weekenddate;noerr]</td>
+		<td>[ts.serialnumber;noerr]</td>
+		<td>[ts.theirref;noerr]</td>
+		<td>[ts.tempname]</td>
+		<td>[ts.companyname]</td>
+	    <td>[ts.position;noerr]</td>
+		<td class="number twodp rightalign">[ts.timesheettotal;noerr]</td>
+		<td class="center"><img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="zoomtimesheet(this,'[ts.timesheettype]','[ts.temptimesheetid]','[ts.serialnumber;noerr]')" /></td>
+		<td>[ts.temptimesheetid]</td>
+		<td>[ts.companyaddress;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+

@@ -1,0 +1,100 @@
+
+
+     <div id="welcomenav">
+                        <div id="welbuttonlarge">
+ 			    <button id="updatemydiary" onclick="updatemydiary(1)" type="button">
+                                <div>
+                                    Update</div>
+                                <div>
+                                    My Diary</div>
+                            </button>
+                            <button id="viewdiary" onclick="goTab(1)" type="button">
+                               View Diary
+                            </button>
+<button id="viewpaidtimesheets" onclick="goTab(6)" type="button">
+                                <div>
+                                    View Paid</div>
+                                <div>
+                                    Timesheets</div>
+                            </button>                        
+    <button id="downloadtimesheets" onclick="openTimesheetPDF()" type="button">
+                                <div>Download</div>
+				<div>Timesheets</div>
+                            </button>
+                           
+                            
+                        </div>
+                        <div id="welbuttonsmall">
+  				<button id="updatepayrolldetails" onclick="goTab(3)" t				ype="button">
+	                        Update Payroll Details
+                            </button>
+                            <button id="uploaddocument" onclick="goTab(4)" type="button">
+                                Upload Document
+                            </button>
+                            <button id="changepassword" onclick="gotochangepassword(2)" type="button">
+                                Change Password
+                            </button>
+                            <button id="updatecontactdetails" onclick="goTab(2)" type="button">
+                                Update Contact Details
+                            </button>
+			    	
+                        </div>
+                    </div>
+
+                    <div id="welfooter">                       
+                        <div class="fright">
+                            <div id="copyright">
+                                &copy; Copyright Geneva 2013</div>
+                            <img alt="" src="css/images/GenIOS-logo.jpg" id="genevalogofooter" />
+                        </div>
+                    </div>
+
+
+<script type="text/javascript">
+
+	function goTab(i){
+		
+		
+	$moTabs.tabs({ selected: i });
+
+	
+
+	}
+
+	var mlWorkingWithTabID = 0;
+	function gotochangepassword(i)
+	{
+		$moTabs.tabs({ selected: i });
+	
+		//Hide the tab we have just displayed while we popup up the password form
+		// Give the tab 2 seconds to render before we pop the password form.
+		mlWorkingWithTabID = i;	
+		$("#ui-tabs-" + mlWorkingWithTabID).hide();
+		window.setTimeout('showChangePassword();', 2000);
+
+	}
+	function openTimesheetPDF()
+	{
+		window.open('/pdf/temptimesheet.pdf');	
+		
+	}
+
+	function showChangePassword(){
+	
+		
+		$("#frmcandprofile").hide();
+
+		IQXChain("#divchangepassword", {action: "load", page: "changepassword"}); 
+		$("#ui-tabs-" + mlWorkingWithTabID).show();
+
+	}
+	function updatemydiary(i)
+	{
+		$moTabs.tabs({ selected: i });
+
+		window.setTimeout('addAvailability();', 2000);	
+
+	}
+	
+
+</script>

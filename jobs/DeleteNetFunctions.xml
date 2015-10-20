@@ -1,0 +1,28 @@
+<Job title="Delete procedures and functions from database" dateformat="ddd dd/mm/yyyy" autoclose="YES">
+
+	<Parameters>
+		<Parameter name="procPrefix" value="Net" required="YES">
+			Procedure name prefix
+		</Parameter>
+	</Parameters>
+	<IfOKDialog text="This will delete all current {procPrefix} database procedures. Press Ok to continue.">
+		<SQLQuery>
+			<SQLSelect>
+				select proc_name as pname,replace(proc_defn,'{{','{{{{') as pdefn from sys.sysprocedure where pname like '{procPrefix}%' and creator=(select first user_id from sys.sysuserperm where user_name='pears') order by pname
+			</SQLSelect> 
+- 			<ForEachRow>
+- 				<If x1="{pdefn}" comparison="%" x2="create procedure" trim="YES" ignorecase="YES">
+					<SQLExec>
+						DROP PROCEDURE {pname}
+					</SQLExec> 
+  				</If>
+- 				<Else>
+  					<SQLExec>
+						DROP FUNCTION {pname}
+					</SQLExec> 
+  				</Else>
+			</ForEachRow>
+		</SQLQuery>
+	</IfOKDialog>
+	<MessageDialog text="Completed" />
+</Job>

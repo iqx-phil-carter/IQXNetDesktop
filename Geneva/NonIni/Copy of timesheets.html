@@ -1,0 +1,64 @@
+<!-- 20120330 modify date defaults -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('.divFilterTableDetail').html('');
+	IQXInitSection($("#divTimesheetFilter"));
+	
+	// modified to give the week before the previous entire week
+	var StartDate = new Date();
+	var EndDate = new Date();
+	var OffsetInDays=13+StartDate.getDay();
+	
+	$('#TimesheetFilterStart').val(CreateDate(StartDate,OffsetInDays));
+	$('#TimesheetFilterEnd').val(CreateDate(EndDate,OffsetInDays-6));
+	
+	$('#TimesheetFilterStart').datepicker({defaultDate: (OffsetInDays)*-1,dateFormat:'dd/mm/yy'});
+	$('#TimesheetFilterEnd').datepicker({defaultDate: (OffsetInDays-6)*-1,dateFormat:'dd/mm/yy'});
+	
+	$('#TimesheetFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#TimesheetFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(){
+	var StartDate=$('#TimesheetFilterStart').val();
+	var EndDate=$('#TimesheetFilterEnd').val();
+	if(StartDate && EndDate){
+		IQXChain('#divTimesheetDetail',{action:'load',page:'timesheetsDetail&pFromDate='+StartDate+'&pToDate='+EndDate});
+	}else{
+		$('.errormessage').html('Please ensure both Fetch dates are present');
+	}
+}
+
+</script>
+
+<div id="divTimesheetFilter" class="dataTables_wrapper">
+	<div class="dataTables_dateRange" style="padding: 10px">
+		Fetch between
+		<input id="TimesheetFilterStart" class="dataTables_dateRange_from" >
+		and
+		<input id="TimesheetFilterEnd" class="dataTables_dateRange_to" >
+		<button class="fixed dataTables_search" onClick="LoadData()" >Fetch</button>
+	</div>
+	<div class="clear" ></div>
+	<div id="divTimesheetDetail" ><span class="EmptyTable">No data has been selected.</span></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

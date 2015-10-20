@@ -1,0 +1,16 @@
+<!-- Mobile IQXNet -->
+<!--[onload;tplvars;favs='NetFavourites?pNodeID']-->
+
+<ul data-role="listview" data-filter="false">
+    <li data-role="list-divider">[favs.ParentName;noerr;block=li;headergrp=ParentName]</li>
+    <li>
+        <a href="[favs.NodeID;block=li;noerr;if '[favs.Type]'=='PH';then 'tel:[val]';
+            if '[favs.Type]'=='EM';then 'mailto:[val]';
+            if '[favs.Type]'=='TX';then 'sms:[val]';
+            if '[favs.Type]'=='MP';then 'http://maps.google.co.uk/maps?q=[val]';
+            else 'iqxnet.php?P=favourites&pNodeID=[val]']">
+            <h3>[favs.Name;block=li;noerr]</h3>
+            <p>[favs.Note;noerr]</p>
+        </a>
+    </li>
+</ul>

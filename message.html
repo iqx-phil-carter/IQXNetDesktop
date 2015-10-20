@@ -1,0 +1,80 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+				
+		$('#divQueryMessageForm').dialog({
+			title:'Query',
+			modal:false,
+			width:310,
+			buttons: {
+				Cancel: function(){
+					IQXcloseUIdialog(this);
+				},
+				Send: function(){
+					MQpostQuery(this);
+				}
+			}
+		});
+	});
+	
+	function MQerrMsg(msg,frmdiv){
+		$('#msg_error',frmdiv).text(msg);
+	}
+	
+	function MQloadInd(htm,frmdiv){
+		$('#divLoadIndicator',frmdiv).html(htm);
+	}
+	
+	function MQfldEmpty(fldID,fldLab,frmdiv){
+		if($.trim($('#'+fldID,frmdiv).val())=='') {
+			MQerrMsg('Please enter '+fldLab,frmdiv);
+			return true;
+		}
+		return false;
+	}
+	
+	function MQpostQuery(frmdiv){
+		if (MQfldEmpty('msg_title','Subject',frmdiv) || MQfldEmpty('msg_descrip','Details',frmdiv)) {
+			return;
+		}
+		MQerrMsg('',frmdiv);
+		var dat=$('#frmmessage',frmdiv).serializeArray();
+		MQloadInd(IQXLoadMessage('Sending'),frmdiv);
+		$.post('IQXPost.php?proc=netmessage',dat,function(data, textStatus){
+			if (data == 'Ok') {
+				IQXcloseUIdialog(frmdiv);
+			} else {
+				MQloadInd('',frmdiv);
+				MQerrMsg(data,frmdiv);
+			}
+		},'text');
+	}
+	
+</script>
+
+<div id="divQueryMessageForm" class="ui-helper-hidden">
+	<form id="frmmessage" name="message" class="Message" action="IQXPost.php?proc=netmessage" method="POST" accept-charset="ISO-8859-1">
+        <input type="hidden" id="msg_type" name="ptype" value="[var.x_params.pType;noerr]" />
+        <input type="hidden" id="msg_vacancyid" name="pvacancyid" value="[var.x_params.pVacancyID;noerr]" />
+        <input type="hidden" id="msg_placementid" name="pplacementid" value="[var.x_params.pPlacementID;noerr]" />
+        <input type="hidden" id="msg_progressid" name="pprogressid" value="[var.x_params.pProgressID;noerr]" />
+        <input type="hidden" id="msg_provtsid" name="pprovtimesheetid" value="[var.x_params.pTempProvTimesheetID;noerr]" />
+        <input type="hidden" id="msg_tsid" name="ptimesheetid" value="[var.x_params.pTempTimesheetID;noerr]" />
+        <p>
+            <label for="msg_title">
+                Subject
+            </label>
+            <input type="text" id="msg_title" name="ptitle" class="required" value="[var.x_params.pTitle;noerr]" />
+        </p>
+		<p>
+			<label>Details</label>
+		</p>
+        <p>
+            <textarea rows=3 cols=45 wrap=soft class="required" id="msg_descrip" name="pdescription"></textarea>
+        </p>
+		<div id="divLoadIndicator"></div>
+    	<p>
+        	<span id="msg_error" class="errormessage">[var.x_errormessage]</span>
+    	</p>
+	</form>
+</div>
+

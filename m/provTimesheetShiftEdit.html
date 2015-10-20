@@ -1,0 +1,52 @@
+<!--[onload;tplvars;pts='MobileTimesheetShiftDetail?pTempShiftID']-->
+
+<script>
+		
+function SaveShiftChanges(){
+	$('#frmShiftChanges').attr('action','IQXPost.php?proc=NetProvTimesheetShiftSet');
+	$('#frmShiftChanges').ajaxSubmit({
+			success: function (data, textStatus){
+				if (textStatus=='success') {
+					if(data!='Ok'){		
+						LoadPage();
+					}
+				} else {
+					$('.localerrormessage').html('Error B: '+data);
+				}
+			},
+			error: function(data,textStatus){
+				$('.localerrormessage').html('Error C: '+data);
+			},
+			dataType: "html"
+		});
+		
+	}
+
+function LoadPage(){
+	var NewPage='iqxnet.php?P=provtimesheetshifts&ptempprovtimesheetid='+$('#pTempProvTimesheetID').val();
+	jQuery.mobile.changePage(NewPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+
+</script>
+
+<div>
+	<form id="frmShiftChanges" action="" method="post" data-ajax="false" >
+		<label for="pShiftDate">Serial Number</label><input id="pSerialNumber" class="ui-input-text-data" disabled="disabled" value="[pts.ShiftSerialNumber;noerr]" ></input>
+		<label for="pShiftDate">Date</label><input id="pShiftDate" name="pshiftdate" type="date" class="ui-input-text-data" value="[pts.ShiftDate;noerr]" ></input>
+		<label for="pTimeFrom">From</label><input id="pTimeFrom" name="ptimefrom" type="time" class="ui-input-text-data" value="[pts.TimeFrom;noerr]" ></input>
+		<label for="pTimeTo">To</label><input id="pTimeTo" name="ptimeto" type="time" class="ui-input-text-data" value="[pts.TimeTo;noerr]" ></input>
+		<label for="pBreakMinutes">Break (minutes)</label><input id="pBreakMinutes" name="pbreakminutes" type="number" class="ui-input-text-data" value="[pts.BreakMinutes;noerr]" ></input>
+		<label for="pDescription">Description</label><input id="pDescription" class="ui-input-span" disabled="disabled" value="[pts.Description;noerr]"></input>
+		<br/>
+		<label for="pTSNote">Note</label><textarea id="pTSNote" name="pNote" type="text" class="ui-input">[pts.TSNote;noerr]</textarea>
+		<br/>
+		<input id="ptempshiftid" type="hidden" name="ptempshiftid" value="[pts.tempShiftID;noerr]" />
+		<input id="pTempProvTimesheetID" type="hidden" value="[pts.tempProvTimesheetID;noerr]" ></input>
+	</form>
+	<button data-rel="button" onclick="SaveShiftChanges()">Save changes</button>
+	<button data-rel="button" onClick="LoadPage()">Back to Timesheet</button>
+</div>

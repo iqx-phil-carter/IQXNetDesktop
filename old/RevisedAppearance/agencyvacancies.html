@@ -1,0 +1,84 @@
+<!--[onload;tplvars;vacancies='NetAgencyVacancies']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection($("#divagvacs"));
+	IQXDeepLink("R");
+	});
+	
+function preparesubmitcandidate(row,vacid,planid) {
+	$(".submitbutton").hide();
+	$("#divagvacs").data("zoomedrow",{
+		row: row,
+		vacid: vacid,
+		planid: planid
+	});
+	$(row).after('<tr><td colspan=9><div id="divsubmitcandidate" class="zoomeddiv"></div>'+
+				  '</td></tr>');
+	IQXChain('#divsubmitcandidate',{action:'load',page:'agencycandidatesubmit'});
+	}
+
+
+function submitcandidate(persid) {
+	var dat=$("#divagvacs").data("zoomedrow");
+	var postdata={pPersonID:persid,pVacancyID:dat.vacid,pShiftPlanID:dat.planid};
+	var nxt={action:'func',func:IQXRefreshTab};
+	IQXChain('#agvacerror',{action:'send',proc:'NetAgencyCandidateSubmit',postdata:postdata,nextlink:nxt});
+	}
+
+function abandonsubmitcandidate() {
+	var dat=$("#divagvacs").data("zoomedrow");
+	$(dat.row).next().remove();
+	$(".submitbutton").show();
+	$("#divagvacs").removeData("zoomedrow");
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_agency_requirements_top.html;noerr]</div>
+
+<div class="ButtonGroup" align="right">
+	<button type="button" id="agvac_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+</div>
+<span id="agvacerror" class="errormessage">[var.x_errormessage]</span>
+		
+<div id="divagvacs">
+<table class="tablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+		<th>Company</th>
+		<th>Position</th>
+		<th>Start Date</th>
+		<th>Time</th>
+		<th>Finish Date</th>
+		<th>Time</th>
+		<th>Our Ref</th>
+		<th>Submitted Candidates</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]">
+	    <td>[vacancies.CompanyName;noerr]</td>
+	    <td>[vacancies.Position;noerr] [vacancies.ShiftDescription;noerr]</td>
+	    <td class="longdate">[vacancies.StartDate;noerr]</td>
+	    <td class="time">[vacancies.StartTime;noerr]</td>
+	    <td class="longdate">[vacancies.FinishDate;noerr]</td>
+	    <td class="time">[vacancies.FinishTime;noerr]</td>
+	    <td>[vacancies.OurRef;noerr]</td>
+		<td>[vacancies.SubmittedCandidates;noerr]</td>
+		<td>
+			<span> [vacancies.IsCurrent;ope=nif:0,minv;magnet=span] 
+				<span> [onload_fill;block=span;when [var.x_rights.SUBMITCANDIDATES;noerr]=1]
+	    			<button type="button" class="tablebutton nonformbutton submitbutton" onclick="preparesubmitcandidate(this.parentNode.parentNode.parentNode.parentNode,'[vacancies.VacancyID]','[vacancies.TempShiftPlanID;noerr]')">Submit</button>
+				</span>
+			</span>
+		</td>
+		</tr>
+	</tbody>
+</table>
+		<p id="agvacstatus" ></p>
+        
+</div>
+<div class="usertext">[onload;file=txt_agency_requirements_bottom.html;noerr]</div>

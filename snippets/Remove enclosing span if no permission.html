@@ -1,0 +1,7 @@
+<!--
+	category: IQX
+	name: Remove enclosing span if no permission
+	tooltip: Remove enclosing span if no permission
+	prompt(prm): Please enter the permission
+-->
+[onload_${prm};block=span;when [var.x_rights.${prm};noerr]=1]

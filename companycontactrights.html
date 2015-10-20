@@ -1,0 +1,43 @@
+<!--[onload;tplvars;rts='NetContactRights?pEmploymentID']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	$('td.statebutton').statebutton(['Allow','Deny','  ']);
+	IQXInitSection($("#divcontrights"));
+	});
+	
+function SaveContactRights(){
+	var rightlist = [];
+	var empid=$("#divcontrights").data("empid");
+	$("tr > td > button.statebutton",$("#tblrights")).each(function(){
+		rightlist.push(this.parentNode.parentNode.id + '=' + $(this).text());
+	});
+	IQXChain('#rightssavemessage',{action:'send',proc:'NetContactRightsSet',postdata:{pEmploymentID:empid,pRightsList:rightlist.toString()},
+	 nextlink:{action:'func',func:IQXRefreshTab}});
+}	
+
+</script>
+
+<table class="tablesorter" id="tblrights" >
+	<thead>
+		<tr>
+		<th>Activity</th>
+		<th>Default</th>
+		<th>Over-ride</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="Right_[rts.RightID;block=tr]" >
+		<td>[rts.RightDescription]</td>
+		<td width="60" align="center">[rts.RightDefault]</td>
+		<td width="60" align="center" class="statebutton">[rts.RightAssignedLabel;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<p id="rightssavemessage" ></p>
+<span class="errormessage">[var.x_errormessage]</span>
+<button type="button" class="fixed nonformbutton" onclick="SaveContactRights()" >Save</button>
+<button type="button" class="fixed nonformbutton" onclick="UndoContactRights()" >Abandon</button>
+
+

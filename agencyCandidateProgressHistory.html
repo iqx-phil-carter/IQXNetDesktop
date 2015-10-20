@@ -1,0 +1,32 @@
+<!--[onload;tplvars;ProgHist='NetAgencyCandidateProgressHistory?pProgressID']-->
+
+<!-- 20120817 change to generic document list -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divProgressHistory"));
+	});
+
+</script>
+
+<div id="divProgressHistory" class="zoomeddivProgressHistory">
+	<table class="tablesorter" id="tblProgressHistory">
+		<thead>
+			<tr>
+				<th>Action</th>
+				<th>Action Date</th>
+				<th>Action Time</th>
+				<th>Staff</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+	    		<td>[ProgHist.ActionName;block=tr;noerr]</td>
+	    		<td>[ProgHist.ActionDate;noerr]</td>
+	    		<td>[ProgHist.ActionTime;noerr]</td>
+	    		<td>[ProgHist.StaffName;noerr]</td>
+			</tr>
+		</tbody>
+	</table>
+
+</div>

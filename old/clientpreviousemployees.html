@@ -1,0 +1,42 @@
+<!--[onload;tplvars;emps='NetClientPreviousEmployees']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#tblcliprevtemp"));
+	});
+
+function showemployeejobs(row,persid) {
+	if ($(row).hasClass("rowexpanded")) {
+		$(row).next('tr.rowexpansion').remove();
+		$(row).removeClass("rowexpanded");
+		$(row).find('button').text('Details');
+		}
+	else {
+		$(row).after('<tr class="rowexpansion"><td colspan=2><div class="zoomeddiv"></div></td></tr>');
+		$(row).addClass("rowexpanded");
+		$(row).find('button').text('Hide Details');
+		IQXChain($(row).next('tr.rowexpansion').find("div.zoomeddiv"),{action:'load',page:'clientpreviousemployeejobs&pPersonID='+encodeURIComponent(persid)});
+		}
+	}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_previousemps_top.html;noerr]</div>
+<table class="tablesorter" id="tblcliprevtemp">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[emps.Name;block=tr;noerr]</td>
+		<td>
+			<button type="button" class="tablebutton nonformbutton" onclick="showemployeejobs(this.parentNode.parentNode,'[emps.PersonID]')">Details</button>
+		</td>	
+		</tr>
+		
+	</tbody>
+</table>
+<div class="usertext">[onload;file=txt_client_previousemps_bottom.html;noerr]</div>

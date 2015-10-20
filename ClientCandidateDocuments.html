@@ -1,0 +1,37 @@
+<!--[onload;tplvars;docs='NetCandidateDocuments?pPersonID';doctypes='NetUploadTypes?pOwnerType=P']-->
+
+<!-- 20120627 if loading on to a printable segment, then hide download link -->
+		
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		$("#tblcanddocs").tablesorter({dateFormat:'uk'});
+		if($('#divcontent').prev('div').html()==null){	// if null then no previous div, therefore printable.
+			$('#Downloadspan').css('visibility','hidden');}
+	});
+	
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_documents_top.html;noerr]</div>
+<table class="tablesorter" id="tblcanddocs">
+	<thead>
+		<tr>
+		<th>Type</th>
+		<th>Description</th>
+		<th>Last Updated</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+		<td>[docs.DocType;block=tr;noerr]</td>
+	    <td>[docs.DocDescription;noerr]</td>
+	    <td>[docs.LastUpdate;noerr]</td>
+	    <td><span id='Downloadspan'><a href="IQXRawData.php?page=S_FileDownload&binary=1&type=[docs.SpecialType;noerr]&id=[docs.DocumentID;noerr]&personid=[docs.PersonID;noerr]" target="_blank">Download</a></span></td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="errormessage">[var.x_errormessage]</p>
+<div class="usertext">[onload;file=txt_candidate_documents_bottom.html;noerr]</div>
+<div id="tblcanddocs"></div>

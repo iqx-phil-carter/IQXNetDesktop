@@ -1,0 +1,34 @@
+// Master
+
+[Switches]
+// Use this section to set common features, like tabs.
+
+WelcomeTab="Welcome"									; Show Welcome Tab
+ProfileTab="Me"											; Show Profile Tab
+;PayrollTab="Payroll"									; Show Payroll Tab
+;RegistrationTab="Registration"							; Show Registration Tab
+;DocumentsTab="Documents"								; Show Documents Tab
+CalendarTab="Calendar"									; Show Calendar Tab
+;StatementsTab="Statements"								; Show Statements Tab
+CurrentTimesheetsTab="Current Timesheets"				; Show Current Timesheets Tab
+;HistoricTimesheetsTab="Historic Timesheets"			; Show Historic Timesheets Tab. Do not use with Historic Timesheets Extended
+HistoricTimesheetsExtendedTab="Historic Timesheets"		; Show Historic Timesheets Tab. Do not use with Historic Timesheets Standard
+;JobSearchTab="Job Search"								; Show Job Search Tab
+;ReportsTab="Reports"									; Show Reports Tab
+;TestTab="Test Tab"										; Show Test Tab
+
+[tplvars]
+// use this section to specify data which should be transferred using the tplvars
+
+[Candidate]
+// Use this section to make changes to discrete objects. 
+
+LogoutScriptPathway="./asa/OverrideLogout.js"			; Pathway to js file containing custom asa logout
+ShowLogOutButton=1										; Show Log Out Button at bottom
+;ExtendedTable=1										; Use Extended table search rather than dates only
+;btnAddShiftRequirements="Bookings"						; Change Shift Requirements button to Add Bookings
+CurrentRequirementsDropdownDefault=25					; Set the default value for the Sample Size dropdown on the Current Requirements tab
+HistoricTimesheetsDropdownDefault=25					; Set the default value for the Sample Size dropdown on the Historic Timesheets tab
+PreviousTempsDropdownDefault=25							; Set the default value for the Sample Size dropdown on the Previous Temps tab
+;StarsScriptPathway="./DisplayFurgsTotal.js"			; Pathway to js file containing stars routines
+ShowExplanationLine=1									; Explanation line

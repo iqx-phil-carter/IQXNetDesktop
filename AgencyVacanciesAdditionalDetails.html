@@ -1,0 +1,143 @@
+<!--[onload;tplvars;AdditionalDetails=NetAgencyVacanciesAdditionalDetails?pRowID]-->
+
+<!-- 20120905 RC2 -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('div.zoomeddivCurrent').attr('class','zoomeddivMilestones');
+	
+	});
+
+
+function EditDate(btn){
+	// pop up datepicker and show save button
+	
+	var LineID=$(btn).attr('id');
+	var QuestionID=LineID.substr(1,4);
+		
+	$('#divD'+QuestionID).show();
+	$('#E'+QuestionID).hide();
+	$('#S'+QuestionID).show();
+	$('#C'+QuestionID).show();
+	$('#D'+QuestionID).datepicker({dateFormat:'dd/mm/yy'});
+	$('button.FixedA').attr('disabled','disabled');
+}
+
+
+function CancelDate(btn){
+	// hide Additional Details row
+	
+	var LineID=$(btn).attr('id');
+	var QuestionID=LineID.substr(1,4);
+		
+	$('#Err'+QuestionID).html('');
+	$('#divD'+QuestionID).hide();
+	$('#E'+QuestionID).show();
+	$('#S'+QuestionID).hide();
+	$('#C'+QuestionID).hide();
+	$('button.FixedA').removeAttr('disabled');
+}
+
+
+function CheckDate(btn){
+	// check for valid date and time before submitting to save
+	
+	var LineID=$(btn).attr('id');
+	var DateID=LineID.substr(1,4);
+	var DateVal=$('#D'+DateID).val();
+	var TimeID='D'+DateID.substring(0,2)+'T';
+	var TimeVal='';
+	var ErrorString='';
+	if ($('#'+TimeID).length>0){
+		TimeVal=$('#'+TimeID).val();
+		if(TimeVal.length!=5 || TimeVal.substring(2,3)!=':'){ErrorString='Please check Time';}
+		if($('#'+TimeID).attr('class').substring(0,14)=='StartingColour'){ErrorString='Time has not been edited';}
+	}
+	if(DateVal.length!=10 || DateVal.substring(2,3)!='/' || DateVal.substring(5,6)!='/'){ErrorString=ErrorString+'Please check Date';}
+	if($('#D'+DateID).attr('class').substring(0,14)=='StartingColour'){ErrorString='Date has not been edited';}
+	if(ErrorString.length>0){
+		$('#Err'+DateID).html(ErrorString);
+	}else{
+		SaveDate(btn);
+	}
+	
+}
+
+
+function SaveDate(btn){
+	// interpret save button call
+	
+	var LineID=$(btn).attr('id');
+	var QuestionID=LineID.substr(1,4);
+	var VacID=$('form').attr('id').substring(1,22);
+	var DateVal=$('#D'+QuestionID).val();
+			
+	$('#pTransactionType').val('dummy');
+	$('#pVacID').val(VacID.substring(1));
+	$('#pAdditionalQuestionCode').val(QuestionID);
+	$('#pNote').val(DateVal);
+	
+	SaveAction(VacID,QuestionID);
+	var TimeID=QuestionID.substring(0,2);
+	if ($('#D'+TimeID+'T').length>0){
+		var TimeVal=$('#D'+TimeID+'T').val();
+		$('#pAdditionalQuestionCode').val(TimeID+'T');
+		$('#pNote').val(TimeVal);
+		SaveAction(VacID,QuestionID);
+	}
+	CancelDate(btn);			
+}
+
+	
+function SaveAction(VacID,QuestionID){
+	// save to database
+		
+	$('#F'+VacID).attr('action','IQXPost.php?proc=NetAgencyVacanciesAdditionalQuestionsUpdate');
+	$('#F'+VacID).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var ReturnVal=data.toString().substr(data.toString().indexOf('#')+1);
+			$('#R'+QuestionID).html($('#R'+QuestionID).html()+' '+ReturnVal);
+			$('#E'+QuestionID).hide();
+			if (textStatus != 'success') {
+				$('.errormessage').html(data);
+				}
+			},
+		error: function(data,textStatus){
+			$('.errormessage').html(data);
+			},
+		dataType: "text"
+		});	
+}
+
+
+function RemoveStartColour(box){
+	// change date and time box back to default on onFocus event
+	
+	$(box).attr('class','');	
+}
+
+</script>
+
+<div id='[AdditionalDetails.DateQuestionCode;block=div]' >
+	<span width='140px'>[AdditionalDetails.QuestionText]</span>
+	<span style='float:right;' id='R[AdditionalDetails.DateQuestionCode]' width='30px' >[AdditionalDetails.DateQuestionValue] [AdditionalDetails.TimeQuestionValue]</span>
+	<div style='float:right;'> 
+		<button id='E[AdditionalDetails.DateQuestionCode]' type='button' style='[AdditionalDetails.LockButton;if [val]='1';then 'display:none';else '']' class='FixedA' onClick='EditDate(this)'>Edit</button> 
+		<button id='S[AdditionalDetails.DateQuestionCode]' type='button' onClick='CheckDate(this)' style='display:none'>Save</button>
+		<button id='C[AdditionalDetails.DateQuestionCode]' type='button' onClick='CancelDate(this)' style='display:none'>Cancel</button> 
+	</div>
+	<div id='divD[AdditionalDetails.DateQuestionCode]' style='float:right;display:none'>
+		<div style='padding:3px;float:right;[AdditionalDetails.TimeQuestionCode;if [val]='';then 'display:none';]'><input id='D[AdditionalDetails.TimeQuestionCode]' size='5' class='StartingColour' value='00:00' onFocus='RemoveStartColour(this)'></div> 
+		<div style='padding:3px;float:right'><input id='D[AdditionalDetails.DateQuestionCode]' size='10' class='StartingColour' value='dd/mm/yyyy' onFocus='RemoveStartColour(this)' ></div>
+	</div>
+	<br />
+	<span id='Err[AdditionalDetails.DateQuestionCode]' class='errormessage'></span>
+	&nbsp;<hr /> 
+</div>
+<button onClick='CloseForm()'>Close</button>
+<input id='pNote' name='pNote' style='display:none' />	
+
+	

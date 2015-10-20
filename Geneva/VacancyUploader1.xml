@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Job autoclose="yes">
+	<!-- Upload multiple Webvacancies.xml files to multiple web servers -->
+	<!-- 20111109 RC1 -->
+	<!-- 20111212 RC2 Pathways modified -->
+	
+	<!-- Use in conjunction with UploadVacancies.xml -->
+	<!-- insert breakpoint="yes" into tag to set breakpoint if required. Remember to take it out when you are finished -->
+	<!-- Leaf directories should match Department names in IQX, but without spaces -->
+	
+	<!-- User Variables -->
+		<SetVariable name="FTPServerPath" value="iqx.ilingo.co.nz" /> 							<!-- Address for remote server -->
+		<SetVariable name="LocalRootDirectory" value="C:\inetpub\wwwroot\IQXNet\Uploads" /> 	<!-- Base folder on source machine containing: -->
+		<SetVariable name="RemoteRootDirectory" value="\Uploads" /> 							<!-- Base folder on destination machine containing: -->
+		<SetVariable name="FirstDirectory" value="\Healthcare" /> 								<!-- Leaf folder for Healthcare. Change as appropriate -->
+		<SetVariable name="SecondDirectory" value="\Education" /> 								<!-- Leaf folder for Education. Change as appropriate -->
+		<SetVariable name="UploadFileName" value="WebVacancies.xml" /> 							<!-- Name of Transfer file. Do not Change -->
+	<!-- User Variables -->
+	
+	
+	<FTPConnection host="{FTPServerPath}" username="iqxnetgh" password="iqx2011" passive="NO"> 						<!-- Change username and password as appropriate -->
+		<!-- first upload to Health Root Folder -->
+		<ChangeDirectory ftppath="{RemoteRootDirectory}{FirstDirectory}" /> 										<!-- Change to first directory on local machine -->
+		<CopyFile source="{LocalRootDirectory}{FirstDirectory}\{UploadFileName}" ftptarget="{UploadFileName}" /> 	<!-- FTP file to remote machine -->
+	
+		<!-- second upload Education Root Folder -->
+		<ChangeDirectory ftppath="{RemoteRootDirectory}{SecondDirectory}" />
+		<CopyFile source="{LocalRootDirectory}{SecondDirectory}\{UploadFileName}" ftptarget="{UploadFileName}" />
+	</FTPConnection>
+	<!-- repeat groups as neccesary -->
+	
+</Job>

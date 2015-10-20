@@ -1,0 +1,471 @@
+<!--[onload;tplvars;tsr='NetProvTimesheetRates?ptempprovtimesheetid';QuestControl='']-->
+
+<!-- 20140717 Error fix in ProcessTimesheet -->
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+    	    	
+        var zoomedts = $("#divtimesheets").data("zoomedts");
+        if (zoomedts.completed) {
+            $("#tblrates td.buttoncolumn").text("");
+            $("#timesheetcomplete").remove();
+            $("#timesheetauthorise").text("Authorise");
+            $("#divPTRFlowEdit").hide();
+            $('#ProvTimesheetRatesTheirRef').attr('disabled', 'disabled');
+        } else {
+            $("#timesheetUncomplete").remove();
+            if ("[var.x_rights.AUTHORISETIMESHEETS;noerr]"=="1") {
+			// Synarbor thing: if they are allowed to authorise, do not show the Complete button as well
+			$("#timesheetcomplete").remove();
+			}
+        }
+        IQXInitSection($("#divtimesheetrates"));
+        $(".tstotal", "#divtimesheetrates").totalcolumn("#tstotal", 2);
+        if ($("#tstotal2").length > 0) $(".tstotal2", "#divtimesheetrates").totalcolumn("#tstotal2", 2);
+        
+        var TR = $('#TheirRef').val();
+        $("#inputProvTimesheetRatesTheirRef").val(TR);
+        $("#pProvTimesheetRatesTheirRef").show();
+        if (!zoomedts.completed) {
+            $("#inputProvTimesheetRatesTheirRef").removeAttr("readonly");
+        }
+
+        var ShowFlowEdit = false;
+        $("#divPTRFlowEdit").hide();
+                
+        if ('[var.x_userclass;noerr]' == 'CLIENT' && '[var.x_local.Switches.ClientShowFlowEdit;noerr]' == '1') { ShowFlowEdit = true; }
+        if ('[var.x_userclass;noerr]' == 'CANDIDATE' && '[var.x_local.Switches.CandidateShowFlowEdit;noerr]' == '1') { ShowFlowEdit = true; }
+        if ('[var.x_userclass;noerr]' == 'AGENCY' && '[var.x_local.Switches.AgencyShowFlowEdit;noerr]' == '1') { ShowFlowEdit = true; }
+        if (ShowFlowEdit == true) {
+        	if($('#spanEditButtons').html() != null){
+            	$("#divPTRFlowEdit").show();
+           }
+        }
+        
+        var ShowEditCol=false;
+		if('[var.x_userclass;noerr]'=='CLIENT' && '[var.x_local.Client.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+		if('[var.x_userclass;noerr]'=='CANDIDATE' && '[var.x_local.Candidate.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+		if('[var.x_userclass;noerr]'=='AGENCY' && '[var.x_local.Agency.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}	
+		if(ShowEditCol==false){
+			$("[id*= colEditColumn]").hide();
+			$("#colEditColumnHead").hide();
+			$("#colEditColumnTotal").hide();
+		}
+	
+         
+    });
+
+function CalculateGrandTotal(ColumnIdentifier){
+	// recalculate the grand total of a table, after a value has been changed. Used on rates, times and shifts detail pages
+	
+	var GrandTotal=0;
+	$(ColumnIdentifier).each(function(){
+		GrandTotal=GrandTotal+parseFloat($(this).text());
+	});
+	return GrandTotal.toFixed(2);					
+}
+
+function PTReditrate(row,owner,rowNo){
+	// set fields for edit, and add Submit routine to final input in sequence
+	 	
+	var rateid=$(row).attr("id");
+	var FlowEdit=$('#PTRFlowEdit').attr('class');
+	
+		
+	IQXEnableForm("#frmtimesheetrates",{
+		successhandler:loadrates,
+		row:row,
+		idfieldname: "pTempProvTimesheetLineID",
+		idvalue: rateid,
+		errortarget: "#timesheetrateserror"
+	});
+	
+	if(FlowEdit=='FlowEdit1'){	
+		if(owner=='OWNER'){
+			$('input[name*=phours]').focus();
+			$('input[name*=ptimefrom]').focusout(function(){
+				PTRSubmitForm(this,owner,rowNo);	
+			});
+		}else{
+			$('input[name*=pUnits]').focus();
+			$('input[name*=pUnits]').focusout(function(){
+				PTRSubmitForm(this,owner,rowNo);	
+			});
+		}
+	}else{ // not flow edit.
+		$('input[name*=pUnits]').focus();
+	}	
+}
+	
+function uneditrate(row){
+	IQXDisableForm();
+	if ($(row).data("rowjustadded")==1){
+		$(row).remove();
+	};
+}
+	
+function copyrate(row){
+	var idcount=$("#tblrates").data("rowaddid");
+	if (idcount==undefined){
+		idcount=0;
+	}
+	idcount=idcount+1;
+	$("#tblrates").data("rowaddid",idcount);
+	
+	var newid='Copy' + idcount + $(row).attr("id");
+	var newrow=$("#"+newid).get(0);
+	
+	$(row).clone().attr('id',newid).appendTo('#tblratesbody');	
+	$(newrow).data("rowjustadded",1);
+	$(newrow).find("td button").mouseoverclass();
+	PTSeditrate(newrow);
+}
+	
+function processtimesheet(ts, Routine, Params, authorising) {
+    
+    //link.nextlink = { action: 'func', func: IQXRefreshTab };
+    var TheirRefRequired = 0;
+    if (ts.theirrefrequired) { TheirRefRequired = ts.theirrefrequired; }
+	$("#errProvTimesheetRatesTheirRef").text('');  // clear any previous their ref error message
+	
+	if (TheirRefRequired != '0') {
+		var ref=$("#inputProvTimesheetRatesTheirRef").text();
+		if (authorising && !ref){   // If authorising we insist that it is filled in
+			$("#errProvTimesheetRatesTheirRef").text('Reference Required');
+			return;
+		}
+		
+		if (ts.theirref !== ref) {
+			var OverRidePermission=0;
+			if ('[var.x_userclass;noerr]' == 'CLIENT'){OverRidePermission= '[var.x_local.Client.OverRidePermission;noerr]'; }
+        	if ('[var.x_userclass;noerr]' == 'CANDIDATE'){OverRidePermission= '[var.x_local.Candidate.OverRidePermission;noerr]'; }
+        	if ('[var.x_userclass;noerr]' == 'AGENCY'){OverRidePermission= '[var.x_local.Agency.OverRidePermission;noerr]'; }
+        
+			var postdata = {ptempprovtimesheetid: ts.id, pTheirRef: ref,pOverRidePermission: OverRidePermission};
+			IQXChain('#timesheetcompletemessage', {action: 'send',proc: 'NetProvTimesheetSetTheirRef',postdata: postdata,nextlink: link});
+			return;
+			}
+		}
+	
+	$('#frmtimesheetrates').attr('action','IQXPost.php?'+Routine+'?'+Params);
+	$('#frmtimesheetrates').ajaxSubmit(
+		{
+		    success: function(data, textStatus) {
+		        if (data == 'Ok') {
+		            if (window.IPAddr) {
+		                var IPAddr = window.IPAddr;
+		                var postdata = { ptempprovtimesheetid: ts.id, pInstruction: null, pConfirmString: IPAddr };
+		                IQXChain('#timesheetcompletemessage', { action: 'send', proc: 'NetProvTimesheetCompleteLogAction', postdata: postdata });
+		            }
+		            IQXRefreshTab();
+		        } else {
+		            // this is where we need to interpert error messages. Some need to stop the processing
+		            var ErrCode = data.substr(0, 1);
+		            switch (ErrCode) {
+		                case '#':
+		                    ErrCode = data.substr(1, data.indexOf(':'));
+		                    $('#timesheetrateserror').html('Error code ' + ErrCode + ' Please contact your agency');
+		                    break;
+		                case '^':
+		                    $('#timesheetrateserror').html('This timesheet must be authorised by the agency, please use the Query button below to inform your Consultant');
+		                    $('#timesheetauthorise').hide();
+		                    break;
+		                default:
+		                    $('#timesheetrateserror').html('Error: ' + data.substr(0, 2) + ' - Please contact your Agency');
+		            }
+		        }
+		    },
+		    error: function(data, textStatus) {
+		        $('#timesheetrateserror').html("Transmission error "+data);
+		    },
+		    dataType: "text"
+		});
+}
+
+function completetimesheet(instruction){
+	
+	var ts=$("#divtimesheets").data("zoomedts");
+	var Routine="proc=NetProvTimesheetComplete";
+	if(window.IPAddr){
+		var IPAddr=window.IPAddr;
+		var Params=encodeURIComponent('ptempprovtimesheetid='+ts.id+'&pInstruction='+instruction+'&pConfirmString='+IPAddr);
+	}else{
+		var Params=encodeURIComponent('ptempprovtimesheetid='+ts.id+'&pInstruction='+instruction);
+	}
+	processtimesheet(ts,Routine,Params,false);
+}
+
+function authorisetimesheet(){
+	
+    var ts = $("#divtimesheets").data("zoomedts");
+    
+	var Params='ID='+ts.id;
+	var Routine;
+	if (ts.type == 'S') {
+		Routine = 'service=PROVTSCOMPLETE';
+	}
+	else {
+		Routine = 'service=PROVNONSHIFTTSCOMPLETE';
+	}
+	processtimesheet(ts,Routine,Params,true);
+	
+}
+
+
+function PTRSubmitForm(row,owner,rowNo){
+	// submit form, and either return, or flow edit
+	
+			
+	$('#frmtimesheetrates').attr('action','IQXPost.php?proc=NetProvTimesheetRateSet');
+	
+	var ThisRow=$(row.parentNode.parentNode.parentNode).attr('id');
+	var NextRow=$(row.parentNode.parentNode.parentNode).next('tr');
+	var ThisRow=$(row.parentNode.parentNode).attr('id');
+	var NextRow=$(row.parentNode.parentNode).next('tr');
+	var pdate=$('td[class*=number]').children('input').val();
+	var pfrom=$('td[class*=time]').children('input').val();
+	var pUnits = $('#trr'+rowNo+'_pUnits').children('input').val();
+	var pRate=$('#trr'+rowNo+'_pRate').html();
+	var pNewTotal=(pRate*pUnits).toFixed(2);
+	
+	$('#trr'+rowNo+'_pTotal').html(pNewTotal);
+
+	var FlowEdit=$('#PTRFlowEdit').attr('class');
+
+	if (pUnits == '') {
+	    pUnits='0.00';
+	}
+	pUnits=parseFloat(pUnits).toFixed(2);
+	
+	$('#frmtimesheetrates').ajaxSubmit(
+		{
+		    success: function(data, textStatus) {
+		        if (textStatus != 'success') {
+		            $('.errormessage').html(data);
+		            exit;
+		        }
+		        
+		        IQXDisableForm();
+		        $("td.tickable").click(hiderates);
+		        $('#trr'+rowNo+'_pUnits').html(pUnits);
+		        $('#trr'+rowNo+'_pRate').html(pRate);
+		        $('#trr'+rowNo+'_pTotal').html(pNewTotal);
+		        
+				$('#tstotal').html(CalculateGrandTotal('.tstotal'));
+								
+		        if (((FlowEdit == 'FlowEdit1') && ($(NextRow).attr('id') != null)) && ($(document.activeElement).attr('id') != 'PTRFlowEdit')) {
+		            PTReditrate(NextRow,owner,parseInt(rowNo)+1);
+		        } else {
+		            IQXDisableForm();
+		            
+		            $("td.tickable").click(hiderates);
+		            if(FlowEdit == 'FlowEdit1'){
+		            	if ($(NextRow).attr('id') == null) {
+		            		$('#PTRFlowEdit').removeAttr('class');
+		                	$('#PTRFlowEdit').setFocus();
+		                	$('#divPTRFlowEdit').hide();
+		            	}
+		            }
+		        }
+		    },
+		    error: function(data, textStatus) {
+		        $('.errormessage').html(data);
+		    },
+		    dataType: "text"
+		});
+		$('#frmtimesheetrates').attr('action', '');
+}
+
+	
+function PTRFlowEditB(btn){
+	// Flow Edit all table lines, using tab to skip between fields
+
+    var active = $(btn).attr('class');
+    var activeid = $(btn).attr('id');
+       
+	if(active=='FlowEdit mouseover'){
+		$(btn).attr('class','FlowEdit1 mouseover');
+		$('#divPTRFlowEditInstructions').show();
+	}else{
+		$(btn).attr('class','FlowEdit mouseover');
+		$('#divPTRFlowEditInstructions').hide();
+	}
+	
+}
+
+
+function PTRReferenceSubmit() {
+    // Submit reference number to database
+    
+    
+    $('#IntTimesheetID').val($('#TSID').val());  
+    $('#IntTheirRef').val($('#inputProvTimesheetRatesTheirRef').val());
+    
+    var OverRidePermission=0;
+	if ('[var.x_userclass;noerr]' == 'CLIENT'){OverRidePermission= '[var.x_local.Client.OverRidePermission;noerr]'; }
+    if ('[var.x_userclass;noerr]' == 'CANDIDATE'){OverRidePermission= '[var.x_local.Candidate.OverRidePermission;noerr]'; }
+    if ('[var.x_userclass;noerr]' == 'AGENCY'){OverRidePermission= '[var.x_local.Agency.OverRidePermission;noerr]'; }
+    $('#IntOverRidePermission').val(OverRidePermission);    
+        
+    var SubmitString = "IQXPost.php?proc=NetProvTimesheetSetTheirRef";
+    var TheirRefClass = $('#inputProvTimesheetRatesTheirRef').attr('class');
+    
+    $('#ReferenceForm').attr('action', SubmitString);
+    $('#inputProvTimesheetRatesTheirRef').attr('class',TheirRefClass+' busy');
+    $('#ReferenceForm').ajaxSubmit(
+		{
+		    success: function(data, textStatus) {
+		        $('#inputProvTimesheetRatesTheirRef').attr('class', TheirRefClass);
+		        return;
+		    },
+		    error: function(data, textStatus) {
+		        $('#errProvTimesheetRatesTheirRef').val(textStatus);
+		    }
+		});
+}
+</script>
+
+<form id="frmtimesheetrates"  method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tblrates">
+	[onload_PAYandCHARGE;block=table;when [var.x_userclass;noerr]='OWNER';noerr]
+	<thead>
+		<tr>
+			<th>[onload_SHOWDAYCOLUMN1;block=td;when [var.x_local.Switches.ShowDayColumn;noerr]=1]
+				Day
+			</th>
+			<th>Pay Type</th>
+			<th>Unit</th>
+			<th class="rightalign">Units</th>
+			<th class="rightalign">Pay Rate</th>
+			<th class="rightalign">Total Pay</th>
+			<th class="rightalign">Charge Rate</th>
+			<th class="rightalign">Total Charge</th>
+			<th id="colEditColumnHead" >
+		    	<div id="divPTRFlowEdit" >
+	            	<button type="button" id="PTRFlowEditB" onclick="PTRFlowEdit(this)" class="FlowEdit" title="Red = tab from one line to the next R">Flow Edit</button>
+	            	<div id="divPTRFlowEditInstructions" style="display:none" class="ToolTipPopupNarrow" >Click Edit on the line you want to start editing.<br /><br />Use the tab key to move between fields.<br /><br />To finish editing, unclick the Flow Edit button.</div>
+            	</div>
+			</th>
+		</tr>
+	</thead>
+	<tbody id="tblratesbody">
+		<tr id="Rate_[tsr.TempProvTimesheetLineID;block=tr]" >
+			<td>[onload_SHOWDAYCOLUMN2;block=td;when [var.x_local.Switches.ShowDayColumn;noerr]=1]
+				[tsr.ShiftDay;noerr]
+			    <input id="TheirRef" style="display:none" value="[tsr.TheirRef;noerr]" />
+				<input id="TSID" style="display:none" value="[tsr.TimesheetID;noerr]" />
+			</td>
+			<td>[tsr.BandDescription]</td>
+			<td id="trr[tsr.#]_pUnitDescription" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required">[tsr.UnitDescription;noerr]</td>
+			<td id="trr[tsr.#]_pUnits" class="tdeditable required number twodp rightalign">[tsr.Units;noerr]</td>
+	    	<td id="trr[tsr.#]_pRate" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required number twodp rightalign">[tsr.Rate;noerr]</td>
+			<td id="trr[tsr.#]_pTotal" class="tstotal twodp rightalign">[tsr.Total]</td>
+	    	<td id="trr[tsr.#]_pRate2" class="twodp rightalign">[tsr.Rate2;noerr]</td>
+			<td class="tstotal2 twodp rightalign">[tsr.Total2]</td>
+			<td id="colEditColumn" class="buttoncolumn" width=120>
+				<span id="spanEditButtons"> [tsr.CanEdit;ope=nif:0,minv;magnet=span]
+		    		<button type="button" class="tablebutton nonformbutton" onclick="PTReditrate(this.parentNode,'[var.x_userclass;noerr]','[tsr.#]')">Edit</button>
+		    		<button type="button" class="tablebutton nonformbutton" onclick="copyrate(this.parentNode.parentNode.parentNode)">Copy[tsr.IsExpenses;ope=nif:0,minv;magnet=button]</button>
+		    		<button type="button" class="tablebutton formbutton" onclick="PTRSubmitForm(this,'[var.x_userclass;noerr]','[tsr.#]')">Save</button>
+		    		<button type="button" class="tablebutton formbutton" onclick="uneditrate(this.parentNode.parentNode.parentNode)">Undo</button>
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan=4>Total</td>	
+			<td id="tstotal" class="twodp rightalign"></td>	
+			<td id="colEditColumnTotal">[onload_QUESTGROUPCOL;block=td;when [var.x_local.tplvars.QuestControl;noerr]!='']
+				<input type="hidden" id="QuestGroup" value="[QuestControl.QuestVal]" />
+				<input type="hidden" id="QuestSerialNumber" value="[QuestControl.SerialNo]" />	
+			</td>
+			<td>[onload_QUESTGROUPCOL2;block=td;when [var.x_local.tplvars.QuestControl;noerr]='']
+			</td>
+			<td id="tstotal2" class="twodp rightalign"></td>	
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+<table class="tablesorter" id="tblrates">
+	[onload_PAYandCHARGE;block=table;default]
+	<thead>
+		<tr>
+			<th>[onload_SHOWDAYCOLUMN3;block=th;when [var.x_local.Switches.ShowDayColumn;noerr]=1]
+				Day
+			</th>
+			<th>Pay Type</th>
+			<th>Unit</th>
+			<th class="rightalign">Units</th>
+			<th class="rightalign">Rate</th>
+			<th class="rightalign">Total</th>
+			<th>
+		   		<div id="divPTRFlowEdit" >
+	            	<button type="button" id="PTRFlowEdit" onclick="PTRFlowEditB(this)" class="FlowEdit" title="Red = tab from one line to the next R">Flow Edit</button>
+	            	<div id="divPTRFlowEditInstructions" style="display:none" class="ToolTipPopupNarrow" >Click Edit on the line you want to start editing.<br /><br />Use the tab key to move between fields.<br /><br />To finish editing, unclick the Flow Edit button.</div>
+            	</div>
+            </th>
+		</tr>
+	</thead>
+	<tbody id="tblratesbody">
+		<tr id="Rate_[tsr.TempProvTimesheetLineID;block=tr]" >
+			<td>[onload_SHOWDAYCOLUMN4;block=td;when [var.x_local.Switches.ShowDayColumn;noerr]=1]
+				[tsr.ShiftDay;noerr]
+				
+			</td>
+			<td>[tsr.BandDescription]</td>
+			<td id="trr[tsr.#]_pUnitDescription" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required">[tsr.UnitDescription;noerr]</td>
+			<td id="trr[tsr.#]_pUnits" class="tdeditable required number twodp rightalign">[tsr.Units;noerr]</td>
+	    	<td id="trr[tsr.#]_pRate" class="[tsr.IsExpenses;if [val]=1;then 'tdeditable';else ''] required number twodp rightalign">[tsr.Rate;noerr]</td>
+			<td id="trr[tsr.#]_pTotal" class="tstotal twodp rightalign">[tsr.Total]</td>
+			<td class="buttoncolumn" width=120>
+				<span id="spanEditButtons">[tsr.CanEdit;ope=nif:0,minv;magnet=span]
+		    		<button type="button" class="tablebutton nonformbutton" onclick="PTReditrate(this.parentNode.parentNode.parentNode,'[var.x_userclass;noerr]','[tsr.#]')">Edit</button>
+		    		<button type="button" class="tablebutton nonformbutton" onclick="copyrate(this.parentNode.parentNode.parentNode)">Copy[tsr.IsExpenses;ope=nif:0,minv;magnet=button]</button>
+		    		<button type="button" class="tablebutton formbutton" onclick="PTRSubmitForm(this,'[var.x_userclass;noerr]','[tsr.#]')">Save</button>
+		    		<button type="button" class="tablebutton formbutton" onclick="uneditrate(this.parentNode.parentNode.parentNode)">Undo</button>
+				</span>
+				<input id="TheirRef" style="display:none" value="[tsr.TheirRef;noerr]" />
+				<input id="TSID" style="display:none" value="[tsr.TimesheetID;noerr]" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan=4>[onload_SHOWDAYCOLUMN5;block=td;when [var.x_local.Switches.ShowDayColumn;noerr]!=1]Total</td>
+			<td colspan=5>[onload_SHOWDAYCOLUMN6;block=td;when [var.x_local.Switches.ShowDayColumn;noerr]=1]Total</td>	
+			<td id="tstotal" class="twodp rightalign"></td>	
+			<td>[onload_QUESTGROUPCOL3;block=td;when [var.x_local.tplvars.QuestControl;noerr]!='']
+				<input type="hidden" id="QuestGroup" value="[QuestControl.QuestVal]" />
+				<input type="hidden" id="QuestSerialNumber" value="[QuestControl.SerialNo]" />	
+			</td>
+			<td>[onload_QUESTGROUPCOL4;block=td;when [var.x_local.tplvars.QuestControl;noerr]='']
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p id="pProvTimesheetRatesTheirRef" class="ui-helper-hidden">[onload_REFERENCEREQUIRED;block=p;when [var.x_local.Switches.ReferenceRequired;noerr]='1']
+	<label for="inputProvTimesheetRatesTheirRef">
+		Reference
+	</label>
+	<input id="inputProvTimesheetRatesTheirRef" class="uppercase" onblur="PTRReferenceSubmit()" >[tsr.ThierRef]</input>
+	<span class="errormessage" id="errProvTimesheetRatesTheirRef"></span>
+</p>
+</form>
+
+
+<span id="timesheetcompletemessage"></span>
+<span class="errormessage" id="timesheetrateserror" >[var.x_errormessage]</span>
+
+<button type="button" id="timesheetcomplete" class="fixed nonformbutton" onclick="completetimesheet('')" >Complete</button>
+<button type="button" id="timesheetUncomplete" class="fixed nonformbutton" onclick="completetimesheet('REVERSE')" >Undo</button>
+<span>	[onload_AUTHORISETIMESHEETS;block=span;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+   <button type="button" id="timesheetauthorise" class="fixed nonformbutton" onclick="authorisetimesheet()" >Complete and Authorise</button>
+</span>
+<div class="usertext">
+	[onload_AUTHORISETIMESHEETS1;block=div;when [var.x_rights.AUTHORISETIMESHEETS;noerr]=1]
+	[onload;file=txt_timesheet_authorise.html;noerr]
+</div>
+<form id="ReferenceForm" method="post" accept-charset="utf-8">
+    <input id="IntTimesheetID" name="ptempprovtimesheetid"  style="display:none" />
+    <input id="IntTheirRef" name="pTheirRef" style="display:none" />
+    <input id="IntOverRidePermission" name="pOverRidePermission" style="display:none" />
+</form>

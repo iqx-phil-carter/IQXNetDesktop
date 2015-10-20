@@ -1,0 +1,83 @@
+<!--[onload;tplvars;tst='NetProvTimesheetTimes?ptempprovtimesheetid';ViewOnly='']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	
+   	if('[var.x_params.ViewOnly]'=='1'){
+   		$('#btnCalculate').hide();
+   		$('#btnView').show();
+   	}else{
+   		$('#btnCalculate').show();
+   		$('#btnView').hide();
+   	}
+ });
+	
+	
+function processdays(){
+	var tsid='[var.x_params.ptempprovtimesheetid]';
+		
+	var SubmitString='IQXPost.php?service=ProvNonShiftTSProcessRateScript';
+	$('#tsidTransmit').val(tsid);
+	
+	$('#frmSubmitToService').attr('action',SubmitString);
+	$('#frmSubmitToService').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					LoadRates('0');
+				}else{
+					$('.localerrormessage').html('Error EA: '+data);	
+				}
+			} else {
+				$('.localerrormessage').html('Error EB: '+data);
+			}
+		},
+		error: function(data,textStatus){
+			$('.localerrormessage').html('Error EC: '+data);
+		},
+		dataType: "html"
+	});
+}	
+
+function LoadRates(ViewOnly){
+
+	var tsid='[var.x_params.ptempprovtimesheetid]';
+	$('#tsidTransmit').val(tsid);
+	var NewPage='provtimesheetrates&ptempprovtimesheetid=' + tsid+'&ViewOnly='+ViewOnly;
+	LoadPage(NewPage);
+}
+
+function LoadPage(NewPage){
+	jQuery.mobile.changePage('iqxnet.php?P='+NewPage, {
+        allowSamePageTransition: true,
+        transition: 'none',
+        reloadPage: true
+    });
+}
+
+</script>
+
+<span id="spanHeadline"></span>
+<table class="tablesorter" id="tbldays" >
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Start Time</th>
+			<th>Hours</th>
+		</tr>
+	</thead>
+	<tbody id="tblshiftsbody">
+		<tr id="[tst.placementid;block=tr]_[tst.shiftdate]" onclick="ProcessDays()">
+			<td id="tst[tst.#]_pshiftdate" class="longdate">[tst.shiftdate]</td>
+			<td id="tst[tst.#]_ptimefrom" class="tdeditable time">[tst.timefrom;noerr]</td>
+			<td id="tst[tst.#]_phours" class="tdeditable number twodp rightalign">[tst.hours;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<a id="btnCalculate" data-role="button" class="btnMenu" onclick="processdays()">Calculate</a>
+<a id="btnView" data-role="button" class="btnMenu" onclick="LoadRates(true)">View Rates</a>
+<a data-role="button" class="btnMenu" onclick="LoadPage('CandProvTimesheets')">Back to timesheets</a>
+<form id="frmSubmitToService" method="post" data-ajax="false" >
+	<input type="hidden" id="tsidTransmit" name="id" />
+</form>

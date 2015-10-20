@@ -1,0 +1,74 @@
+<!--[onload;tplvars;DateOffset='GenevaNetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20121112 change fetch to search and add default dates -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('.divFilterTableDetail').html('');
+	IQXInitSection($("#divPrevEmpFilter"));
+	
+	var StoredStartDate=$.data(document.body,'PreviousTemps').Start;
+	var StoredEndDate=$.data(document.body,'PreviousTemps').End;
+	
+	if(StoredStartDate!='0'){
+		$('#PrevEmpFilterStart').val(StoredStartDate);
+		$('#PrevEmpFilterEnd').val(StoredEndDate);
+	}
+	//var OffsetInDays=183;
+	//var StartDate = new Date();
+	//var EndDate = new Date();
+	
+	//$('#PrevEmpFilterStart').val(CreateDate(StartDate,OffsetInDays));
+	//$('#PrevEmpFilterEnd').val(CreateDate(EndDate,0));
+	
+	$('#PrevEmpFilterStart').datepicker({dateFormat:'dd/mm/yy'});
+	$('#PrevEmpFilterEnd').datepicker({dateFormat:'dd/mm/yy'});
+	
+	$('#PrevEmpFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#PrevEmpFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	LoadData();
+	
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(){
+	var StartDate=$('#PrevEmpFilterStart').val();
+	var EndDate=$('#PrevEmpFilterEnd').val();
+	if(StartDate && EndDate){
+		IQXChain('#divPrevEmpDetail',{action:'load',page:'clientpreviousemployeesDetail&pFromDate='+StartDate+'&pToDate='+EndDate});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+</script>
+
+<div id="divPrevEmpFilter" class="dataTables_wrapper">
+	<div class="LoadPage" style="padding: 10px">
+		Search between
+		<input id="PrevEmpFilterStart" class="dataTables_dateRange_from" onChange="StoreDateChange('PrevEmp')" value="[DateOffset.StartDate]" >
+		and
+		<input id="PrevEmpFilterEnd" class="dataTables_dateRange_to" onChange="StoreDateChange('PrevEmp')" value="[DateOffset.EndDate]" >
+		<button class="fixed dataTables_search" onClick="LoadData()" >Search Data</button>
+	</div>
+	<div class="clear" ></div>
+	<div id="divPrevEmpDetail" ><span class="EmptyTable">No data has been selected.</span></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

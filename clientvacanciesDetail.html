@@ -1,0 +1,213 @@
+<!--[onload;tplvars;vacancies='NetClientVacancies?pStartDate&pEndDate&pPageNo&SearchString&SampleSize&pOrderType']-->
+
+<!-- 20130930 search order removed, enforce inherited search order from routine. Unfilled enforced -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('form').next('tr').remove(); // and also any prior detail divisions
+		
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+		
+    var unfilledButtons='Unfilled';
+	var unconfirmedButtons='Unconfirmed';
+	if ("[var.x_rights.FILLJOBS;noerr]"=="1"){
+		unfilledButtons+=' <button onClick="ShiftFill(this)">Fill</button>';
+	}
+	if ("[var.x_rights.AUTHORISEJOBS;noerr]"=="1"){
+		unconfirmedButtons+=' <button onClick="ShiftConfirm(this)">Confirm</button> <button onClick="ShiftCancel(this)">Cancel</button>';
+	}
+	
+	$('#tblclivacs').data('IQXdtDateFilter',{dateColumn:3,clearButtonText:"Clear"});
+	var oTbl=$('#tblclivacs').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"sDom": '<"clear">rt',	
+		"iDisplayLength":100,
+		"aaSorting": [ [14,'asc'] ],
+		"aoColumnDefs": [{aTargets:[0],fnRender: function(oObj){
+			if (oObj.aData[13]){
+				return oObj.aData[0]+'<br/>'+oObj.aData[13];
+			} else {
+				return oObj.aData[0];
+			}
+		}},
+		{aTargets:[8],bSortable:false,bSearchable:false,fnRender: function(oObj){
+			if (oObj.aData[9]=="1"){return '';} // Filled
+			if (oObj.aData[10]=="1"){return unconfirmedButtons;}
+			return unfilledButtons;
+		}},
+		{aTargets:[9,10,11,12,13,14],bVisible:false,bSearchable:false}]
+	});
+
+	var RecordCount=$('#RecordCount').val();
+	var SampleSize=$('#VacSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1;}
+	PageCount=Root+Mantissa;
+	$('#LastPage').html(PageCount);
+	$('#NavButtons').hide();
+	if($('#LastPage').html() != 'NaN'){
+		$('#NavButtons').show();
+		}	
+	
+	if('[var.x_local.client.OverWriteFilledBy;noerr]'!='0'){	
+	$("td[id*='C8']").each(function(index){
+		if($(this).text()==''){$(this).text('[var.x_local.client.OverWriteFilledBy;noerr]');}
+	});	
+	}	
+});
+
+
+function RowHighlight(btn,HighlightState){
+	// Highlight or lowlight a table row
+	
+	if(HighlightState==false){
+		$('tr').toggleClass('ui-state-highlight',false);
+	}else{
+		var LineID=$(btn).parent().parent().attr('id');
+		$('#'+LineID).toggleClass('ui-state-highlight');
+	}
+}
+
+
+function ShiftFill(btn){
+	// highlight row and open choice popup
+	
+	var LineID=$(btn).parent().parent().attr('id');
+	var VacancyID=$('#VA'+LineID).val();
+	var ShiftPlanID=$('#PL'+LineID).val();
+	var sCaption=$('#P'+LineID).html();
+	
+	RowHighlight(btn, true);
+	
+	if ($('#divclivacs').data('dlgIsLoaded')) {
+		$('#cliPlacDlg').dialog('option','title',sCaption);
+		$('#cliPlacDlg').dialog('open');
+	} else {
+		$('body').delegate('#cliPlacDlg','PlacementEvent',function(e,sType,sID,sName){
+			if (sType=='DialogCreate'){
+				$('#divclivacs').data('dlgIsLoaded',true);
+				$('#cliPlacDlg').dialog('option','title',sCaption);
+			} else if (sType=='DialogClose'){
+				actionCleanup(btn);
+			} else if (sType=='Request'){
+				doFillVacancy(sID,sName,VacancyID,ShiftPlanID);
+			}
+		});
+	IQXChain('#divclivacFillerDlg', {action: 'load', page: 'clientemployeestoplacedialog'});
+	}
+}	
+
+
+function ShiftConfirm(btn){
+	// Confirm Shift
+	
+	var LineID=$(btn).parent().parent().attr('id');
+	var sVacID=$('#VA'+LineID).val();
+	var sPlanID=$('#PL'+LineID).val();
+	
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};
+		var nxt={action:'func',func:function(){
+			LoadData($('#RowCount').html(),0);
+		}};
+		IQXChain('',{action:'send',proc:'NetVacancyConfirm',postdata:postdata,nextlink:nxt});
+}	
+
+
+function ShiftCancel(btn){
+	// Cancel Shift and refresh grid
+
+	$IQXFormContext={blocktabswitch:true, switchmessage:"Please close any dialogs before switching to a different tab."};
+	
+	var LineID=$(btn).parent().parent().attr('id');
+	var sVacID=$('#VA'+LineID).val();
+	var sPlanID=$('#PL'+LineID).val();
+	var sCaption=$('#P'+LineID).html();
+		
+	var postdata={pvacancyid:sVacID,pshiftplanid:sPlanID};
+	var nxt={action:'func',func:function(){
+		$('#'+LineID).html('');
+		LoadData($('#RowCount').html(),0);  
+	}};
+	
+	IQXUIDialog('Cancel this requirement?',{xDlgType:'YesNo',modal:true,title:sCaption},function(){
+		IQXChain('',{action:'send',proc:'NetVacancyCancel',postdata:postdata,nextlink:nxt,failFunc:actionCleanup(btn)});
+		},actionCleanup(btn));	
+}
+
+
+function actionCleanup(btn){
+	// clear lock on form, and then clear all highlit rows
+
+		$IQXFormContext={blocktabswitch:false};
+		RowHighlight(btn, false);
+	};
+	
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+
+<table class="Xtablesorter" id="tblclivacs">
+	<thead>
+		<tr>
+		<th>Position</th>
+		<th>Start Date</th>
+		<th>Time</th>
+		<th>Finish Date</th>
+		<th>Time</th>
+		<th>Our Ref</th>
+		<th>Your Ref</th>
+		<th>Filled By</th>
+		<th></th>
+		<th>Filled</th>
+		<th>Unconfirmed</th>
+		<th>VacancyID</th>
+		<th>TempShiftPlanID</th>
+		<th>Address</th>
+		<th>SortColumn</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[vacancies.RowID;block=tr]">
+	    <td id="P[vacancies.RowID]">[vacancies.Position;noerr] [vacancies.ShiftDescription;noerr]</td>
+	    <td class="longdate">[vacancies.StartDate;noerr]</td>
+	    <td class="time">[vacancies.StartTime;noerr]</td>
+	    <td class="longdate">[vacancies.FinishDate;noerr]</td>
+	    <td class="time">[vacancies.FinishTime;noerr]</td>
+	    <td>[vacancies.OurRef;noerr]</td>
+	    <td>[vacancies.TheirReference;noerr]</td>
+		<td id="C8">[vacancies.FilledBy;noerr]<input id="RecordCount" type="hidden" value="[vacancies.RowCount;noerr]" /><input id="VA[vacancies.RowID]" type="hidden" value="[vacancies.VacancyID;noerr]" /><input id="PL[vacancies.RowID]" type="hidden"  value="[vacancies.TempShiftPlanID;noerr]" /></td>
+		<td style="width:150px"></td>
+		<td>[vacancies.Filled;noerr]</td>
+		<td>[vacancies.Unconfirmed;noerr]</td>
+		<td>[vacancies.VacancyID;noerr]</td>
+		<td>[vacancies.TempShiftPlanID;noerr]</td>
+		<td>[vacancies.CompanyAddress;noerr]</td>
+		<td>[vacancies.OrderColumn;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<p>
+    <span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+</p>
+
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="CandDetailsPopups" class="ui-helper-hidden"></div>
+<div id="DocDetails" class="ui-helper-hidden"></div>
+
+<input type="hidden" id="TempShiftDate" ></input>
+
+<div id="FormDiv" ></div>

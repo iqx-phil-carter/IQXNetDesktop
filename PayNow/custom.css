@@ -1,0 +1,50 @@
+/* PayNow */
+
+#divheading {
+	height: 70px;
+	margin-bottom: 10px;
+	background-color: white;
+	color: black;
+	font-family: Times New Roman, serif;
+	font-size:20px;
+	background-image: url(images/sitelogo.png);
+	background-repeat: no-repeat;
+	background-position: right;
+	overflow:auto;
+}
+
+#divheading h1 {
+	display:none;
+}
+
+#divheading h2 {
+	display:none;
+}
+
+#divheading h3 {
+	text-align:left;
+	vertical-align:top;
+	top:25%;
+	height: 50%;
+	position:relative;
+	text-indent:170px;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+.logoutlink{	/* set colour for logout link */
+	color:black;
+}

@@ -1,0 +1,28 @@
+<!--[onload;tplvars;]-->
+	
+	<script type="text/javascript">
+
+$(document).ready(function(){
+
+	var DivWidth='600px';
+	var UserGroup='[var.x_userclass;noerr]';
+	var Address=window.location.href;
+	if(Address.substring(Address.length-11)=='iqxnet.php#'){Address=Address.substring(0,Address.length-11);}
+	var LinkPath=Address+'/Feed'+'[var.x_userclass;noerr]'+'.rss';
+	var ImgPath=Address+'/Images/RssFeed.png';
+	
+	$('#divRSS').css('width',DivWidth);
+	$('#lnkRSS').attr('href',LinkPath);
+	$('#imgRSS').attr('src',ImgPath);
+
+	$.get('IQXRawData.php?page=L_Feed'+UserGroup+'.rss&noauth=YES&render=text_html__IQXNetRssFeed.xsl',function(data){
+		$('#divRSS').html(data);
+	});
+	
+});
+
+</script>
+
+<a id="lnkRSS" target="_blank"><img id="imgRSS" alt="Subscribe to What's New"></a>
+
+<center><div id="divRSS" > </div></center>

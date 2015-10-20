@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Job title="Do nothing except for poll database, to keep connection awake" autoclose="YES">
+	<SQLQuery>
+		<SQLSelect>
+			select first s.name from staff s
+		</SQLSelect>	
+		<IfAnyRows>
+			<!-- do nothing -->
+		</IfAnyRows>
+	</SQLQuery>
+	
+</Job>

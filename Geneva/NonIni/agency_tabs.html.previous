@@ -1,0 +1,56 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#agencytabs");
+	$('a').click(function(){
+		if($(this).attr('href') == '#tabcontent-1'){
+			$('#divheading').show();
+			$('#divheadingSmall').hide();
+		}else{
+			$('#divheading').hide();
+			$('#divheadingSmall').show();
+		}
+	})
+});
+
+// set default date values
+$.data(document.body,'CurrentRequirements',{Start:0,End:0,Search:'',Sample:25});
+$.data(document.body,'CurrentTimesheets',{Start:0,End:0,Search:'',Sample:25});
+$.data(document.body,'HistoricTimesheets',{Start:0,End:0,Search:'',Sample:25});
+
+
+</script>
+    
+<div id="agencytabs" >
+    <ul>
+        <li><a href="#tabcontent-1"><span>Home</span></a></li>
+        <li><a href="IQXPage.php?page=agencyprofile"><span>Contact Details</span></a></li>
+        <li><a href="IQXPage.php?page=agencycandidates"><span>Candidates</span></a></li>
+        <li id="R"><a href="IQXPage.php?page=agencyvacancies&pGroupID=A&pFormName=R"><span>Current Opportunities</span></a></li>
+        <li id="P"><a href="IQXPage.php?page=agencyprovtimesheets&pGroupID=A&pFormName=C"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheetsExtended&pGroupID=A&pFormName=T"><span>Historic Timesheets</span></a></li>
+        <li><a href="IQXPage.php?page=companycontacts"><span>Contacts[onload_conts;block=li;when [var.x_rights.MAINTAINCONTACTS;noerr]=1]</span></a></li>
+        <li><a href="IQXPage.php?page=reports"><span>Reports[onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+   </ul>
+    <div id="tabcontent-1">
+		<div class="usertext">[onload;file=txt_agency_welcome_top.html;noerr;]</div>
+		<div id="Agencynonstandardtext" class="usertext">[onload;file=txt_agency_nonstandard_welcome.html;noerr;]</div>
+		<div id="Agencystandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title] Agency Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Update your contact details and password</li>
+				<li>Update the contact mechanism for cascaded opportunities</li>
+				<li>Maintain candidates</li>
+				<li>View opportunities and submit candidates</li>
+				<li>Complete temporary workers' timesheets</li>
+				<li>View historical details and management information</li>
+			</ul>
+			<p>Please explore the options, and if you have queries, contact [var.x_title].</p>
+		</div>
+		<div class="usertext">[onload;file=txt_agency_welcome_bottom.html;noerr]</div>
+    </div>
+    <div id="tabcontent-blank">
+    </div>
+ </div>
+

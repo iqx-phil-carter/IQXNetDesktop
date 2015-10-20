@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Job title="AutoExport Net Database Procedures">
+	<!-- user variables -->
+		<SetVariable name="DestPath" value="C:\Development\RoutineBackups" />
+		<SetVariable name="DestFile" value="NetRoutineExtract" />
+		<SetVariable name="LogFile" value="LogFile.log" />
+		<SetVariable name="DatePart" sql="select dateformat(now(),'Ddd') from dummy" />
+		<SetVariable name="ReturnMessage" value="Backup completed {DatePart}" />
+	<!-- user variables -->
+	
+	<Block>
+		<ExportFile filename="{DestPath}\{DestFile} {DatePart}.xml" extension="xml">
+			<WriteXMLTag tag="Job" _title="{procPrefix} Database Procedure Import">
+				<WriteXMLTag tag="IfYesDialog" _text="This job will update the {procPrefix} database procedures. Ok to proceed?">
+					<SQLQuery>
+						<SQLSelect>select proc_name as pname,replace(proc_defn,'{{','{{{{') as pdefn 
+from sys.sysprocedure where pname like '{procPrefix}%' and 
+creator=(select  first user_id from sys.sysuserperm where user_name='pears') order by pname</SQLSelect>
+						<ForEachRow>
+							<If x1="{pdefn}" comparison="%" x2="create procedure" trim="YES" ignorecase="YES">
+								<SetVariable name="rtype" value="procedure" />
+							</If>
+							<Else>
+								<SetVariable name="rtype" value="function" />
+							</Else>	
+			            	<WriteXMLTag tag="SQLExec" _ignoreerror="YES"><Writeln cdata="YES">drop {rtype} pears.{pname}</Writeln></WriteXMLTag>
+							<WriteXMLTag tag="SQLExec" _parameters="NO" _xProcName="{pname}"><Writeln cdata="YES">{pdefn}</Writeln></WriteXMLTag>
+			            	<WriteXMLTag tag="SQLExec" _ignoreerror="YES"><Writeln cdata="YES">grant execute on pears.{pname} to IQXNet</Writeln></WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			</WriteXMLTag>
+		</ExportFile>
+	</Block>
+	<Catch>
+		<SetVariable name="ReturnMessage" value="There was an error: {Exception}" />
+		<If x1="I/O Error 32" x2="{Exception}" >
+    		<SetVariable name="ReturnMessage" value="There was an output error. Please ensure the destination file is available, and not open" />
+    	</If>
+	</Catch>
+	<ExportFile directory="{DestPath}" filename="{LogFile}" append="YES">
+		<WriteLn text="{Timestamp} {ReturnMessage}"/>
+	</ExportFile>
+</Job>

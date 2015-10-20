@@ -1,0 +1,266 @@
+<!--[onload;tplvars;PayRateDesc='NetOwnerRateDetails?pTempJobTypeID';JRList='NetOwnerJobRateListOuter']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	$('input','#OwnerSubmitFormDiv').attr('readonly','readonly');		// lock
+		//($("#OwnerPayRateTable").attr('rows').length) == 1)
+		if (($("#E_Position").val()) == '') { // If length==4 then table empty, i.e. set for new Payrate
+			$('input[id*="__DT"]').datepicker({
+				dateFormat: 'D dd/mm/yy',
+				firstDay:'[var.x_global.general.DatePickerStartday]'
+			});
+			OwnerSetForEdit('New');
+			$('#pVacancyID').val($('#ObjID').val());
+			var LiIdStr = "[id*=" + String.fromCharCode(34) + 'VA_' + $('#TempParent').val() + String.fromCharCode(34) + "]"; // LIstIDSTRing - duplicate nodes in 'All Vacancies' list need highlit as well as main vacancy entry in Contact list
+			$('li' + LiIdStr).css('background', '#CFCFCF');
+		};
+			
+	});
+
+function PayRateButtonHandler(ActionType,ActionClass,ObjIndex){
+	// ## deal with buttons - actions different to main forms
+	
+	switch (ActionType) {
+		case "N": // Create a new object
+			IQXDisableForm('#FormVacancy');
+			$('#OwnerSubmitFormDiv').show();
+			$('#VacancyNewPayRate').hide();
+			$('#SFInputPayRate').val('');
+			$('#SFInputChargeRate').val('');
+			$('#SFInputPayRate').attr('readonly', '');
+			$('#SFInputChargeRate').attr('readonly', '');
+			$('input[id*="E_"]','#OwnerSubmitFormDiv').val('');
+			$('input[id*="E_"]','#OwnerSubmitFormDiv').attr('readonly', '');
+			$('#SFCancelButtonNew').show();
+			$('#SFSaveButtonNew').show();
+			$('#OwnerDetailButtonDiv').hide();
+			break;
+		case "E":	// Edit for subform
+			OwnerSetForEdit(ObjIndex);
+			$('#OwnerDetailButtonDiv').show();
+			break;
+		case "F":	// Edit for subform
+			OwnerSetForEdit(ObjIndex);
+			break;
+		case "S": // Save current object
+			
+			if(ObjIndex=='0'){ObjIndex=''};
+			$('#E_SFInputPayRate').val($('#E_SFInputPayRate' + ObjIndex).val());
+			$('#E_SFInputChargeRate').val($('#E_SFInputChargeRate' + ObjIndex).val());
+			if ($('#ObjID').val() > '') {
+				$('#pVacancyID').val($('#ObjID').val());
+				}
+			SubmitString = "IQXPost.php?proc=NetOwnerPayRateEdit";
+			$('#OwnerPayRateDetail').attr('action', SubmitString);
+			
+			if(ObjIndex==0){ObjIndex='';}	// if charge rate is less than pay rate, raise error message
+			if(parseFloat($('#E_SFInputChargeRate' + ObjIndex).val())<parseFloat($('#E_SFInputPayRate' + ObjIndex).val())){
+				$("#EM_"+ObjIndex).show();
+				break;
+			}else{
+				$("#EM_"+ObjIndex).hide();
+			}
+			
+			$('#OwnerPayRateDetail').ajaxSubmit(
+				{	
+				success: function(data, textStatus){
+				if (data=='Ok') {
+					$('input').attr('readonly','readonly');
+					$('#OwnerErrorDiv').html('');
+					OwnerResetAfterEdit();
+					$('#OwnerDetailButtonDiv').show();
+					
+				}else {
+					$('#OwnerErrorDiv').html("PayRateButtonHandler Set Error: "+data);
+					}
+				},
+			dataType: "text"
+			});
+			$('#OwnerTreeRoot').jstree("refresh");
+			break;
+		case "U": // Undo
+			OwnerCancelEdit(ObjIndex);
+			break;
+		default:	// Should be nothing ever reaches here
+			$('#OwnerErrorDiv').html("PayRateButtonHandler Error: "+SubmitString+"");
+		}
+}
+
+function OwnerSetForEdit(ObjIndex){
+	// ## Set visibilities for editing
+	
+	$('#CancelButton' + ObjIndex).show();
+	$('#SaveButton' + ObjIndex).show();
+	$('#EditButton' + ObjIndex).hide();
+	$('#pObjID').val(ObjIndex);
+	$('#pCode').val($('#SFInputTPBID'+ObjIndex).val());
+	$('#pOldPay_Rate').val($('#E_SFInputPayRate'+ObjIndex).val());
+	$('#pOldCharge_Rate').val($('#E_SFInputChargeRate'+ObjIndex).val());
+	$('#pParentObject').val($('#ObjID').val());
+	
+	if (ObjIndex == "New") {
+		$('input[id*="E_"]', '#OwnerSubmitFormDiv').removeAttr('readonly');
+		if($('#E_Position').val()=='')
+			{$('#OwnerSubmitFormDiv').hide();
+		}else{
+			$('#OwnerSubmitFormDiv').show();
+			$('#VacancyNewPayRate').hide();
+		}
+		$('#OwnerPayRateDisplayDiv').hide();
+		$('#NoPayRateDetailDiv').show();
+	}
+	else {
+		$('input[id*="E_"]', '#OwnerPayRateDisplayDiv').removeAttr('readonly');
+		
+		$('#OwnerPayRateDisplayDiv').show();
+		$('#NoPayRateDetailDiv').hide();
+		}
+};
+
+function OwnerResetAfterEdit(){
+	// ## put everything back after successful edit
+	
+	$('Button[id*=Cancel]').hide();
+	$('Button[id*=Save]').hide();
+	$('Button[id*=Edit]').show();
+	$('#OwnerDetailButtonDiv').show();
+	$('#OwnerSubmitFormDiv').hide();
+	$('#VacancyNewPayRate').show();
+	$('#OwnerPayRateDisplayDiv').show();
+	$('#NoPayRateDetailDiv').hide();
+	
+	IQXChain('#OwnerDetailDiv',{action:'load',page:'OwnerPayRateSubScreen&pTempJobTypeID='+$('#ObjID').val()});
+};
+
+
+function OwnerComboChanged(ComboID,ComboValue){
+	// ## draw value from combo, set ID, description and period
+	var Val = $('#ComboDescNew option:selected').text();
+	var SplitPos=Val.indexOf(" - ");
+	var Description=Val.substring(0, SplitPos);
+	var Unit=Val.substring(SplitPos+3);
+	var ObjIndex=ComboID.substring(16);
+	$('#pCode').val(ComboValue);
+	$('#SFInputDescription' + ObjIndex).val(Description);
+	$('#SFInputUnits'+ObjIndex).val(Unit);
+	$('#SFInputDescription' + ObjIndex).show();
+	$('#ComboDescription' + ObjIndex).hide();
+	$('#SaveButton' + ObjIndex).show();
+	$('input[id*="E_"]','#OwnerSubmitFormDiv').val('');
+	$('input[id*="E_"]','#OwnerSubmitFormDiv').removeAttr('readonly');
+	$('#E_SFInputPayRate' + ObjIndex).focus();
+}
+
+function OwnerCancelEdit(ObjIndex){
+	// ## Abandon edit, clear out values and hide div, if appropriate
+	
+	if (ObjIndex == '0') {	// Discard unsaved object
+		$('input[id*=SF]','#OwnerSubmitFormDiv').val('');
+		$('input[id*=p]','#OwnerSubmitFormDiv').val('');
+		$('input[id*=pOld]').val('');
+		$('#ComboDescNew').val('');
+		$('#OwnerSubmitFormDiv').hide();
+		$('#VacancyNewPayRate').show();
+		$("#EM_").hide();
+	}
+	else {
+		$('#CancelButton' + ObjIndex).hide();
+		$('#SaveButton' + ObjIndex).hide();
+		$('#EditButton' + ObjIndex).show();
+		$('#pObjID' + ObjIndex).val($('#pOldObjID').val());
+		$('#E_SFInputPayRate' + ObjIndex).val($('#pOldPay_Rate').val());
+		$('#E_SFInputChargeRate' + ObjIndex).val($('#pOldCharge_Rate').val());
+		$('#pCode').val('');
+		$('input[id*=pOld]').val('');
+		$('input[id*="E_"]','#OwnerDetailDiv').attr('readonly', 'readonly');
+		$("#EM_"+ObjIndex).hide();
+	}
+}
+
+</script>
+
+<div id="OwnerPayRateDiv" style="float:left" >
+	<div id="OwnerPayRateDisplayDiv">
+	<fieldset class="ui-corner-all" style="align:left" >	
+		<table class="questionnaire" id="OwnerPayRateTable" >	<!-- display pay rate -->
+			<thead>
+				<tr>
+					<th class="qquestion Left ui-widget-header">Description</th>
+					<th class="qquestion Left ui-widget-header" >Units</th>
+					<th class="qquestion Left ui-widget-header" >Pay Rate</th>
+					<th class="qquestion Left ui-widget-header" >Charge Rate</th>
+					<th ></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr id="[PayRateDesc.ObjID;block=tr]" >
+					<td><input id="SFInputDescription[PayRateDesc.ObjID]" name="pDescription" class="Wide" readonly="readonly" value="[PayRateDesc.Description]" />
+						<input id="SFInputTPBID[PayRateDesc.ObjID]" name="pDescription" class="Wide hidden" readonly="readonly" value="[PayRateDesc.TempPayBandID]" />
+					</td>
+					<td ><input id="SFInputUnits[PayRateDesc.ObjID]" name="pUnits" class="MedNarrow" readonly="readonly" value="[PayRateDesc.Units]" /></td>
+					<td ><input id="E_SFInputPayRate[PayRateDesc.ObjID]" name="pPay_Rate" class="MedNarrow required" readonly="readonly" value="[PayRateDesc.Pay_Rate]" /></td>
+					<td ><input id="E_SFInputChargeRate[PayRateDesc.ObjID]" name="pCharge_Rate" class="MedNarrow required" readonly="readonly" value="[PayRateDesc.Charge_Rate]" />
+						<div class='errormessage' id="EM_[PayRateDesc.ObjID]" style="display:none" >Charge Rate is less than Pay rate</div>
+					</td>
+	    			<td width="20%" >
+	    				<button type="button" id="EditButton[PayRateDesc.ObjID]"class="tablebutton" onclick="PayRateButtonHandler('F','PA','[PayRateDesc.ObjID]')">Edit</button>
+						<button type="button" id="CancelButton[PayRateDesc.ObjID]" class="tablebutton hidden" onclick="PayRateButtonHandler('U','PA','[PayRateDesc.ObjID]')">Cancel</button>
+						<button type="button" id="SaveButton[PayRateDesc.ObjID]" class="tablebutton hidden" onclick="PayRateButtonHandler('S','PA','[PayRateDesc.ObjID]')">Save</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</fieldset>
+		</div>
+		<div id='OwnerButtonSubDiv' class="FloatDivLeft" ></div>
+		<div id='OwnerNewDetailDiv' class="FloatDivLeft" ></div>
+		<div id='OwnerSubmitFormDiv' class="FloatDivLeft" style="display:none" >	<!-- add a new rate -->
+			<form id="OwnerPayRateDetail" method="post" accept-charset="utf-8">
+				<fieldset class="ui-corner-all">
+				<table class="questionnaire" id="OwnerPayRateTable" >
+					<thead>
+						<tr>
+							<th class="qquestion Left ui-widget-header">Description</th>
+							<th class="qquestion Left ui-widget-header" >Units</th>
+							<th class="qquestion Left ui-widget-header" >Pay Rate</th>
+							<th class="qquestion Left ui-widget-header" >Charge Rate</th>
+							<th ></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<div border="1px"><select id="ComboDescNew" class="Wide" onChange="OwnerComboChanged(this.id,this.value)">
+									<option value=""></option>
+									[JRList.JobRateList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+								</select></div>
+							</td>
+							<td><input id="SFInputUnits" class="MedNarrow" /></td>
+							<td><input id="E_SFInputPayRate" name="pPay_Rate" class="MedNarrow" /></td>
+							<td><input id="E_SFInputChargeRate" name="pCharge_Rate" class="MedNarrow" />
+								<div class='errormessage' id="EM_" style="display:none" >Charge Rate is less than Pay rate</div>
+							</td>
+							<td width="20%" >	<!-- boxes for submit to database -->
+	    						<button type="button" id="SFCancelButtonNew" class="tablebutton" onclick="PayRateButtonHandler('U','PA','0')">Cancel</button>
+								<button type="button" id="SFSaveButtonNew" class="tablebutton" onclick="PayRateButtonHandler('S','PA','0')">Save</button>
+								<input id="pCode" name="pCode" class="MedNarrow hidden" value="" />
+								<input id="pObjID" name="pObjID" class="MedNarrow hidden" value="" />
+								<input id="pVacancyID" name="pVacancyID" class="MedNarrow hidden" value="" />
+								<input id="SFParentObject" name="pParentObject" class="MedNarrow hidden" value="" />
+							</td>
+						</tr>
+						<tr>	<!-- previous values for undo -->
+							<td><input id="pOldDescription" name="pOldDescription" class="MedNarrow hidden" /></td>
+							<td><input id="pOldUnits" name="pOldUnits" class="MedNarrow hidden" /></td>
+							<td><input id="pOldPay_Rate" name="pOldPay_Rate" class="MedNarrow hidden" /></td>
+							<td><input id="pOldCharge_Rate" name="pOldCharge_Rate" class="MedNarrow hidden" /></td>
+							<td width="20%" ></td>
+						</tr>
+					</tbody>
+				</table>
+				</fieldset>
+			</form>
+		</div>
+	<span class="errormessage">[var.x_errormessage]</span>     	
+</div>

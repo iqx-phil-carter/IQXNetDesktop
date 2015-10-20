@@ -1,0 +1,134 @@
+<Job title="Export Vacancies to Web" dateformat="ddd dd/mm/yyyy" autoclose="Yes">
+	<!-- 20111019 modified to provide multiple export files for multiple sites, divided by department -->
+	<!-- ref Geneva NZ -->
+	
+	<!-- user variables -->
+	<SetVariable name="UploadDirectory" value="Uploads" />
+	<!-- user variables -->
+	
+	<Library>
+		<MakeFormField fieldtype="" caption="" name="" multiple="multiple or blank" class="e.g. required" sql="select value,description">
+			<WriteXMLTag tag="SearchField" _fieldtype="{fieldtype}" _caption="{caption}" _name="{name}" _multiple="{multiple}" _class="{class}">
+				<If x1="{sql}" x2="" trim="YES" comparison="!=">
+					<SQLQuery>
+						<SQLSelect>{sql}</SQLSelect>
+						<ForEachRow>
+							<WriteXMLTag nocrlf="YES" tag="option" _value="{value}"><Write xmlsafe="YES">{description}</Write></WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</If>
+			</WriteXMLTag>
+		</MakeFormField>
+		<MakeCaption fieldname="" caption="">
+			<WriteXMLTag nocrlf="YES" tag="Caption" _fieldname="{fieldname}"><Write xmlsafe="YES">{caption}</Write></WriteXMLTag>
+		</MakeCaption>
+		<MakeField fieldname="" inRow="1 if should appear in the table row" inExpansion="1 if should appear in the expanded details">
+			<WriteXMLTag nocrlf="YES" tag="{fieldname}" _tbl="{inRow}" _exp="{inExpansion}"><WriteField cdata="YES">{fieldname}</WriteField></WriteXMLTag>
+		</MakeField>
+	</Library>
+	<IfFileExists filename="{jobdir}vacancyuploader.xml">
+  		<SetVariable name="doUpload" value="1"/>
+  		<SetVariable name="exportfolder" value="{tempdir}"/>
+	</IfFileExists>
+	<Else>
+  		<SetVariable name="doUpload" value="0"/>
+  		<SetVariable name="exportfolder" sql="select first websitefolder from IQXNetEmailDetails"/>
+	</Else>
+	<!-- loop on Department Names -->
+	<SQLQuery>
+		<SQLSelect>select d.departmentid as DeptID,replace(d.name,' ','') as DeptName from department d where d.publishtoweb=1</SQLSelect>
+  		<ForEachRow>
+  			<CreateDirectory path="{exportfolder}\\{UploadDirectory}\\{DeptName}" />
+			<ExportFile directory="{exportfolder}\\{UploadDirectory}\\{DeptName}\\" filename="WebVacancies.xml">
+    		<WriteLn text="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>"/>
+    		<WriteXMLTag tag="JobSearch">
+      			<WriteXMLTag tag="SearchForm">
+      				<Call fieldtype="select" caption="Job Type" name="xpath_tempperm" multiple="" class="required" sql="select 'T' as value,'Temp' as description union select 'P','Perm'">MakeFormField</Call>
+      				<SQLQuery>
+						<SQLSelect>select tagid,taglocation,description,tagtype from tag where taglocation like 'V%' and publiconweb=1 and tagtype in ('M','L') order by sortorder</SQLSelect>
+						<ForEachRow>
+							<If x1="{tagtype}" x2="L" ignorecase="YES">
+								<SetVariable name="isMultiple" value="multiple" />
+								<SetVariable name="squareBrackets" value="[]" />
+								<SetVariable name="xValue" value="tagchoiceid" />
+							</If>
+							<Else>
+								<SetVariable name="isMultiple" value="" />
+								<SetVariable name="squareBrackets" value="" />
+								<SetVariable name="xValue" value="(if tagchoiceid='_' then '$NONE$' else tagchoiceid endif)" />
+							</Else>
+       						<Call fieldtype="select" caption="{description}" name="xpath_Q_{taglocation}_{tagid}{squareBrackets}" multiple="{isMultiple}" class="" sql="select {xValue} as value, description from tagchoice where charindex('%',tagchoiceid)=0 and tagid=:tagid and taglocation=:taglocation and subchoice=0 and isnull(donotpublishtoweb,0)=0 order by sortorder">MakeFormField</Call>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+				<WriteXMLTag tag="Captions">
+					<Call fieldname="ourref" caption="Reference">MakeCaption</Call>
+					<Call fieldname="position" caption="Position">MakeCaption</Call>
+					<Call fieldname="jobtype" caption="Job Type">MakeCaption</Call>
+					<Call fieldname="department" caption="Department">MakeCaption</Call>
+					<Call fieldname="branch" caption="Branch">MakeCaption</Call>
+					<Call fieldname="startdate" caption="Start Date">MakeCaption</Call>
+					<SQLQuery>
+						<SQLSelect>select tagid,taglocation,description from tag where taglocation like 'V%' and publiconweb=1 order by sortorder</SQLSelect>
+						<ForEachRow>
+							<Call fieldname="VQ_{taglocation}_{tagid}" caption="{description}">MakeCaption</Call>
+							<SetVariable name="VQ_FieldList" value="{VQ_FieldList},getquestanswer('{taglocation}','{tagid}',vacancy.vacancyid) as VQ_{taglocation}_{tagid}" />
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+				<WriteXMLTag tag="Jobs">
+      				<SQLQuery>
+        				<SQLSelect><![CDATA[select 
+							Vacancy.VacancyID, 
+							(if isnull(Vacancy.Temp,0)=1 then 'T' else 'P' endif) as tempperm,
+							(if isnull(Vacancy.Temp,0)=1 then 'Temp' else 'Perm' endif) as jobtype,
+							vacancy.departmentid,department.name as department,
+							vacancy.position,vacancy.startdate,vacancy.refcode as ourref,vacancy.othernotes as description,
+							agencydetails.name as branch,staff.name as contactname,staff.email as contactemail{VQ_FieldList},vacancy.vacancyid as JobId
+						from vacancy key join staff key join agencydetails,vacancy key join department
+						where vacancy.status='C' and trim(isnull(vacancy.position,'')) != '' and trim(isnull(contactemail,'')) != '' and trim(isnull(ourref,'')) != ''
+							and vacancy.startdate is not null and department.searchable=1 and department.departmentid=:DeptID
+						order by ourref ]]>
+						</SQLSelect>
+						<ForEachRow>
+							<Message text="{Row} vacancies exported" />
+							<WriteXMLTag tag="Job" _id="{vacancyid}">
+								<Call fieldname="ourref" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="position" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="jobtype" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="department" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="branch" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="startdate" inRow="1" inExpansion="1">MakeField</Call>
+								<Call fieldname="JobId" >MakeField</Call>
+								<Call fieldname="description">MakeField</Call>
+								<Call fieldname="contactname">MakeField</Call>
+								<Call fieldname="contactemail">MakeField</Call>
+								<Call fieldname="tempperm">MakeField</Call>
+								<Call fieldname="departmentid">MakeField</Call>
+								<FieldQuery>
+									<ForEachRow>
+										<If x1="{FieldName}" x2="VQ_" comparison="%">
+											<Call fieldname="{FieldName}" inExpansion="1">MakeField</Call>
+										</If>
+									</ForEachRow>
+								</FieldQuery>
+								<SQLQuery name="vactagval">
+									<SQLSelect>select tag.tagid,tag.taglocation,tagvalue.tagchoiceid from tagvalue key join tag where tag.taglocation like 'V%' and tagvalue.id=:vacancyid and tag.publiconweb=1 and tag.tagtype in ('M','L')</SQLSelect>
+									<ForEachRow>
+										<WriteXMLTag nocrlf="YES" tag="Q_{taglocation}_{tagid}"><Write cdata="YES">{tagchoiceid}</Write></WriteXMLTag> 
+									</ForEachRow>
+								</SQLQuery>
+							</WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			</WriteXMLTag>
+		</ExportFile>
+		<If x1="{doUpload}" x2="1">
+			<RunJob job="{jobdir}vacancyuploader.xml">
+				<Writeln>{exportfolder}\\{UploadDirectory}\\{DeptName}\\WebVacancies.xml</Writeln>
+			</RunJob>
+		</If>
+		</ForEachRow>
+	</SQLQuery>
+</Job>

@@ -1,0 +1,61 @@
+<!--[onload;tplvars;newvac='NetClientVacancyTemplate?pTemplateVacancyID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliaddjobs"));
+	var frm=$('#frmclientnewvac').get(0);
+	IQXEnableForm(frm);
+	});
+
+</script>
+
+<form id="frmclientnewvac" action="IQXPost.php?proc=NetClientAddVacancies" method="post" accept-charset="utf-8">
+	<fieldset>
+		<legend>New Requirement</legend>
+		<input type="hidden" id="cli_newvac_id" name="ptemplatevacancyid" value="[newvac.VacancyID;block=fieldset]" />
+        <p>
+            <label for="cli_newvac_pos">
+                Position
+            </label>
+            <input type="text" id="cli_newvac_pos" name="ptitle" value="[newvac.Position]" class="required" />
+        </p>
+        <p>
+            <label for="cli_newvac_from">
+                From
+            </label>
+            <input type="text" id="cli_newvac_from" name="pdatefrom" class="required longdate" />
+        </p>
+        <p>
+            <label for="cli_newvac_to">
+                To
+            </label>
+            <input type="text" id="cli_newvac_to" name="pdateto" class="required longdate" />
+        </p>
+        <p>
+            <label for="cli_newvac_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newvac_ref" name="ptheirref" class="uppercase" />
+        </p>
+		<p>
+			<label for="cli_newvac_desc">
+				Description
+			</label>
+           <textarea rows=10 cols=45 wrap=soft id="cli_newvac_desc" name="pdescription">[newvac.VacDescription;noerr]</textarea>
+        </p>
+		<p>
+		    <button type="submit" id="cli_newvac_submit" class="fixed formbutton" >
+		        Save
+		    </button>
+		    <button type="button" id="cli_newvac_reset" class="fixed formbutton" onclick="unaddjob()" >
+		        Undo
+		    </button>
+		</p>
+	
+	</fieldset>
+</form>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+	

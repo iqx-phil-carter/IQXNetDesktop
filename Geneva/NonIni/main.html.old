@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+
+<html lang="EN" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/xml; charset=ISO-8859-1" />
+
+        <title>[var.x_title]</title>
+		
+		[onload;file=HeaderIncludes.html]
+		
+    </head>
+
+    <body>
+        <div>[onload_divheading;block=div;when [var.x_showdivheading;noerr]=1]
+        	<div id="banner" >
+        		<img id="genioslogo" class="fleft" alt="" src="Geneva/images/GenIOS-logo-Red-H.jpg" />
+				<div id="geniosheading" class="divlogo"  >
+					<img id="headicon" class="fleft spaceleft" src="Geneva/images/headicon.jpg" alt="" />
+					<div class="fleft titlegrey spaceleft"> Welcome!</div>
+					<div id="personname" class="fleft spaceleft"></div>
+					<div id="clientname" class="fleft titlelittlegrey spaceleft">- </div>
+					<button id="gh_button_logout" class="fixed" type="button" onclick="IQXLogout()"> Logout </button>
+				</div>
+        	</div>
+			<div id="divheadingSmall" class="divheadingSmall" >
+					<span id="divheadingSmallSpanLeft" >[var.x_title]</span>
+					<span id="divheadingSmallSpanCentre">[var.x_usertitle;htmlconv=no;noerr]</span>
+					<span id="divheadingSmallSpanRight" >[var.x_logoutlink;htmlconv=no;noerr]</span>		
+        		</div>
+        	</div>
+       </div>
+       
+        <div id="divcontent">
+            [onload;file=[var.x_divcontentfilename];noerr]
+        </div>
+		<p class="localerrormessage">[var.x_errormessage]</p>
+    </body>
+</html>
+

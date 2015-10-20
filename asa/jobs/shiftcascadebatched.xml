@@ -1,0 +1,171 @@
+
+<?xml version="1.0"?>
+<Job autoclose="YES">
+  <BeginTransaction/>
+  <SetVariable type="S" name="CRLF" sql="select string(char(10))"/>
+  <SetVariable type="S" name="TAB" sql="select string(char(9))"/>
+  <SetVariable type="S" name="SMTPHost" value="172.16.1.225"/>
+  <SetVariable type="S" name="SMTPUserID" value=""/>
+  <SetVariable type="S" name="SMTPPassword" value=""/>
+  <SetVariable type="S" name="SMTPSender" value="cascade@asarecruitment.co.uk"/>
+  <SetVariable type="S" name="MasterAgencyName" value="ASA Recruitment"/>
+  <SetVariable type="S" name="EmailFoot" value="Please do NOT respond to this request by email, please CALL US. No booking is valid until you receive confirmation from us.  All bookings are subject to our terms and conditions."/>
+  <SQLExec ignoreerror="YES">drop table @CascadingShifts;</SQLExec>
+  <SQLExec><![CDATA[
+declare local temporary table @CascadingShifts(ID int default autoincrement primary key, ThisTempShiftPlanID char(20), NewCascadeDateTime timestamp, NewCascadeLevel smallint, TheStoredSelection char(20),Client char(100), Position char(100), DepartmentID char(2), Contact char(100), ShiftDate date, TimeFrom time, TimeTo time, Description long varchar, ThisCascadeLevel smallint, ShiftSerialNumber char(20), ShiftDateTime timestamp, EssentialSkillGradeID char(4), EssentialSkill char(15), EssentialSkillChoiceList char(100), ClientNote char(50))
+on commit preserve rows;]]></SQLExec>
+  <SQLExec><![CDATA[
+insert into @CascadingShifts( ThisTempShiftPlanID, NewCascadeDateTime, NewCascadeLevel, TheStoredSelection,Client , Position, DepartmentID, Contact, ShiftDate,TimeFrom,TimeTo,Description,ThisCascadeLevel,ShiftSerialNumber, ShiftDateTime, EssentialSkillGradeID, EssentialSkill, EssentialSkillChoiceList, ClientNote)
+SELECT
+ tempshiftplan.TempShiftPlanID as ThisTempShiftPlanID,
+ GetCascadeTime(employment.companyid,tempshiftplan.vacancyid,tempshiftplan.whenentered,tempshiftplan.shiftdate+tempshiftplan.timefrom,current timestamp,tempshiftplan.cascadelevel+2) as NewCascadeDateTime,
+ tempshiftplan.cascadelevel+1 as NewCascadeLevel,
+ isnull(
+    (select first agencystoredselectionid from cascaderule where vacancyid=tempshiftplan.vacancyid and (vacancyrule = 0 or vacancyrule is null) and cascadelevel=tempshiftplan.cascadelevel+1),
+    (select first agencystoredselectionid from cascaderule where CompanyID=employment.companyid and vacancyid is null and (vacancyrule = 0 or vacancyrule is null) and cascadelevel=tempshiftplan.cascadelevel+1)) 
+  as TheStoredSelection,
+ Company.Name as Client,
+ Vacancy.Position,
+ Vacancy.DepartmentID,
+ Person.Name as Contact,
+ TempShiftPlan.ShiftDate,
+ TempShiftPlan.TimeFrom,
+ TempShiftPlan.TimeTo,
+ TempShiftPlan.Description,
+ TempShiftPlan.CascadeLevel as ThisCascadeLevel,
+ TempShiftPlan.ShiftSerialNumber,
+ case when Pears.TempShiftPlan.TimeTo < Pears.TempShiftPlan.TimeFrom then DATEADD(day,1,Pears.TempShiftPlan.ShiftDate+Pears.TempShiftPlan.TimeTo) else Pears.TempShiftPlan.ShiftDate+Pears.TempShiftPlan.TimeTo end as ShiftDateTime,
+ TempShiftPlan.EssentialSkillGradeID,
+ TempShiftPlan.EssentialSkill,
+ TempShiftPlan.EssentialSkillChoiceList,
+ TempShiftPlan.ClientNote
+FROM 
+ TempShiftPlan key join 
+ Vacancy key join 
+ Employment key join 
+ (Company,Person)
+WHERE 
+ TempShiftPlan.CascadeDateTime <= Current Timestamp 
+ and 
+ ShiftDateTime > Current Timestamp
+ and tempshiftplan.tempshiftplanid not in (select tempshiftplanid from tempshift where vacancyid=tempshiftplan.vacancyid
+     and shiftdate=tempshiftplan.shiftdate and (not (state='C' and crefill=1)) and tempshiftplanid is not null)
+ORDER BY ShiftSerialNumber;
+]]></SQLExec>
+  <SQLExec><![CDATA[
+create index ShiftDateTime on @CascadingShifts(ShiftDateTime asc);
+]]></SQLExec>
+  <SQLExec ignoreerror="YES">drop table @ShiftDetails;</SQLExec>
+  <SQLExec><![CDATA[
+		 declare local temporary table @ShiftDetails (ID int default autoincrement primary key, AgencyID char(20), ShiftDetails long varchar, StoredSelectionID char(20),CascadeErrorFlag smallint default 0,DeliveryMethod char(1), Address char(250), AgencyName char(100)) 
+		 on commit preserve rows;
+		 ]]></SQLExec>
+  <SQLExec><![CDATA[
+		 insert into @ShiftDetails(AgencyID,StoredSelectionID) 
+		 select distinct Record,StoredSelectionID from StoredSelectionMember where StoredSelectionMember.StoredSelectionID in (select distinct TheStoredSelection from @CascadingShifts);
+ ]]></SQLExec>
+  <SQLQuery>
+    <SQLSelect><![CDATA[
+select * from @CascadingShifts order by ShiftDateTime
+]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <!--Build the shift details in the temp table-->
+        <SQLExec><![CDATA[ 
+         update @ShiftDetails set ShiftDetails = string(ShiftDetails,'{MasterAgencyName} Order Number: ',:ShiftSerialNumber,:CRLF,'Client: ',:Client,:CRLF,'Job Title: ',:Position,:CRLF,'Date: ',dateformat(:ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(:TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(:TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(:Description, if locate(:Description, ',') > 0 then locate(:Description, ',')-1 else length(:Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(:EssentialSkill, :essentialskillchoicelist, :departmentid),:CRLF,'Band: ',:EssentialSkillGradeID,:CRLF,'Client Note: ',:ClientNote,:CRLF,:CRLF) 
+         from  @ShiftDetails join StoredSelectionMember on @ShiftDetails.AgencyID = StoredSelectionMember.Record 
+         where StoredSelectionMember.StoredSelectionID = :TheStoredSelection
+]]></SQLExec>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery>
+  <!--Notify the agencies-->><SQLQuery>
+    <SQLSelect><![CDATA[			
+				select Company.Name as AgencyName,  @ShiftDetails.AgencyID,  @ShiftDetails.ShiftDetails ,isnull(CascadeDeliveryAddress.DeliveryMethod,'.') as DeliveryMethod, CascadeDeliveryAddress.Address as Address
+				FROM @ShiftDetails join Company on @ShiftDetails.AgencyID = Company.CompanyID key left outer join CascadeDeliveryAddress
+				]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SQLExec>update @ShiftDetails set @ShiftDetails.AgencyName = :AgencyName, @ShiftDetails.DeliveryMethod=:DeliveryMethod,@ShiftDetails.Address = :Address where @ShiftDetails.AgencyID = :AgencyID</SQLExec>
+        <SetVariable name="CascadeErrorFlag" value="0" type="N"/>
+        <IfSQL condition=":DeliveryMethod = 'E'">
+          <SendEmail subject="NEW BOOKING(S) from {MasterAgencyName}" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>NEW BOOKING(S) for {AgencyName}.</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+              <Writeln>{EmailFoot}</Writeln>
+            </EmailBody>
+          </SendEmail>
+          <Else>
+            <SetVariable name="CascadeErrorFlag" value="2" type="N"/>
+          </Else>
+        </IfSQL>
+        <IfSQL condition=":DeliveryMethod not in ('E')">
+          <SetVariable name="CascadeErrorFlag" value="1" type="N"/>
+        </IfSQL>
+        <SQLExec><![CDATA[update @ShiftDetails set @ShiftDetails.CascadeErrorFlag = :CascadeErrorFlag where :CascadeErrorFlag !=0 and @ShiftDetails.AgencyID = :AgencyID;]]></SQLExec>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery><SQLExec ignoreerror="YES">drop table @ShiftDetailsClient;</SQLExec><SQLExec><![CDATA[
+		 declare local temporary table @ShiftDetailsClient (ID int default autoincrement primary key, VacancyID char(20), ShiftDetails long varchar, StoredSelectionID char(20),CascadeErrorFlag smallint default 0,DeliveryMethod char(1), Address char(250), VacancyName char(100)) 
+		 on commit preserve rows;
+		 ]]></SQLExec><SQLExec><![CDATA[
+		 insert into @ShiftDetailsClient(VacancyID) 
+		 select distinct VacancyID from TempShiftPlan where TempShiftPlanID in (select distinct ThisTempShiftPlanID from @CascadingShifts);
+ ]]></SQLExec><SQLQuery>
+    <SQLSelect><![CDATA[
+select * from @CascadingShifts order by ShiftDateTime
+]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <!--Build the shift details in the temp table-->
+        <SQLExec><![CDATA[ 
+         update @ShiftDetailsClient set ShiftDetails = string(ShiftDetails,'{MasterAgencyName} Order Number: ',:ShiftSerialNumber,:CRLF,'Job Title: ',:Position,:CRLF,'Date: ',dateformat(:ShiftDate,'Ddd dd Mmm yyyy'),:CRLF,'From: ',dateformat(:TimeFrom,'hh:nn'),:CRLF,'To: ',dateformat(:TimeTo,'hh:nn'),:CRLF,'Shift Type: ',ltrim(left(:Description, if locate(:Description, ',') > 0 then locate(:Description, ',')-1 else length(:Description) endif)),:CRLF,'Essential Skill(s): ',EssentialSkillDescription(:EssentialSkill, :essentialskillchoicelist, :departmentid),:CRLF,'Band: ',:EssentialSkillGradeID,:CRLF,:CRLF),
+VacancyName = (select Position from Vacancy where Vacancy.VacancyID = @ShiftDetailsClient.VacancyID)
+         from  @ShiftDetailsClient
+         where @ShiftDetailsClient.VacancyID = (select VacancyID from TempShiftPlan where TempShiftPlan.TempShiftPlanID = :ThisTempShiftPlanID)
+]]></SQLExec>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery><!--Notify the clients-->><SQLQuery>
+    <SQLSelect><![CDATA[			
+				select VacancyName,  @ShiftDetailsClient.VacancyID,  @ShiftDetailsClient.ShiftDetails,
+				(select first number from phone key join phonetype where contact = 1 and capabilities like '%E%' and vacancy.employmentid = phone.whoid) as Address
+				FROM @ShiftDetailsClient join Vacancy on (@ShiftDetailsClient.VacancyID = Vacancy.VacancyID)
+				WHERE Address is not null and Address like '%@%.%'
+]]></SQLSelect>
+    <IfAnyRows>
+      <ForEachRow>
+        <SQLExec>update @ShiftDetailsClient set @ShiftDetailsClient.VacancyName = :VacancyName, @ShiftDetailsClient.Address = :Address where @ShiftDetailsClient.VacancyID = :VacancyID</SQLExec>
+        <IfSQL condition=":Address like '%@%.%'">
+          <SendEmail subject="{MasterAgencyName} have cascaded your bookings" smtphost="{SMTPHost}" smtpuserid="{SMTPUserID}" smtpsender="{SMTPSender}" smtppassword="{SMTPPassword}">
+            <EmailRecipients>
+              <WriteLn>{Address}</WriteLn>
+            </EmailRecipients>
+            <EmailBody>
+              <Writeln>BOOKING(S) Job Title: {VacancyName}.</Writeln>
+              <Writeln/>
+              <Writeln>{ShiftDetails}</Writeln>
+              <Writeln/>
+            </EmailBody>
+          </SendEmail>
+        </IfSQL>
+      </ForEachRow>
+    </IfAnyRows>
+  </SQLQuery><!--Record the cascading--><SQLExec><![CDATA[IF VAREXISTS('uniqueroll') = 0 THEN CREATE VARIABLE uniqueroll integer; end if;]]></SQLExec><SQLExec><![CDATA[
+insert into CascadedShift(CascadedShiftID,TempShiftPlanID,SecondaryAgencyID,CascadeTime,CascadeLevel,Method,Details,ErrorLevel,ReNotifyState)
+select uniquekey(number()),@CascadingShifts.ThisTempShiftPlanID,@ShiftDetails.AgencyID,current timestamp,@CascadingShifts.ThisCascadeLevel,@ShiftDetails.DeliveryMethod,
+    case @ShiftDetails.CascadeErrorFlag when 0 then  string('Shift cascaded to ',@ShiftDetails.AgencyName,' at ',@ShiftDetails.Address) 
+                           when 1 then string('Shift cascade FAILED to ',@ShiftDetails.AgencyName,'. Delivery method not set or not supported') 
+                           when 2 then string('Shift cascade FAILED to ',@ShiftDetails.AgencyName,'. Email delivery problem') end ,
+       @ShiftDetails.CascadeErrorFlag, 'Notified' 
+       from @CascadingShifts join @ShiftDetails on @ShiftDetails.StoredSelectionID = @CascadingShifts.TheStoredSelection
+]]></SQLExec><!--Update the TempShiftPlan with new Cascade Times and Levels--><SQLExec><![CDATA[
+      update TempShiftPlan set CascadeDateTime = @CascadingShifts.NewCascadeDateTime, CascadeLevel = @CascadingShifts.NewCascadeLevel 
+      from TempShiftPlan join @CascadingShifts on TempShiftPlan.TempShiftPlanID = @CascadingShifts.ThisTempShiftPlanID;
+]]></SQLExec><Commit/></Job>

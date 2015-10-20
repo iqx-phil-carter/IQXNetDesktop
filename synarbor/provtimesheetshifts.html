@@ -1,0 +1,115 @@
+<!--[onload;tplvars;tss='SynNetProvTimesheetShifts?ptempprovtimesheetid']-->
+
+<!--Synarbor Custom File-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	var completed=$("#divtimesheets").data("zoomedts").completed;
+	$("#tblshifts tr.Daily_1 td.time,#tblshifts tr.Daily_1 td.digits").removeClass("tdeditable").text("");
+	$("#tblshifts tr.Daily_0 button.addTime").remove();
+	$("#tblshifts button.addTime").remove();  // Button no longer wanted - comment this line to put it back
+	if (completed){
+		$("#tblshifts td.buttoncolumn").text("");
+		$("#timesheetshiftcalculate").remove();
+		$("#tblshifts td.tickable").addClass("locked");
+	}
+	IQXInitSection($("#divtimesheetshifts"));
+	if (!completed) {
+		$("td.tickable button").click(hiderates);
+	}
+	});
+	
+function editshift(row){
+	hiderates();
+	var shiftid=$(row).attr("id");
+	IQXEnableForm("#frmtimesheetshifts",{
+		successhandler:loadshifts,
+		row:row,
+		idfieldname: "ptempshiftid",
+		idvalue: shiftid
+	});
+	}
+	
+function uneditshift(row){
+	IQXDisableForm();
+	$("td.tickable").click(hiderates);
+	if ($(row).data("rowjustadded")==1){
+		$(row).remove();
+	};
+	}
+	
+function copyshift(row,extraTime){
+	var idcount=$("#tblshifts").data("rowaddid");
+	if (idcount==undefined){
+		idcount=0;
+	}
+	idcount=idcount+1;
+	$("#tblshifts").data("rowaddid",idcount);
+	
+	var newid='Copy'; 
+	if (extraTime){
+		newid += 'Extra';
+	};
+	newid += idcount + $(row).attr("id");
+	$(row).clone().attr('id',newid).appendTo('#tblshiftsbody');	
+	var newrow=$("#"+newid).get(0);
+	if (extraTime){
+		$(newrow).removeClass('Daily_1');
+		$(newrow).find('td.time').addClass('tdeditable');
+		$(newrow).find('td.shiftDescrip').text('Added Time');
+		}
+	$(newrow).data("rowjustadded",1);
+	$(newrow).find("td.tickable").tickable();
+	$(newrow).find("button.tickable").addClass("ticked");  // New row is automatically ticked
+	$(newrow).find("td button").mouseoverclass();
+	editshift(newrow);
+	}
+
+function processshifts(){
+	var shiftlist = [];
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	$("tr > td > button.ticked",$("#divtimesheetshifts")).each(function(){
+		shiftlist.push(this.parentNode.parentNode.id);
+	});
+	IQXChain('#divtimesheetrates',{action:'send',proc:'NetProvTimesheetShiftsSelect',postdata:{pTempProvTimesheetID:tsid,pShiftList:shiftlist.toString()},
+	 nextlink:{action:'send',service:'ProvTSProcessRateScript',postdata:{id:tsid},
+	 nextlink:{action:'func',func:loadrates}}});
+}	
+
+</script>
+
+<form id="frmtimesheetshifts" action="IQXPost.php?proc=synNetProvTimesheetShiftSet" method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tblshifts" >
+	<thead>
+		<tr>
+		<th>Date</th>
+		<th>From</th>
+		<th>To</th>
+		<th>Break (minutes)</th>
+		<th>Description</th>
+		<th>Worked</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody id="tblshiftsbody">
+		<tr id="Shift_[tss.tempshiftid;block=tr]" class="Daily_[tss.daily;noerr]">
+		<td id="trs[tss.#]_pshiftdate" class="tdeditable required longdate">[tss.shiftdate]</td>
+		<td id="trs[tss.#]_ptimefrom" class="tdeditable required time">[tss.timefrom]</td>
+		<td id="trs[tss.#]_ptimeto" class="tdeditable required time">[tss.timeto]</td>
+	    <td id="trs[tss.#]_pbreakminutes" class="tdeditable digits">[tss.breakminutes;noerr]</td>
+	    <td id="trs[tss.#]_description" class="shiftDescrip">[tss.description;noerr]</td>
+		<td width=30 align="center" class="tickable">[tss.tick;noerr]</td>
+	    <td class="buttoncolumn" width=170>
+	    	<button type="button" class="tablebutton nonformbutton" onclick="editshift(this.parentNode.parentNode)">Edit</button>
+	    	<button type="button" class="tablebutton nonformbutton" onclick="copyshift(this.parentNode.parentNode,false)">Copy</button>
+	    	<button type="button" class="tablebutton nonformbutton addTime" onclick="copyshift(this.parentNode.parentNode,true)">Add Time</button>
+	    	<button type="submit" class="tablebutton formbutton" onclick="">Save</button>
+	    	<button type="button" class="tablebutton formbutton" onclick="uneditshift(this.parentNode.parentNode)">Undo</button>
+		</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+<span class="errormessage">[var.x_errormessage]</span>
+<button type="button" id="timesheetshiftcalculate" class="fixed nonformbutton" onclick="processshifts()" >Calculate</button>

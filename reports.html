@@ -1,0 +1,20 @@
+<!--[onload;tplvars;reports='NetReports']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	IQXInitSection($("#divReports"));
+    });
+	
+</script>
+
+<div class="usertext">[onload;file=txt_reports_top.html;noerr]</div>
+<div id="divReports">
+<ul>
+	<li><a href="IQXNetEx.php?page=report&source=[reports.ReportSource;block=li]&params=[reports.ReportParams]&title=[reports.ReportTitle;ope=iqx;spacetoplus]" target="_blank">[reports.ReportTitle]</a></li>
+</ul>
+
+<p>
+<span class="errormessage">[var.x_errormessage]</span>
+</p>	
+</div>
+<div class="usertext">[onload;file=txt_reports_bottom.html;noerr]</div>

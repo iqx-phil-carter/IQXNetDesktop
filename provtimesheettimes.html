@@ -1,0 +1,173 @@
+<!--[onload;tplvars;tst='NetProvTimesheetTimes?ptempprovtimesheetid']-->
+
+<!-- 20130114 Flow edit made switchable on ini -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	var completed=$("#divtimesheets").data("zoomedts").completed;
+	
+	if (completed){
+		$("#tbldays td.buttoncolumn").text("");
+		$("#timesheettimecalculate").remove();
+		$("#divTSSFlowEdit").hide();
+	}
+	
+	var ShowFlowEdit=false;
+	if('[var.x_userclass;noerr]'=='CLIENT' && '[var.x_local.Switches.ClientShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}
+	if('[var.x_userclass;noerr]'=='CANDIDATE' && '[var.x_local.Switches.CandidateShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}
+	if('[var.x_userclass;noerr]'=='AGENCY' && '[var.x_local.Switches.AgencyShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}	
+	if(ShowFlowEdit==false){$("#divTSTFlowEdit").hide();}
+	
+	var ShowEditCol=false;
+	if('[var.x_userclass;noerr]'=='CLIENT' && '[var.x_local.Client.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+	if('[var.x_userclass;noerr]'=='CANDIDATE' && '[var.x_local.Candidate.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+	if ('[var.x_userclass;noerr]' == 'AGENCY' && '[var.x_local.Agency.ShowEditCol;noerr]' == '1') { ShowEditCol = true; }
+	ShowEditCol = true;
+	if (ShowEditCol == false) {
+		$("[id*= colEditColumn]").hide();
+		$("#colEditColumnHead").hide();
+	}
+	
+	IQXInitSection($("#divtimesheetshifts"));
+	processdays();
+	});
+	
+function editday(row){
+	var PTTFlowEdit=$('#btnTSTFlowEdit').attr('class');
+	
+	hiderates();
+	var placementid_date=$(row).attr("id");
+	IQXEnableForm("#frmtimesheettimes",{
+		successhandler:loadshifts,
+		row:row,
+		idfieldname: "pplacementid_date",
+		idvalue: placementid_date
+	});
+	
+	if(PTTFlowEdit=='FlowEdit1'){	
+		$('input[name*=phours]').focus();
+		$('input[name*=ptimefrom]').bind('blur',function(){
+			PTTSubmitForm(row);	
+			});
+		}
+	}
+	
+function uneditday(row){
+	IQXDisableForm();
+	}
+	
+function processdays(){
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	IQXChain('#divtimesheetrates',{action:'send',service:'ProvNonShiftTSProcessRateScript',postdata:{id:tsid},
+	 nextlink:{action:'func',func:loadrates}});
+}	
+
+function PTTShowDetail(){
+	// Show Details
+	
+	if($('#btnShowTSTDetail').html()=='Show Details'){
+		$('#ShowTSTDetail').show();
+		$('#btnTSTFlowEdit').show();
+		$('#btnShowTSTDetail').html('Hide Details');
+	}else{
+		$('#ShowTSTDetail').hide();
+		$('#btnTSTFlowEdit').hide();
+		$('#btnShowTSTDetail').html('Show Details');
+	}
+}
+
+function PTTSubmitForm(row){
+	// submit form, and either return, or flow edit
+	
+	$('#frmtimesheettimes').attr('action','IQXPost.php?proc=NetProvTimesheetTimeSet');
+	
+	var ThisRow=$(row).attr('id');
+	var NextRow=$(row).next('tr');
+	var phours=$(row).children('td[id*=_phours]').children('input').val();
+	var pfrom=$(row).children('td[id*=_ptimefrom]').children('input').val();
+	var FlowEdit=$('#btnTSTFlowEdit').attr('class');
+	 
+	$('#frmtimesheettimes').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			if (textStatus != 'success') {
+				$('.errormessage').html(data);
+				exit;
+				}
+			IQXDisableForm();
+			$("td.tickable").click(hiderates);
+						
+			$(row).children('td[id*=_phours]').html(phours);
+			$(row).children('td[id*=_ptimefrom]').html(pfrom);
+				
+			if((FlowEdit=='FlowEdit1') && ($(NextRow).attr('id')!=null)){
+				editday($(NextRow,1));
+			}else{
+				IQXDisableForm();
+				$("td.tickable").click(hiderates);
+				if($(NextRow).attr('id')==null){
+					$('#btnPTTFlowEdit').hide();
+					$('#spanFlowEditInstructions').hide();
+					}
+				}
+			},
+		error: function(data,textStatus){
+			$('.errormessage').html(data);
+			},
+		dataType: "text"
+		});	
+}
+
+
+function TSTFlowEdit(){
+	// Flow Edit all table lines, using tab to skip between fields
+	
+	var active=$('#btnTSTFlowEdit').attr('class');
+	
+	if(active=='FlowEdit mouseover'){
+		$('#btnTSTFlowEdit').attr('class','FlowEdit1 mouseover')
+		$('#spanFlowEditInstructions').show();
+	}else{
+		$('#btnTSTFlowEdit').attr('class','FlowEdit mouseover');
+		$('#spanFlowEditInstructions').hide();
+	}
+}
+
+</script>
+
+<button type="button" id="btnShowTSTDetail" class="fixed nonformbutton" onclick="PTTShowDetail()" >Show Details</button>
+
+<div id="ShowTSTDetail" style="display:none" >
+<form id="frmtimesheettimes"  method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tbldays" >
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Hours</th>
+			<th>Start Time</th>
+			<th id="colEditColumnHead">
+		    	<div id="divTSTFlowEdit">
+        	    	<button type="button" id="btnTSTFlowEdit" onClick="TSTFlowEdit()" class="FlowEdit" style="display:none" title="Red = tab from one line to the next">Flow Edit</button>
+	            	<div id="spanFlowEditInstructions" style="display:none" class="ToolTipPopupNarrow" >Click Edit on the line you want to start editing.<br /><br />Use the tab key to move between fields.<br /><br />To finish editing, unclick the Flow Edit button, then press Save, on the final line</div>
+            	</div>
+        	</th>
+		</tr>
+	</thead>
+	<tbody id="tblshiftsbody">
+		<tr id="[tst.placementid;block=tr]_[tst.shiftdate]" >
+			<td id="tst[tst.#]_pshiftdate" class="longdate">[tst.shiftdate]</td>
+			<td id="tst[tst.#]_phours" class="tdeditable number twodp rightalign">[tst.hours;noerr]</td>
+			<td id="tst[tst.#]_ptimefrom" class="tdeditable time">[tst.timefrom;noerr]</td>
+	    	<td id="colEditColumn" class="buttoncolumn" width=120>
+	    		<button type="button" class="tablebutton nonformbutton" onclick="editday(this.parentNode.parentNode)">Edit</button>
+	    		<button type="submit" class="tablebutton formbutton" onclick="PTTSubmitForm(this)">Save</button>
+	    		<button type="button" class="tablebutton formbutton" onclick="uneditday(this.parentNode.parentNode)">Undo</button>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+<span class="errormessage">[var.x_errormessage]</span>
+<button type="button" id="timesheettimecalculate" class="fixed nonformbutton" onclick="processdays()" >Calculate</button>
+</div>

@@ -1,0 +1,62 @@
+<!--[onload;tplvars;emps='NetClientDatedPreviousEmployeesFiltered?pFromDate&pToDate']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	IQXInitSection($("#divPrevTemps"));
+	$('#tblcliprevtemp').data('IQXdtDateFilter',{dateColumn:1,dateColumn2:2,text1:'Working between'});
+	var dtpt=$('#tblcliprevtemp').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"aaSorting": [ [2,'desc'], [0,'asc'] ],
+		"aoColumns": [{},{},{},{bSortable:false,bSearchable:false}]
+	});
+
+	$("#tblcliprevtemp").data('dataTable',dtpt);
+	IQXDeepLink("T",dtpt);
+	});
+
+function showemployeejobs(img,persid) {
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#tblcliprevtemp").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		dt.fnClose(row);
+		return;
+	}
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).rowafter({dataTable:dt,divs:[{divclass:"zoomeddiv"}]});
+	var encpersid=encodeURIComponent(persid);
+	IQXChain($(row).next('tr').find("div.zoomeddiv"),
+	   {action:'load',page:'clientpreviousemployeejobs&pPersonID='+encpersid+'&pid='+encpersid});
+	}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_previousemps_top.html;noerr]</div>
+<div id="divPrevTemps" >
+<table class="Xtablesorter" id="tblcliprevtemp">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Earliest Placement Date</th>
+			<th>Latest Placement Date</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    	<td>[emps.Name;block=tr;noerr]</td>
+	    	<td>[emps.FirstDate;noerr]</td>
+	    	<td>[emps.LatestDate;noerr]</td>
+			<td class="center"><img class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="showemployeejobs(this,'[emps.PersonID]')" /></td>
+		</tr>
+		
+	</tbody>
+</table>
+</div>
+<div class="usertext">[onload;file=txt_client_previousemps_bottom.html;noerr]</div>
+

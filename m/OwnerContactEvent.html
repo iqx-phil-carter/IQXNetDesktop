@@ -1,0 +1,147 @@
+﻿<!--[onload;tplvars;DiaryListDetail='MobileNetOwnerDiary?pCalendarLineID&pEventType']-->
+
+<script type="text/javascript">
+    
+    $(document).ready(function () {
+        
+        $('#btnCEventHome').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType);
+        $('#btnCEventClose').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        $('#btnCEventDiaryHome').attr('href', 'iqxnet.php?P=OwnerDiaryDetail&pCalendarLineID=' + window.pReturnID + '&pEventType=' + window.pEventType);
+        $('#btnCEventHelp').attr('href', window.HelpRoot + 'hat_5');
+        $('#Method').html(window.pMethod);
+        $('#Address').html(window.pAddress);
+        $('#CETaskButtons').hide();
+        CreateContactEvent();
+    });
+
+    function CreateContactEvent() {
+        
+        $.get('IQXRawData.php?page=MobileNetOwnerContactEventDropdownOuter?pClass=C&pDefaultVal=[DiaryListDetail.Status;noerr]&render=text_plain', function (data) {
+            var ResultString = data;
+            var StartPoint = ResultString.indexOf('![CDATA[');
+            var Endpoint = ResultString.indexOf(']]><');
+            ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+            ResultString = '<select id="comboStatus" name="pStatus"><option value=""></option>' + ResultString + '</option></select>';
+            $('#StatusArea').html(ResultString);
+        });
+        $.get('IQXRawData.php?page=MobileNetOwnerContactEventDropdownOuter?pClass=O&pDefaultVal=x&render=text_plain', function (data) {
+            var ResultString = data;
+            var StartPoint = ResultString.indexOf('![CDATA[');
+            var Endpoint = ResultString.indexOf(']]><');
+            ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+            ResultString = '<select id="comboOutcome" name="pOutcome"><option value=""></option>' + ResultString + '</option></select>';
+            $('#OutcomeArea').html(ResultString);
+            var SelectString = '<select id="comboPriority" name="pPriority">';
+            for (var Loopcounter = 1; Loopcounter <= 5; Loopcounter++) {
+                SelectString = SelectString + '<option value="' + Loopcounter + '"';
+                if (Loopcounter == '[DiaryListDetail.Priority;noerr]') { SelectString = SelectString + ' selected="true" '; }
+                SelectString = SelectString + '>' + Loopcounter + '</option>';
+            }
+            SelectString = SelectString + '</select>';
+            $('#PriorityArea').html(SelectString);
+        });
+        
+
+  
+        CEShowNav();
+       
+    }
+
+    
+
+    function SaveEvent() {
+        if ($('#comboStatus').val() == '') {
+            $('#divOwnerCEventErrorDiv').html('Please choose a Status');
+            return;
+        }
+        if ($('#comboOutcome').val() == '') {
+            $('#divOwnerCEventErrorDiv').html('Please choose an Outcome');
+            return;
+        }
+        
+        $('#frmOwnerContactEvent').ajaxSubmit({
+            success: function (data, textStatus) {
+                if (textStatus == 'success' && data == 'Ok') {
+                    DestPage = 'iqxnet.php?P=OwnerDiary&pEventType=' + window.pEventType;
+                    jQuery.mobile.changePage(DestPage, {
+                        allowSamePageTransition: true,
+                        transition: 'none',
+                        reloadPage: true
+                    });
+                } else {
+                    $('#divOwnerCEventErrorDiv').html(data);
+                }
+            },
+            error: function (data, textStatus) {
+                $('#divOwnerCEventErrorDiv').html(data);
+            },
+            dataType: "html"
+        });
+
+    }
+
+    function CEShowNav() {
+        $('#CETaskButtons').fadeIn();
+        $('#CETaskButtons').fadeOut();
+        $('#CETaskButtons').fadeIn();
+    }
+
+</script>
+
+<nav role="navigation" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnCEventHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+    <span class="btnNavLeft"><a id="btnCEventHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    <span class="btnNavLeft"><a id="btnCEventDiaryHome" href="" data-role="button" data-icon="grid" data-iconpos="notext">Diary</a></span>
+</nav>
+<span>Contact Event</span>
+<nav id="CETaskButtons" style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnCEventClose" href="" data-role="button" data-icon="delete" data-iconpos="notext" onclick="">Close</a></span>
+    <span class="btnNavRight"><a id="btnCEventSave" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="SaveEvent()">Edit</a></span>
+</nav>
+
+<div>
+    <form id="frmOwnerContactEvent" action="IQXPost.php?proc=MobileNetOwnerCreateContactEvent" method="post">
+        <table class="tablesorter">
+            <tr>
+                <td id="Method"></td>
+                <td id="Address"></td>
+            </tr>
+            <tr id="[DiaryListDetail.PositionID;noerr]">
+                <td>Position</td>
+                <td>[DiaryListDetail.Position;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.LineID;noerr]">
+                <td>Status</td>
+                <td id="StatusArea">[DiaryListDetail.Status;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.CompanyID;noerr]">
+                <td>Company</td>
+                <td>[DiaryListDetail.CompanyName;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.ContactID;noerr]">
+                <td>Contact</td>
+                <td>[DiaryListDetail.ContactName;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.ApplicantID;noerr]">
+                <td>Candidate</td>
+                <td>[DiaryListDetail.ApplicantName;noerr]</td>
+            </tr>
+            <tr >
+                <td>Priority</td>
+                <td id="PriorityArea"></td>
+            </tr>
+            <tr>
+                <td>Outcome</td>
+                <td id="OutcomeArea"></td>
+            </tr>
+        </table>
+        <textarea id="NoteText" name="pNote"></textarea>
+        <input name="pLineID" type="hidden" value="[DiaryListDetail.LineID;noerr]" />
+        <input name="pPositionID" type="hidden" value="[DiaryListDetail.PositionID;noerr]" />
+        <input name="pCompanyID" type="hidden" value="[DiaryListDetail.CompanyID;noerr]" />
+        <input name="pContactID" type="hidden" value="[DiaryListDetail.ContactID;noerr]" />
+        <input name="pApplicantID" type="hidden" value="[DiaryListDetail.ApplicantID;noerr]" />
+    </form>
+</div>
+
+<div id="divOwnerCEventErrorDiv" class="errormessage"></div>

@@ -1,0 +1,66 @@
+<!-- 20130822 insert Autoload -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('.divFilterTableDetail').html('');
+	IQXInitSection($("#divPrevEmpFilter"));
+	
+	var OffsetInDays=183;
+	var StartDate = new Date();
+	var EndDate = new Date();
+	
+	$('#PrevEmpFilterStart').val(CreateDate(StartDate,OffsetInDays));
+	$('#PrevEmpFilterEnd').val(CreateDate(EndDate,0));
+	
+	$('#PrevEmpFilterStart').datepicker({ defaultDate: OffsetInDays * -1, dateFormat: 'dd/mm/yy', firstDay: '[var.x_global.general.DatePickerStartday]' });
+	$('#PrevEmpFilterEnd').datepicker({ defaultDate: 0, dateFormat: 'dd/mm/yy', firstDay: '[var.x_global.general.DatePickerStartday]' });
+	
+	$('#PrevEmpFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#PrevEmpFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	
+	LoadData();
+	});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(){
+	var StartDate=$('#PrevEmpFilterStart').val();
+	var EndDate=$('#PrevEmpFilterEnd').val();
+	
+	if(StartDate && EndDate){
+		IQXChain('#divPrevEmpDetail',{action:'load',page:'clientpreviousemployeesDetail&pFromDate='+StartDate+'&pToDate='+EndDate});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+</script>
+
+<div id="divPrevEmpFilter" class="dataTables_wrapper">
+	<div class="LoadPage" style="padding: 10px">
+		Fetch between
+		<input id="PrevEmpFilterStart" class="dataTables_dateRange_from" >
+		and
+		<input id="PrevEmpFilterEnd" class="dataTables_dateRange_to" >
+		<button class="fixed dataTables_search" onClick="LoadData()" >Search Data</button>
+	</div>
+	<div class="clear" ></div>
+	<div id="divPrevEmpDetail" ><span class="EmptyTable">No data has been selected.</span></div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>

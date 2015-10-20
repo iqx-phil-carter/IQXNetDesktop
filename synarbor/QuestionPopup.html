@@ -1,0 +1,80 @@
+<!--[onload;tplvars;PopupQuest='F_questions_div?ptaglocation=L&pgroup']-->
+
+<!-- 201211069 RC9 remove routine to enforce comments -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	var dlg=$('#divQuestPopup').dialog({
+		title:'STARS Questions',   
+		modal:true,
+		width:670,
+		open: function() { 
+			$(".ui-icon-closethick").hide();
+			$(".ui-dialog-titlebar-close").hide();
+			},
+		buttons: {
+			"Skip": function(){
+				//if($('[name*="Q_TL__W0B"]').length!=0){
+				//	$('#PopupError').html('The first timesheet must be rated.');
+				//	return;
+				//	}	
+				var SkipResponse=confirm("Select ok to re-enter values on the Question form and process the timesheet, click Cancel to close the Question form. The timesheet will still authorise");
+				if (SkipResponse==false)
+  				{
+  					IQXDisableForm();
+					IQXcloseUIdialog(this);
+					IQXRefreshTab();
+  				}
+			},
+			"Save": function(){
+				if($('#SerialNumber').val()==null){
+					$('#PopupError').html('There is no serial number for this timesheet. Questionnaire Data will not save');
+					return;
+					}
+				if($('[class*="qmultisummary"]').val()==''){
+					$('#PopupError').html('Please enter a Rating for this timesheet.');
+					return;
+					}				
+				//if($('[name*="Q_TL"]').val()==''){
+				//	$('#PopupError').html('Please enter Feedback for this timesheet.');
+				//	return;
+				//	}	
+				$("#FrmQuestPopup").submit();
+				
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+				IQXRefreshTab();
+			}
+		}	
+	});
+	$(".questionnaire").questionnaire();
+	IQXEnableForm("#FrmQuestPopup");
+	$('div.qmultientry').show();
+	
+	var ts=$("#QuestSerialNumber").val();
+	$('#SerialNumber').val(ts);
+	
+	var ErrMsg=$('#timesheetcompletemessage').children('span').html();
+	if(ErrMsg>''){
+		$('#PopupError').html(ErrMsg);
+		$('button').attr('hidden','true');
+		$('fieldset').attr('hidden','true');
+	}
+	});
+
+
+</script>
+
+<div>
+	<form id="FrmQuestPopup" name="FrmQuestPopup" action="IQXPost.php?proc=SynNetQuestPopupSet" method="POST" accept-charset="utf-8">
+		[onload;file=txt_FURGS_Popup.html;noerr]
+		<fieldset class="regular">
+			<input type="hidden" id="SerialNumber" name="pSerialNumber" value="" />
+			<div class="questionnaire">[PopupQuest;block=div]</div> 
+        </fieldset>
+	</form>
+	<span class="errormessage"  id="PopupError">[var.x_errormessage]</span>
+</div>
+
+

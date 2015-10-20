@@ -1,0 +1,216 @@
+<script type="text/javascript">
+
+// 20120113 modified calendar to adjust height according to window size
+
+$(document).ready(function(){
+    $('#CandCalendar').fullCalendar({
+        events:'IQXRawData.php?page=NetCandidateCalendar&render=text_plain__NetCandidateCalendar.xsl',
+		startParam:'pstart',
+		endParam:'pend',
+		cacheParam:'dummy_nocache',
+		firstDay:1,
+		weekMode:'variable',
+		height: $(window).height()-$('#CandCalendar').position().top-50,
+		theme:true,
+		selectable:true,
+		selectHelper:true,
+		header:{
+    		left:   'title',
+    		center: 'month,agendaWeek,agendaDay',
+    		right:  'today prev,next'
+		},
+		titleFormat:{
+    		month: 'MMMM yyyy',                            
+    		week: "MMMM dS[ yyyy]{ '&#8212;'[ MMMM] dS, yyyy}", 
+    		day: 'dddd, MMMM dS, yyyy'                
+		},
+		viewDisplay: hideAnyCluetips,
+		columnFormat:{month: 'dddd', week: 'ddd d/M', day: 'dddd d/M'},
+		timeFormat: 'HH:mm',
+		eventRender: function(event, element)
+			{
+			var titleString = event.title+'|'+event.description+'|';
+			titleString += $.fullCalendar.formatDate(event.start,'d/M/yyyy');
+			if (event.allDay) {
+				titleString += ' All day';
+				}
+			else {
+				titleString += $.fullCalendar.formatDates(event.start,event.end,'  HH:mm{ - HH:mm}');
+			}
+			
+			var choice=event.title.substr(0,1);
+			if(choice=='P'){ 									// Provisionally
+				if (event.confirmable) {
+					titleString += '<br>Requires Confirmation<br><span style="color:blue; text-decoration:underline; cursor:pointer" onClick=confirmEvent("' + event.id + '")>Confirm</span>'
+					titleString += '&nbsp;/&nbsp';
+					titleString+='<span style="color:blue; text-decoration:underline; cursor:pointer" onClick=rejectEvent("'+event.id+'")>Reject</span>'
+				}
+				else{
+					titleString+='<br>Requires confirmation by agency<br>';	
+				}
+			}
+			if(choice=='A'||choice=='U'||choice=='H'){ 			//Available / Unavailable / Holiday
+				titleString+='<br><span style="color:blue; text-decoration:underline; cursor:pointer" onClick=deleteEvent("'+event.id+'")>Delete</span>';
+				}
+			if(choice=='C'){ 									//Cancelled
+				titleString+='<br><span style="color:blue; text-decoration:underline; cursor:pointer" onClick=confirmEvent("'+event.id+'")>Acknowledge</span>';
+				}
+			element.attr('title',titleString);
+			element.cluetip({splitTitle: '|', cluetipClass: 'jtip', width: 350,sticky: true,mouseOutClose: true, closePosition: 'title',closeText: '<img src="css/images/cross.png" alt=""', positionBy: 'mouse'});
+		
+		},
+			
+		eventResize:function( event, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view )
+			{
+			event.title = "(Event times changes) - " + event.title;
+	        $('#CandCalendar').fullCalendar('updateEvent', event);
+			CreateSave(event)	
+			 },
+
+		eventDrop:function( event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view )
+			{
+			var NewStartHour;
+			var NewStartMin;
+			var NewEndHour;
+			var NewEndMin;
+			var ViewName = view.name;
+			var NewStartDay=event.start.getDate() + '/' + (event.start.getMonth()+1) + '/' + event.start.getFullYear();
+			if (!allDay) {
+				NewStartHour = event.start.getHours()
+				NewStartMin = event.start.getMinutes()
+				if (event.end == null) {
+					NewEndHour = NewStartHour + 2;
+					NewEndMin = NewStartMin;
+				}
+				else {
+					NewEndHour = event.end.getHours();
+					NewEndMin = event.end.getMinutes()
+				}
+			}
+			
+			$('#IDCode').val(event.id);
+			$('#pDateFrom').val(NewStartDay);
+			$('#pTimeFrom').val(NewStartHour + ":" + NewStartMin);
+			$('#pTimeTo').val(NewEndHour + ":" + NewEndMin);
+			$('#pState').val('');
+			diaryAddSave();
+			}
+		
+	});   // NB make sure that the div has class fullCalendar so that the calendar is re-rendered on UI tab switching
+
+	$('#CandCalendar').attr('height','400');
+	// Add a refresh button
+	addCalendarButton('#CandCalendar','refresh','calbtnRefresh',true,refreshCalendar);
+	// Add availability Button
+	addCalendarButton('#CandCalendar','availability','calbtnAvail',true,addAvailability);
+	
+	});
+	
+	
+function CreateSave(calEvent)
+	{
+	
+	$('#IDCode').val(calEvent.id);
+	if(calEvent.end==null){
+		alert('This event can not be moved. Please delete it and create a new event.');
+		IQXRefreshTab();
+	}
+	$('#pDateFrom').val(calEvent.start.getDate() + '/' + (calEvent.start.getMonth()+1) + '/' + calEvent.start.getFullYear());
+	$('#pTimeTo').val(calEvent.end.getHours() + ':' + calEvent.end.getMinutes());
+	$('#pTimeFrom').val(calEvent.start.getHours() + ':' + calEvent.start.getMinutes());	
+	diaryAddSave();
+	};
+	
+function doAddVacancies(sPage) {	// open event tab to enter new events
+	IQXChain('#floatLayer',{action:'load',page:sPage});
+};
+
+
+function diaryAddSave(){
+		$('#Calendar').ajaxSubmit(
+			{
+				success: function(data, textStatus){
+				if (data == 'Ok') {
+					refreshCalendar();
+					}
+					else {
+					$('#errorMessage').html(data);
+					}
+				},
+				dataType: "text"
+			})
+		};
+
+function refreshCalendar(){
+	hideAnyCluetips();
+	$('#pState').val('');
+	$('#CandCalendar').fullCalendar('removeEvents');
+	$('#CandCalendar').fullCalendar('refetchEvents');
+}
+
+function addCalendarButton(jqCal,sLab,sID,bSpace,fn){
+	var s='<td><div id="'+sID+'" class="ui-state-default ui-corner-left ui-corner-right"><a><span>'+sLab+'</span></a></div></td>';
+	if (bSpace){
+		s+='<td><span class="fc-header-space"/></td>';
+	}
+	$(jqCal+' td.fc-header-right tr').prepend(s);
+	$('#'+sID).hover(function(){
+		$(this).addClass('ui-state-hover');
+	},function(){
+		$(this).removeClass('ui-state-hover');
+	}).click(fn);
+}
+
+function addAvailability(){
+	hideAnyCluetips();
+	IQXChain('#floatLayer', {
+		action: 'load',
+		page: 'candidateNewMultidayEvent'
+	});
+}
+
+function deleteEvent(IdCode)
+	{
+	$('#IDCode','#Calendar').val(IdCode);
+	$('#pState','#Calendar').val('D');
+	IQXUIDialog('Delete this item?',{
+		xDlgType: 'YesNo',
+		modal: true
+	},diaryAddSave);
+	};
+
+function confirmEvent(IdCode)
+	{
+	$('#IDCode','#Calendar').val(IdCode);
+	$('#pState','#Calendar').val('F');
+	IQXUIDialog('Confirm this shift?',{
+		xDlgType: 'YesNo',
+		modal: true
+	},diaryAddSave);
+	};
+
+function rejectEvent(IdCode)
+	{
+	$('#IDCode','#Calendar').val(IdCode);
+	$('#pState','#Calendar').val('C');
+	IQXUIDialog('Reject this shift?',{
+		xDlgType: 'YesNo',
+		modal: true
+	},diaryAddSave);
+	};
+		
+</script>
+<div id="errorMessage" class="errormessage" ></div>
+
+<div class="usertext">[onload;file=txt_candidate_diary_top.html;noerr]</div>
+
+<div id="CandCalendar" class="fullCalendar"></div>
+
+<div class="usertext">[onload;file=txt_candidate_diary_bottom.html;noerr]</div>
+
+<form id="Calendar" action="IQXPost.php?proc=NetCandidateDiaryAdd" method="post" accept-charset="utf-8">
+<input type="hidden" id="IDCode" name="IDCode" /><input type="hidden" id="pDateFrom" name="pDateFrom" /><input type="hidden" id="pTimeFrom" name="pTimeFrom" /><input type="hidden" id="pTimeTo" name="pTimeTo" /><input type="hidden" id="pState" name="pState" />
+</form>
+<div id="floatLayer" class="ui-helper-hidden"></div><!-- layer for availability button -->
+
+

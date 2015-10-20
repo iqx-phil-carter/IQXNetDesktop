@@ -1,0 +1,233 @@
+<script language="javascript" type="text/javascript" src="test.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+	$("#sampleData").tablesorter({sortList:[[0,0]],dateFormat:'uk'});	
+	$("input.longdate").datepicker({dateFormat: 'D dd/mm/yy', firstDay: 1});	
+    setTimeout("tblGraph()",100);
+	});
+	
+function tblGraph(){
+   $.plot($('#sampleGraph'), makeFlotData('#sampleData','Week Beginning',[{label:'New Vacancies'},{label:'New Placements'}]), {legend:{show:false},xaxis:{mode:'time'}});
+}
+
+function xblGraph(){
+	var d1 = {
+		label: 'd1',
+		data: []
+	};
+
+    for (var i = 0; i < 14; i += 0.5)
+        d1.data.push([i, Math.sin(i)]);
+
+    var d2 = {
+		label: 'd2',
+		data: [[0, 3], [4, 8], [8, 5], [9, 13]],
+		lines: { show: false },
+    	bars: { show: true}
+	};
+
+    // a null signifies separate line segments
+    var d3 = {
+		label: 'd3',
+		data: [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]]
+	};
+    
+    $.plot($("#sampleGraph"), [ d1, d2, d3 ]);
+}
+
+function graphableDates(ar,horiz){
+	var tmp;
+	for (var i in ar){
+		tmp=UKtoJSdate(ar[i][0]);
+		if (horiz){
+			ar[i][0]=ar[i][1];
+			ar[i][1]=tmp;
+		} else {
+			ar[i][0]=tmp;
+		}
+	}
+}
+
+function timeTickGenerator(axis) {
+    var res = [];
+	var lab;
+	for(var i=Math.round(axis.min);i<=axis.max;i++) {
+	  lab = i % 2 == 0 ? '' : i + ':00';
+      res.push([i, lab]);
+    } 
+    return res;
+  }
+  
+function dateTickGenerator(axis) {
+    var Days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var res = [];
+	var lab;
+	for(var i=axis.min;i<axis.max;i+=24 * 60 * 60 * 1000) {
+	  var d = new Date(i);
+	  lab = Days[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+      res.push([i, lab]);
+    } 
+    return res;
+  }
+
+function zblGraph(){
+	var startdate=UKtoJSdate('5/1/2009');
+	var enddate=startdate+24 * 60 * 60 * 1000 * 7;
+	var avail = {
+		label: 'Available',
+		data:[['5/1/2009',17,8],['6/1/2009',17,10],['6/1/2009',13,8],['7/1/2009',17,8],['8/1/2009',14,10],['9/1/2009',17,8],['10/1/2009',17,8],['11/1/2009',16,12]],
+		lines: { show: false },
+    	bars: { show: true, barWidth:24 * 60 * 60 * 1000, horizontal:true},
+		color: "rgb(0, 255, 0)"
+	}
+	var unavail = {
+		label: 'Unavailable',
+		data:[['7/1/2009',18.5,7],['9/1/2009',13,10]],
+		lines: { show: false },
+    	bars: { show: true, barWidth:24 * 60 * 60 * 1000, horizontal:true},
+		color: "rgb(255, 0, 0)"
+	}
+	var working = {
+		label: 'Working',
+		data:[['5/1/2009',19.5,9],['7/1/2009',20.5,9]],
+		lines: { show: false },
+    	bars: { show: true, barWidth:24 * 60 * 60 * 1000, horizontal:true},
+		color: "rgb(0, 0, 255)"
+	}
+	graphableDates(avail.data,true);
+	graphableDates(unavail.data,true);
+	graphableDates(working.data,true);
+    $.plot($("#sampleGraph"), [ avail, working, unavail ],
+	{
+//		yaxis:{mode:'time',min:startdate,max:enddate},
+		yaxis:{min:startdate,max:enddate,ticks:dateTickGenerator,labelHeight:45},
+		xaxis:{min:0,max:24,ticks:timeTickGenerator}
+	});
+}
+
+// Closures
+
+function makePowerFn(power) {
+   return function(x){
+   	return Math.pow(x,power);
+   }
+   }
+
+function makeIncrementer() {
+   var n = 0;
+   return function() {
+       alert(++n);
+   }
+}
+
+
+function IQXTest1(){
+//	var dt=$('#mtestval').val();
+//	var re=/[a-z]*\s*(\d+)\/(\d+)\/(\d+)(\s+(\d+)\:(\d+))?/i;/
+//	var res=re.exec(dt);
+//	alert(typeof(res[5]));
+//	alert(-1 % 6)
+//	var squareX=makePowerFn(2);
+//	var cubeX=makePowerFn(3);
+//	alert(cubeX(3));
+var inc1 = makeIncrementer();
+var inc2 = makeIncrementer();
+
+inc1(); // returns 1;
+inc1(); // returns 2;
+inc1(); // returns 3;
+inc2(); // returns 1;
+inc2(); // returns 2;
+inc2(); // returns 3;
+
+
+}
+
+function IQXTest(){
+	testar();
+	}
+	
+
+
+</script>
+<div id="sampleGraph" style="width:150px;height:100px;"></div>
+
+<table class="tablesorter" id="sampleData">
+	<thead>
+		<tr>
+		<th>Week Beginning</th>
+		<th>New Vacancies</th>
+		<th>New Placements</th>
+		</tr>
+	</thead>
+	<tbody>
+	    <tr>
+	    	<td>Thu 1/1/2009</td>
+	    	<td>7</td>
+	    	<td>3</td>
+		</tr>
+	    <tr>
+	    	<td>Fri 2/1/2009</td>
+	    	<td>0</td>
+	    	<td>2</td>
+		</tr>
+	    <tr>
+	    	<td>Sat 3/1/2009</td>
+	    	<td>9</td>
+	    	<td>2</td>
+		</tr>
+	    <tr>
+	    	<td>Sun 4/1/2009</td>
+	    	<td>2</td>
+	    	<td>10</td>
+		</tr>
+	    <tr>
+	    	<td>Mon 5/1/2009</td>
+	    	<td>5</td>
+	    	<td>1</td>
+		</tr>
+	    <tr>
+	    	<td>Tue 6/1/2009</td>
+	    	<td>1</td>
+	    	<td>5</td>
+		</tr>
+	    <tr>
+	    	<td>Wed 7/1/2009</td>
+	    	<td>3</td>
+	    	<td>6</td>
+		</tr>
+	    <tr>
+	    	<td>Thu 8/1/2009</td>
+	    	<td>4</td>
+	    	<td>5</td>
+		</tr>
+	    <tr>
+	    	<td>Fri 9/1/2009</td>
+	    	<td>6</td>
+	    	<td>2</td>
+		</tr>
+	    <tr>
+	    	<td>Sat 10/1/2009</td>
+	    	<td>8</td>
+	    	<td>1</td>
+		</tr>
+	</tbody>
+</table>
+<label class="errormessage"></label>
+<p>
+	<input type="text" id="mtestval1" class="longdate" value="Tue 06/01/2009" />
+<p>
+<p>
+	<input type="text" id="mtestval" value="Wed 25/03/2009 09:00" />
+<p>
+<button type="button" id="button_test" class="fixed" onclick="IQXTest()">
+   	Test
+</button>
+</p>
+<p>
+<a href="IQXRawData.php?page=xNetTimesheets&render=text_plain__IQXNetDataTable.xsl" target="_blank">Timesheets JSON</a>
+<a href="IQXRawData.php?page=xNetTimesheets&render=text_plain__IQXNetCSV.xsl" target="_blank">Timesheets CSV</a>
+<a href="IQXRawData.php?page=xNetTimesheets&render=text_x-csv_download.csv_IQXNetCSV.xsl" target="_blank">Timesheets Excel</a>
+<a href="IQXRawData.php?page=NetCandidateCalendar&render=text_plain__NetCandidateCalendar.xsl&pstart=1267401600&pend=1270422000&dummy_nocache=1273147066575" target="_blank">Calendar JSON</a>
+<a href="IQXNetEx.php?page=report&source=xNetTimesheets&title=Report" target="_blank">Report</a>
+</p>

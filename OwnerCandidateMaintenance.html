@@ -1,0 +1,71 @@
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXDisableForm();
+		$('#OwnerCandMaintEditPopupDiv').dialog('destroy');
+		$('#OwnerCandMaintEditPopupDiv').html('');
+		$('#SearchBox').focus();
+		RunSearch('SomethingWhichWillNeverBeFound');
+});
+
+function RunSearch(SearchValue){
+	// ## reload subscreen using search criteria from 'SearchValue' textbox
+	
+	IQXDisableForm();
+	$('#OwnerCandMaintEditPopupDiv').dialog('destroy');
+	$('#OwnerCandMaintEditPopupDiv').html('');
+	if(SearchValue==''){SearchValue=$('#SearchBox').val()}
+	IQXChain('#OwnerCandMaintResultsDiv', {action: 'load',page: 'OwnerCandidateMaintenanceSubScreen&SearchValue=' + SearchValue});
+	}
+
+function CandMaintEditButtonClick(EditType, PersonID){
+	// ## open popup for editing candidate details
+	// ## use EditType to decide 'Profile' or 'Bank'
+	
+	$('#OwnerCandMaintEditPopupDiv').dialog('close');
+	$('#OwnerCandMaintEditPopupDiv').dialog('destroy');
+	$('#OwnerCandMaintEditPopupDiv').html('');
+	IQXChain('#OwnerCandMaintEditPopupDiv', {
+		action: 'load',
+		page: 'OwnerCandidate'+EditType+'Edit&pPersonID=' + PersonID + '&pid=' + PersonID
+		});
+		
+	var dlg = $('#OwnerCandMaintEditPopupDiv').dialog({
+		title: 'Edit Candidate ' + EditType + ' Details',
+		modal: true,
+		width: "60%",
+		position: [window.width / 2, 100],
+		close: function(){
+			IQXDisableForm();
+			$('#OwnerCandMaintEditPopupDiv').html('');
+			}	// clear old data
+	});
+	
+}function OwnerCandidatePopupCancelButton(){
+	// ## cancel popup window
+	
+	IQXDisableForm();
+	$('#OwnerCandMaintEditPopupDiv').dialog('destroy');
+}
+
+function CheckForReturn(event){
+	// ## run search on pressing enter in search box
+	
+	if(event.keyCode==13){RunSearch(SearchValue=$('#SearchBox').val());}
+}
+	
+</script>
+
+<div id="OwnerSearchDiv">
+	<fieldset class="regular ui-corner-all">
+		<div style="float:left" >
+			<input id="SearchBox" class="Wide" onKeyUp="CheckForReturn(event)" />
+			<button onClick="RunSearch('')">Search</button>
+		</div>
+			<div style="float:right" >
+		<button onClick="CandMaintEditButtonClick('Profile','0')">&nbsp;&nbsp;New&nbsp;&nbsp;</button>
+		</div>
+	</fieldset>
+	<div id="OwnerCandMaintResultsDiv" ></div>
+	<div id="OwnerCandMaintEditPopupDiv" ></div>
+</div>

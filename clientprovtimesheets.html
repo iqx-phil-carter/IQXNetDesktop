@@ -1,0 +1,211 @@
+<!--[onload;tplvars;ts='NetClientProvTimesheets']-->
+
+<!-- 20131203 Add Multiple Timesheets button -->
+
+<script type="text/javascript" src="[var.x_local.client.AutoComplete;noerr]" ></script>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	 	
+	  
+	if (! ('[var.x_rights.AUTHORISETIMESHEETS;noerr]'=='1' || '[var.x_rights.FILLTIMESHEETS;noerr]'=='1')) {
+			$("#tbltimesheets tr button.zoombutton").remove();
+	} else {
+		var comptext;
+		if ('[var.x_rights.AUTHORISETIMESHEETS;noerr]'=='1') {
+			comptext='Authorise';
+		} else {
+			comptext='View Details';
+		}
+		$("#tbltimesheets tr.completed button.zoombutton").text(comptext);
+	}
+	IQXDeepLink("P");
+	if('[var.x_local.client.AutoComplete;noerr]'!=''){	
+		TickAll('Setup');
+	}
+	
+	});
+	
+function loadshifts(){
+	var ts=$("#divtimesheets").data("zoomedts");
+
+	if (ts.type=='C'){
+		$("#divtimesheetshifts").text('');
+		loadrates();
+	} else {
+		var shiftpage;
+		if (ts.type == 'S') {
+			shiftpage = 'provtimesheetshifts';
+		}
+		else {
+			shiftpage = 'provtimesheettimes';
+		} 
+		var nxt;
+		if (ts.completed){           // Load the rates as well
+			nxt={action:'func',func:loadrates};
+		}
+		IQXChain('#divtimesheetshifts',{action:'load',page:shiftpage + '&ptempprovtimesheetid=' + encodeURIComponent(ts.id),nextlink:nxt});
+	}
+}
+
+function loadrates(){
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	IQXChain('#divtimesheetrates',{action:'load',page:'provtimesheetrates&ptempprovtimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function hiderates(){
+	$("#divtimesheetrates").text('');
+}
+
+function openmessage(row){
+	var dat=$("#divtimesheets").data("zoomedts");
+	var Subject=encodeURIComponent('Query Timesheet '+dat.serialnumber);
+	var stit='pTitle=' + Subject;
+	var sid='pTempProvTimesheetID=' + encodeURIComponent(dat.id);
+	var plid='pPlacementID=' + encodeURIComponent(dat.placementid);
+
+	if('[var.x_global.general.TimerRefreshInterval;noerr]'==''){
+		IQXChain('#divmessage',{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid});
+		return;
+	}
+	$.post('IQXPost.php?proc=NetChatInitiate','pSearchKey='+dat.serialnumber+'&pSearchType='+'T&pSubject='+Subject,function(data, textStatus){
+		if (textStatus == 'success') {
+			var retval=data;
+			if(retval!=''){
+				if(retval=='No One'){
+					IQXChain('#divmessage',{action:'load',page:'message&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid});
+				}else{
+					ChatRemoteUser='ChatRemoteUser=' + encodeURIComponent(retval);
+					IQXChain('#divmessage',{action:'load',page:'messageChat&pType=TIMESHEET&'+stit+'&'+sid+'&'+plid+'&'+ChatRemoteUser});
+				}
+			}
+		} else {
+			$('#errormessage').html(data);
+		}
+	},'text');
+} 
+
+function zoomtimesheet(row,tstype,tsid,completed,serialnumber,theirref,theirrefrequired,placementid){
+	
+	var ColumnCount=$('#tbltimesheets').find('tr')[0].cells.length;
+	
+	$(".zoombutton").hide();
+	$("[ID^=AA_]").hide();
+	$("#divtimesheets").data("zoomedts",{
+		type: tstype,
+		id: tsid,
+		completed: completed,
+		serialnumber: serialnumber,
+		theirref: theirref,
+		theirrefrequired: theirrefrequired,
+		placementid: placementid
+	});
+	
+	if(completed){
+		var abandontext='Close';
+	} else {
+		var abandontext='Abandon';
+	}
+	
+	$(row).after('<tr><td colspan='+ColumnCount+'><div id="divtimesheetshifts" class="zoomeddiv"></div>'+
+	              '<div id="divtimesheetrates" class="zoomeddiv"></div>'+
+				  '<div id="divtimesheetbuttons" class="zoomeddiv">'+
+				    '<button type="button" class="fixed nonformbutton" onclick="abandontimesheet(this.parentNode.parentNode.parentNode)">'+abandontext+'</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="openmessage(this.parentNode.parentNode.parentNode)">Query</button>'+
+				    '<button type="button" class="fixed nonformbutton" onclick="IQXopenInNewWindow(\'IQXNetEx.php?page=TimesheetProvSingle&wrapper=bare&tsnumber='+encodeURIComponent(serialnumber)+'&ptempprovtimesheetid=' + encodeURIComponent(tsid)+'\')">Printable Version</button>'	+
+				  '</div>'+
+				  '<div id="divmessage" class="zoomeddiv"></div>'+
+				  '</td></tr>');
+	IQXInitSection($("#divtimesheetbuttons"));
+	loadshifts();
+}
+
+function abandontimesheet(row){
+	$(row).remove();
+	$(".zoombutton").show();
+	$("[ID^=AA_]").show();
+	$("#divtimesheets").removeData("zoomedts");
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_timesheets_top.html;noerr]</div>
+
+<div  align="right">
+	<span  align="right">[onload_AutoCompleteA;block=span;when [var.x_local.client.AutoComplete;noerr]!='']
+		<button type="button" class="fixed nonformbutton" onclick="TickAll(this)">Tick All</button>
+	</span>
+	<span  align="right">[onload_MultipleTimesheetButton;block=span;when [var.x_local.client.ShowMultiplePrintButton;noerr]='1']
+		<button type="button" class="fixed nonformbutton" onclick="IQXopenInNewWindow('IQXNetEx.php?page=TimesheetProvAll&wrapper=bare&pSampleSize=[var.x_local.client.pSampleSize;noerr]')">Print All</button>
+	</span>
+	<span class="ButtonGroup" align="right" >
+		<button type="button" id="provtimesheet_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+			Refresh
+		</button>
+	</span>
+</div>
+
+<div id="divtimesheets">[onload_TimesheetGroup;block=div;when [var.x_local.Switches.HideTimesheets;noerr]='']
+<table class="tablesorter" id="tbltimesheets">
+	<thead>
+		<tr>
+			<th>Number</th>
+			<th>Temp</th>
+			<th>Client</th>
+			<th>Address</th>
+			<th>Position</th>
+			<th>End Date</th>
+			<th>[onload_AutoCompleteB;block=th;when [var.x_local.client.AutoComplete;noerr]!='']Summary</th>
+			<th>Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[ts.tempprovtimesheetid;block=tr]" class="[ts.completed;if [val]=1;then 'completed';else '']">
+			<td>[ts.serialnumber;noerr]</td>
+			<td>[ts.tempname]</td>
+			<td>[ts.companyname]</td>
+			<td>[ts.companyaddress;noerr]</td>
+	    	<td>[ts.position;noerr]</td>
+	    	<td>[ts.weekenddate;noerr]</td>
+	    	<td>[onload_AutoCompleteC;block=td;when [var.x_local.client.AutoComplete;noerr]!='']
+	    		<span id="UT_[ts.tempprovtimesheetid]">[ts.UnitsTotal;noerr]</span>
+	    		&nbsp;hours&nbsp;:&nbsp;&#163;
+	    		<span id="CT_[ts.tempprovtimesheetid]">[ts.ChargeTotal;noerr]</span>
+	    		&nbsp;&nbsp;
+	    		<span id="LineReturn_[ts.tempprovtimesheetid]" class="errormessage"></span>
+	    		<span id="AuthoriseRequired_[ts.tempprovtimesheetid]" style="visibility:hidden">[ts.theirrefrequired;noerr]</span>
+	    	</td>
+	    	<td width=100>
+	    		<button type="button" id="btn_[ts.tempprovtimesheetid]" class="tablebutton zoombutton" onclick="zoomtimesheet(this.parentNode.parentNode,'[ts.timesheettype]','[ts.tempprovtimesheetid]',[ts.completed],'[ts.serialnumber;noerr]','[ts.theirref;noerr;htmlconv=js]','[ts.theirrefrequired;noerr]','[ts.placementid;noerr]')">Complete</button>
+				<span>[onload_AutoCompleteD;block=span;when [var.x_local.client.AutoComplete;noerr]!='']
+					<input type="checkbox" id="AA_[ts.tempprovtimesheetid]" />	
+				</span>
+				<input type="hidden" id="VacID[ts.tempprovtimesheetid]" value="[ts.VacancyID]" />
+				<input type="hidden" id="TSType[ts.tempprovtimesheetid]" value="[ts.timesheettype]" />
+				<input type="hidden" id="TSComp[ts.tempprovtimesheetid]" value="[ts.completed]" />
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<div id="timesheetstoauthorised_custom_text">[onload_DevDiv;block=div;when [var.x_local.client.ShowDevelopmentMessage;noerr]!=''][var.x_local.client.ShowDevelopmentMessage;noerr]</div>
+
+    <p>
+        <span id="errormessage" class="errormessage">[var.x_errormessage]</span>
+    </p>
+	<p>
+		<button type="button" id="provtimesheet_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+   			Refresh
+		</button>
+	
+	<span  align="right">[onload_AutoCompleteE;block=span;when [var.x_local.client.AutoComplete;noerr]!='']
+		<button type="button" class="fixed nonformbutton" onclick="CompleteAll('0')">Complete and Authorise All Ticked</button>
+	</span>
+	</p>
+</div>
+
+<div class="usertext">[onload;file=txt_client_timesheets_bottom.html;noerr]</div>
+<div id="divmessage"></div>
+
+<form id="frmSubmitCompleteAll" ></form>

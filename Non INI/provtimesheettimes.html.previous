@@ -1,0 +1,62 @@
+<!--[onload;tplvars;tst='NetProvTimesheetTimes?ptempprovtimesheetid']-->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	var completed=$("#divtimesheets").data("zoomedts").completed;
+	if (completed){
+		$("#tbldays td.buttoncolumn").text("");
+		$("#timesheettimecalculate").remove();
+	}
+	IQXInitSection($("#divtimesheetshifts"));
+	});
+	
+function editday(row){
+	hiderates();
+	var placementid_date=$(row).attr("id");
+	IQXEnableForm("#frmtimesheettimes",{
+		successhandler:loadshifts,
+		row:row,
+		idfieldname: "pplacementid_date",
+		idvalue: placementid_date
+	});
+	}
+	
+function uneditday(row){
+	IQXDisableForm();
+	}
+	
+function processdays(){
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	IQXChain('#divtimesheetrates',{action:'send',service:'ProvNonShiftTSProcessRateScript',postdata:{id:tsid},
+	 nextlink:{action:'func',func:loadrates}});
+}	
+
+</script>
+
+<form id="frmtimesheettimes" action="IQXPost.php?proc=NetProvTimesheetTimeSet" method="post" accept-charset="utf-8">
+<table class="tablesorter" id="tbldays" >
+	<thead>
+		<tr>
+		<th>Date</th>
+		<th>Hours</th>
+		<th>Start Time</th>
+		<th></th>
+		</tr>
+	</thead>
+	<tbody id="tblshiftsbody">
+		<tr id="[tst.placementid;block=tr]_[tst.shiftdate]" >
+		<td id="tst[tst.#]_pshiftdate" class="longdate">[tst.shiftdate]</td>
+		<td id="tst[tst.#]_phours" class="tdeditable number twodp rightalign">[tst.hours;noerr]</td>
+		<td id="tst[tst.#]_ptimefrom" class="tdeditable time">[tst.timefrom;noerr]</td>
+	    <td class="buttoncolumn" width=120>
+	    	<button type="button" class="tablebutton nonformbutton" onclick="editday(this.parentNode.parentNode)">Edit</button>
+	    	<button type="submit" class="tablebutton formbutton" onclick="">Save</button>
+	    	<button type="button" class="tablebutton formbutton" onclick="uneditday(this.parentNode.parentNode)">Undo</button>
+		</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+<span class="errormessage">[var.x_errormessage]</span>
+<button type="button" id="timesheettimecalculate" class="fixed nonformbutton" onclick="processdays()" >Calculate</button>

@@ -1,0 +1,27 @@
+<rss version="2.0">
+	<channel>
+		<title>IQXNet SysAdmin News</title>
+		<link>http://www.iqx.co.uk</link>	
+		<description>News and events for IQXNet System Administrators</description>
+		<pubdate>28th March 2014</pubdate>
+		<item>
+			<title>IQXNet RSS tab</title>
+			<link>http://localhost/iqxnet/rss/20140212A.htm</link>
+			<description>There is now an Alerts tab available. Click the link below for further details.</description>
+			<pubdate>26th March 2014</pubdate>
+			<author>Phil C</author>
+		</item>
+		<item>
+			<title>IQXNet RSS tab and rss feed</title>
+			<description>Tab seems to work</description>
+			<pubdate>27th March 2014</pubdate>
+			<author>Phil C</author>
+		</item>
+		<item>
+			<title>IQXNet RSS feed from database</title>
+			<description>Would be a jolly good scheme to draw it from a database table</description>
+			<pubdate>28th March 2014</pubdate>
+			<author>Phil C</author>
+		</item>
+	</channel>
+</rss>

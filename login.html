@@ -1,0 +1,269 @@
+<!--[onload;tplvars;]-->
+
+<!-- 20140730 -->
+
+  
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection("#frmlogin");
+	IQXEnableForm("#frmlogin",{successhandler:IQXRefreshBrowser});
+	$('#labForgotten').show();	// starts off hidden so does not show if javascript is disabled
+	$('#recaptcha_area').css('margin','auto');
+	
+	$('#frmlogin').on('submit',false);
+	$('#frmCaptcha').on('submit',false);
+	$('#login_uid').focus();
+});
+ 
+function CheckCount(){
+  	// Send Login count request
+   	  	
+   	$('#frmlogin').attr('action','LoginCounter.php');  		
+	$('#frmlogin').ajaxSubmit({
+		success: function (data, textStatus){
+			if(data=='Verify'){
+				ShowForgotten('Login');
+				return;
+			}
+			$('#respnse').html('Incorrect login or password');
+		},
+		error: function (data,textStatus){
+			$('#respnse').html('The Login routine returned the following error: '+data);
+		},
+		dataType: "html"
+	});
+	
+}
+
+function SubmitForm(){
+  	// send login request
+   	  	
+   	$('#frmlogin').attr('action','IQXLogin.php'); 
+	$('#frmlogin').ajaxSubmit({
+		success: function (data, textStatus){
+			if(data=='Invalid user name or password'){
+				if($('#parForgotten').html()!=null){
+					CheckCount();
+					return;
+				}else{
+					$('.localerrormessage').html(data);
+					throw new error('stop');
+					return;
+				}
+			}
+			if(data=='Ok'){
+				window.location.reload(true);
+				return;
+			}
+			$('#respnse').html(data);
+		},
+		error: function (data,textStatus){
+			$('#respnse').html('The Login routine returned the following error: '+data);
+		},
+		dataType: "html"
+	});
+	
+}
+
+function VerifyCaptcha(){
+  	// send Verify Captcha request
+  	   	  		
+  	var CaptchaReason=$('#VerifyReason').html();
+  	  	
+  	$('#frmCaptcha').attr('action','verify.php');
+	$('#frmCaptcha').ajaxSubmit({
+		success: function (data, textStatus){
+			if(data=='OK'){
+				$('#login_uid').val('');
+				$('#login_pwd').val('');
+				$('#divCaptcha').hide();	
+				if(CaptchaReason=='Password'){
+					$('#respnse').html('Please enter the email address that you first used to register, in the box above');
+					$('#labForgotten').hide();
+ 					$('#divForgotten').show();
+ 				}
+ 				if(CaptchaReason=='Login'){
+					$('#respnse').html('Please attempt to log in again');
+ 					DisableLogin(false);
+ 				}
+			}else{
+				$('#respnse').html('Your entry was not accepted. Please try again');
+				if(typeof(Recaptcha)=='object'){
+					Recaptcha.reload();
+				}
+			}
+		},
+		error: function (data,textStatus){
+			$('#respnse').html('The reCaptcha verification server returned the following error: '+data);
+			return;
+		},
+		dataType: "html"
+	});
+}
+  	
+function SubmitForgottenPasswordRequest(){
+  	// submit forgotten password
+  	  		
+	$('#frmlogin').attr('action','IQXlogin.php?forgotten=true');
+	$('#frmlogin').ajaxSubmit({
+		success: function (data, textStatus){
+			if (textStatus=='success') {
+				if(data=='Ok'){	
+					$('#respnse').text('A request has been placed. Your new password will be emailed to you shortly.');	
+					$('#parForgotten').hide();
+					$('#divForgotten').hide();
+					DisableLogin(false);
+				}else{
+					$('#respnse').text(data);	
+				}
+			} else {
+				$('#respnse').text(data);
+			}
+		},
+		dataType: "html"
+	});
+}
+	
+ function ShowForgotten(CheckType){
+ 	// Show Captcha div if captcha public string is set
+ 	 	
+ 	var SrcStr=$('#PwdCaptcha').attr('src');
+ 	if(SrcStr==null){
+		$('#labForgotten').hide();
+ 		$('#divForgotten').show();
+ 		DisableLogin(true);
+ 		return;
+ 	}
+ 	var ChkStr=SrcStr.substring(SrcStr.length-1);
+ 	$('#VerifyReason').html(CheckType);
+ 	  		
+ 	if(ChkStr!='A'){
+ 		if(typeof(Recaptcha)=='object'){
+ 			Recaptcha.reload();
+ 		}
+ 		$('#respnse').text('');
+ 		$('#divCaptcha').show();
+ 		DisableLogin(true);
+ 	}else{
+ 		$('#labForgotten').hide();
+ 		$('#divForgotten').show();
+ 	}
+ }
+	
+function DisableLogin(action){
+	// Lock or unlock uid/password when captcha is visible
+	
+	var LoginClass='';
+	if(action==true){LoginClass='LoginLocked';}
+	$('#login_uid').attr('disabled',action);
+	$('#login_pwd').attr('disabled',action);
+	$('#login_submit').attr('disabled',action);
+	
+	$('#login_uid').attr('class',LoginClass);
+	$('#login_pwd').attr('class',LoginClass);
+}	
+
+function CatchEnter(e){
+	// interrogate keystrokes on password and if enter was pressed, submit the form
+	
+	var code = (e.keyCode ? e.keyCode : e.which);
+	if (code==13){SubmitForm();}
+}	
+		
+</script>
+
+<div style="padding:20px" ></div>
+<form id="frmlogin" class="centreform" name="login" method="POST" accept-charset="utf-8" >
+    <fieldset style="z-index: 0">
+    	
+        <div style="width:100%;float:left;overflow:auto;z-index:10;">
+        	<label for="login_uid" >
+                User ID
+            </label>
+            <div style="float:right;padding-right: 150px;z-index: 25" >
+           		<input type="text" id="login_uid" name="login_uid" />
+            </div>
+        </div>
+        <div class="LoginSpacing"></div>
+        <div style="width:100%;float:left;overflow:auto">
+            <label for="login_pwd" >
+                Password
+            </label>
+            <div style="float:right;padding-right: 150px;" >
+            	<input type="password" id="login_pwd" name="login_pwd" onkeypress="CatchEnter(event)"/>
+            </div>
+        </div>
+        <div class="LoginSpacing"></div>
+        <div>
+            <button type="button"  id="login_submit" class="fixed" onclick="SubmitForm()" >
+                Login
+            </button>
+		</div>
+        <div class="LoginSpacing"></div>
+        <div style="width:100%;float:left;overflow:auto" >[onload_PW;block=div;when [var.x_local.Switches.ShowForgottenPasswordLink;noerr]=1]
+        	<div id='parForgotten' >
+				<label id="labForgotten" onclick="ShowForgotten('Password')" class="ForgottenPassword" >Reset password</label>
+				<div id='divForgotten' style="width:100%;float:left;overflow:auto;display:none">
+					<hr/>
+					<div style="width:90%;float:left;padding-left:50px;overflow:auto;font-size:14px;">Please use the email address that you first used to register</div>
+					<br/>
+					<br/>
+					<label for="login_email" >
+                		Email Address
+            		</label>
+            		<div style="float:right;padding-right: 150px;" >
+            			<input type="text" id="login_email" name="login_email" />
+            			<input type="hidden" id="login_count" name="login_count" />
+            		</div>
+            	   	<div style="float:left;padding-left: 200px;" >				      
+						<button type="button" onclick="SubmitForgottenPasswordRequest()" >Reset password</button>
+					</div>
+				</div>
+			</div>
+        </div>
+    </fieldset>	
+</form>
+<div>[onload_d0;block=div;when [var.x_global.debug.FaultFind;noerr]=1]
+	<a href="http://127.0.0.1:54000/IQXService_/Test" target="_blank" style="color: #FFDDDD">Check Service</a>
+</div>
+
+<p id='parJobSearch'>[onload_d1;block=p;when [var.x_local.Switches.ShowJobSearchLink;noerr]=1]
+	<a class="btn" href="http://localhost/iqxnet/IQXNet.php?P=jobsearch&noauth=YES&render=full">Job Search</a>
+</p>
+		
+<div id="divCaptcha" style="display:none;width:100%;margin:0 auto;" >[onload_d1;block=div;when [var.x_pwcaptcha;noerr]!='']
+	<form id="frmCaptcha" method="post" class="centreform" onsubmit="VerifyCaptcha()" >
+		<center><div id="CaptchaReturnHeader">Please complete the following Captcha</div></center>
+		<script id="PwdCaptcha" type="text/javascript" src="https://www.google.com/recaptcha/api/challenge?k=[var.x_pwcaptcha]"></script>
+		<div style="width:100%;margin:0 auto"></div>    	
+	</form>
+	<div id="VerifyReason" style="display:none"></div>
+</div>
+
+<p align="center">
+    <span id='respnse' class="errormessage" ></span>
+</p>
+
+<noscript>
+		<div style="overflow:auto">
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+				<div style="background-color:lightgray;float:left;overflow:auto;width:60%">
+					<p>Your browser does not support javascript, or javascript is disabled in your settings.</p>
+					<p>Please check your browser security settings:</p>
+					<ul>
+						<li>Internet Explorer - Internet Options / Security / Internet / Custom Level / Scripting</li>
+						<li>Firefox - options / Content / Enable Javascript Tickbox</li>
+					</ul>
+					<p>or use one of the following browsers:</p>
+					<ul>
+						<li>Internet Explorer 8 onwards</li>
+						<li>Firefox 4 onwards</li>
+						<li>Chrome 11 onwards</li>
+						<li>Safari 5 onwards</li>
+						<li>Opera 11 onwards</li>
+					</ul>
+				</div>
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+		</div>	
+</noscript>

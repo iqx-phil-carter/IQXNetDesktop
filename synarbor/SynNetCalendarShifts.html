@@ -1,0 +1,104 @@
+<script type="text/javascript">
+
+function candRefClicked(){
+	
+	if (this.rel) {
+		hideAnyCluetips();
+		IQXChain('#CalendarPopups', {
+			action: 'load',
+			page: 'clientpreviousemployeedetails&pPersonID=' + encodeURIComponent(this.rel) + '&pid=' + encodeURIComponent(this.rel) + '&pname=' + encodeURIComponent(this.innerHTML)
+		});
+	}
+}
+
+function makeBookingRequest(sType){
+	hideAnyCluetips();
+	IQXChain('#CalendarPopups', {
+		action: 'load',
+		page: 'clientnewshiftweekrequirement&pBookingType='+sType
+	});
+}
+
+function refreshCalendar(){
+	hideAnyCluetips();
+	$('#CalOfShifts').fullCalendar('removeEvents');
+	$('#CalOfShifts').fullCalendar('refetchEvents');
+}
+
+function makeCluetip(tt){
+	var rv='';
+	if ($.isArray(tt)) {
+		$.each(tt, function(i, v){
+			rv = rv + '<div class="split=body">';
+			if (v.name) {
+				rv = rv + '<a href="#" rel="' + v.id + '">' + v.name + '</a> ';
+			}
+			rv = rv + v.descrip + '</div>';
+		});
+	} 
+	return rv;
+}
+
+$(document).ready(function(){
+    $('#CalOfShifts').fullCalendar({
+        events:'IQXRawData.php?page=SynNetCalendarShifts&render=text_plain__NetCalendarShifts.xsl',
+		startParam:'pstart',
+		endParam:'pend',
+		cacheParam:'dummy_nocache',
+		firstDay:1,
+		weekMode:'variable',
+		height:600,
+		theme:true,
+		columnFormat:{month: 'dddd', week: 'ddd d/M', day: 'dddd d/M'},
+		header:{
+    		left:   'title',
+    		center: '',
+    		right:  'today prev,next'
+		},
+		viewDisplay: hideAnyCluetips,
+		eventRender: function(event, element){
+			element.attr('title',$.fullCalendar.formatDate(event.start,'dddd dS') + ' - ' + event.title);
+			element.cluetip(function(){return makeCluetip(event.tooltip);},
+			   {cluetipClass: 'jtip', width: 350, positionBy: 'mouse', onShow: function(ct, c){$('a',c).click(candRefClicked);},
+			   sticky: true, mouseOutClose: true, closePosition: 'title', closeText: '<img src="css/images/cross.png" alt="" />'});
+		}
+    });   // NB make sure that the div has class fullCalendar so that the calendar is re-rendered on UI tab switching
+
+
+	// Add a refresh button
+	addCalendarButton('#CalOfShifts','refresh','calbtnRefresh',true,refreshCalendar);
+	// Add booking request buttons
+	addCalendarButton('#CalOfShifts','request daily booking','calbtnBookReqD',true,function(){
+		makeBookingRequest('Daily');
+	});
+	addCalendarButton('#CalOfShifts','request hourly booking','calbtnBookReqH',true,function(){
+		makeBookingRequest('Hourly');
+	});
+	
+});
+
+function addCalendarButton(jqCal,sLab,sID,bSpace,fn){
+	var s='<td><div id="'+sID+'" class="ui-state-default ui-corner-left ui-corner-right"><a><span>'+sLab+'</span></a></div></td>';
+	if (bSpace){
+		s+='<td><span class="fc-header-space"/></td>';
+	}
+	$(jqCal+' td.fc-header-right tr').prepend(s);
+	$('#'+sID).hover(function(){
+		$(this).addClass('ui-state-hover');
+	},function(){
+		$(this).removeClass('ui-state-hover');
+	}).click(fn);
+}
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_shiftcalendar_top.html;noerr]</div>
+
+<div id="CalOfShifts" class="fullCalendar"></div>
+
+<div class="usertext">[onload;file=txt_client_shiftcalendar_bottom.html;noerr]</div>
+
+<div id="CalendarPopups" class="ui-helper-hidden"></div>
+
+
+

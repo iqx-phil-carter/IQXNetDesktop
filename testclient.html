@@ -1,0 +1,64 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#d_test").datepicker({dateFormat: 'dd/mm/yy', firstDay: 1});
+		$("#d_test").cluetip({cluetipClass: 'jtip', width: 350, local:true, sticky:true, 
+		closePosition: 'title', closeText: '<img src="css/images/cross.png" alt="" />',
+		onActivate: function(e){
+			$('#cltiptxt').text('Dynatext');
+			return true;
+		}});
+	});
+	
+	function dodlg(){
+		IQXUIDialog('Test Dialog',{title:'Test',xDlgType:'Close'},function(){alert('The Callback')});
+	}
+	
+	function proctext(){
+		var s=$('#ta').val();
+		var ar=csvToArray(s);
+		$('#someTbl').html(arrayToTable(ar,["Line",{
+			sTitle: "Digit",
+			sClass: "yellowBack"
+		}],{"No.":function(nVal){return (nVal>1);}}));
+	}
+	
+</script>
+
+<style type="text/css">
+	td.yellowBack {
+		background-color:yellow;
+	}
+</style>
+
+<p>
+<a href="IQXRawData.php?page=NetReportClientStats&render=text_xml" target="_blank">Report XML</a>
+<a href="dumprequest.php?page=NetReportClientStats&render=text_xml" target="_blank">Dump</a>
+<a href="IQXRawData.php?page=J_TestJob&render=text_xml" target="_blank">Dump XML</a>
+<a href="IQXRawData.php?page=SynNetCalendarShifts&render=text_xml&pstart=1230768000&pend=1293840000" target="_blank">Synarbor Calendar</a>
+<a href="IQXRawData.php?page=SynNetCalendarShifts&render=text_plain__NetCalendarShifts.xsl&pstart=1230768000&pend=1293840000" target="_blank">Synarbor Calendar JSON</a>
+<a href="IQXNetEx.php?page=jobsearch&noauth=yes&wrapper=full&usertitle=Job+Search" target="_blank">Job Search</a>
+<a href="IQXRawData.php?page=NetClientPreviousEmployees&render=text_plain__IQXNetDataSubTable.xsl" target="_blank">Previous Employees JSON</a>
+
+</p>
+<div>
+	<button onclick="dodlg();">Dialog</button>
+	<button onclick="IQXcloseUIdialog();">Close Dialog</button>
+	<button onclick="$(document).trigger('hideCluetip');">Close Cluetip</button>
+	<input type="text" id="d_test" title="The Date" rel="#cltip1"/>
+	<textarea id="ta">"Line","No.","Digit"
+"Line 1",1,"x"
+"Line 2",2,"y"
+"Line 3",3,"z"
+</textarea>
+<button onclick="proctext();">Proc Text</button>
+</div>
+<div id="someTbl"></div>	
+<div class="ui-helper-hidden">
+<!--
+
+-->	
+<p id="cltip1">
+<span id="cltiptxt">XXX</span>
+<button>B1</button><Button>B2</Button>
+</p>
+</div>

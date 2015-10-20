@@ -1,0 +1,31 @@
+<!--[onload;tplvars;cands='NetAgencyCandidates']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divagcand"));
+	});
+
+</script>
+
+<div id="divagcand">
+<table class="tablesorter" id="tblagcand">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Reference Code</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+	    <td>[cands.CandidateName;block=tr;noerr]</td>
+	    <td>[cands.CandidateReference;noerr]</td>
+		<td class="buttoncolumn">
+			<button type="button" class="tablebutton nonformbutton" onclick="submitcandidate('[cands.PersonID]')">Submit</button>
+		</td>
+		</tr>
+		
+	</tbody>
+</table>
+<button type="button" class="fixed nonformbutton" onclick="abandonsubmitcandidate()" >Abandon</button>
+</div>

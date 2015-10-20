@@ -1,0 +1,16 @@
+CLIENTCONTACTDETAILS	Contact Details Tab		On
+CLIENTVACANCIES			Current vacancies		Off
+CLIENTPROVTIMESHEETS	current timesheets		Off
+CLIENTTIMESHEETS		Historic timesheets		On
+CLIENTPREVMPLOYEES		Previous Temps			Off
+
+CANDPROFILE				Profile					On
+CANDBANKDETAILS			Payroll					On
+CANDREGISTRATION		Registration			Off
+DOCCANDDOWNLOAD			Documents				Off
+CANDCALENDAR			Calendar				On
+CANDPROVTIMESHEETS		Current Timesheets		On
+CANDTIMESHEETS			Historic Timesheets		On
+CANDJOBSEARCH			Job Search				Off
+MANAGEMENTINFO			Reports					Off
+TESTONLY				Test   					Off     

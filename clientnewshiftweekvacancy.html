@@ -1,0 +1,190 @@
+<!--[onload;tplvars;newsh='NetClientShiftTemplate?pVacancyID&pShiftTemplateID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("#divcliaddjobs"));
+	$('#frmclientnewshiftweek select').multiSelect();
+	var frm=$('#frmclientnewshiftweek').get(0);
+	IQXEnableForm(frm,{wholeformvalidator:doChecks});
+	$("#cli_newsh_startdate").datepicker('option',{onSelect:calDateSelected});
+	$('#frmclientnewshiftweek .readonly').attr('readonly','readonly');
+	});
+	
+function doChecks(){
+  return (checkStartsMonday() || checkShiftQuantities());
+}	
+
+function checkShiftQuantities(){
+	var frm = $('#frmclientnewshiftweek').get(0);
+	var s = $('#cli_newsh_monday', frm).val() + $('#cli_newsh_tuesday', frm).val() +
+	$('#cli_newsh_wednesday', frm).val() +
+	$('#cli_newsh_thursday', frm).val() +
+	$('#cli_newsh_friday', frm).val() +
+	$('#cli_newsh_saturday', frm).val() +
+	$('#cli_newsh_sunday', frm).val();
+	if ($.trim(s)) {
+		return "";
+	} else {
+		return "You must put numbers of shifts against the days of the week";
+	}
+}
+
+function checkStartsMonday(){
+	var sdat=$.trim($('#cli_newsh_startdate','#frmclientnewshiftweek').val());
+	if (!sdat) {
+		return "";
+	}
+	var ddat= new Date(UKtoJSdate(sdat));
+	if (ddat.getDay() == 1) {
+		return "";
+	}
+	return "The Week Beginning date must be a Monday";
+}
+
+function calDateSelected(dateText, inst){
+	if (dateText) {
+		var ddat = new Date(UKtoJSdate(dateText));
+		var day = 1000 * 60 * 60 * 24;
+		while (ddat.getDay() != 1) {
+			ddat.setTime(ddat.getTime() - day);
+		}
+		this.value = $.datepicker.formatDate('D dd/mm/yy', ddat);
+		for (var i=0;i<=6;i++) {
+			$('#xxxlabday'+i).text($.datepicker.formatDate('D dd/mm/yy', ddat));
+			ddat.setTime(ddat.getTime() + day);
+		}
+	}
+}
+
+</script>
+
+<form id="frmclientnewshiftweek" action="IQXPost.php?proc=NetClientAddShiftsWeek" method="post" accept-charset="utf-8">
+	<fieldset>
+		<legend>New Requirement - [newsh.Position]</legend>
+		<input type="hidden" id="cli_newsh_vacid" name="pvacancyid" value="[newsh.VacancyID;block=fieldset]" />
+		<input type="hidden" id="cli_newsh_shiftid" name="pshifttemplateid" value="[newsh.TempShiftTemplateID]" />
+        <p>
+            <label for="cli_newsh_startdate">
+                Week Starting
+            </label>
+            <input type="text" id="cli_newsh_startdate" name="pstartdate" class="required longdate" />
+        </p>
+        <p>
+            <label for="cli_newsh_from">
+                Time From
+            </label>
+            <input type="text" id="cli_newsh_from" name="ptimefrom" class="required time [newsh.Moveable;if [val]=1;then '';else 'readonly']" value="[newsh.TimeFrom;noerr]"/>
+        </p>
+        <p>
+            <label for="cli_newsh_to">
+                Time To
+            </label>
+            <input type="text" id="cli_newsh_to" name="ptimeto" class="required time [newsh.Moveable;if [val]=1;then '';else 'readonly']"  value="[newsh.TimeTo;noerr]" />
+        </p>
+        <p>
+            <label for="cli_newsh_brk">
+                Break (minutes)
+            </label>
+            <input type="text" id="cli_newsh_brk" name="pbreak" class="digits [newsh.Moveable;if [val]=1;then '';else 'readonly']"  value="[newsh.BreakMinutes;noerr]" />
+        </p>
+        <p>
+            <label id="xxxlabday0" for="cli_newsh_monday">
+                Monday 
+            </label>
+            <input type="text" id="cli_newsh_monday" name="pmonday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday1" for="cli_newsh_tuesday">
+                Tuesday 
+            </label>
+            <input type="text" id="cli_newsh_tuesday" name="ptuesday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday2" for="cli_newsh_wednesday">
+                Wednesday 
+            </label>
+            <input type="text" id="cli_newsh_wednesday" name="pwednesday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday3" for="cli_newsh_thursday">
+                Thursday 
+            </label>
+            <input type="text" id="cli_newsh_thursday" name="pthursday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday4" for="cli_newsh_friday">
+                Friday 
+            </label>
+            <input type="text" id="cli_newsh_friday" name="pfriday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday5" for="cli_newsh_saturday">
+                Saturday 
+            </label>
+            <input type="text" id="cli_newsh_saturday" name="psaturday" class="digits narrow"  />
+        </p>
+        <p>
+            <label id="xxxlabday6" for="cli_newsh_sunday">
+                Sunday 
+            </label>
+            <input type="text" id="cli_newsh_sunday" name="psunday" class="digits narrow"  />
+        </p>
+        <p>
+            <label for="cli_newsh_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newsh_ref" name="ptheirref" class="uppercase" />
+        </p>
+		<p>
+			<label for="cli_newsh_desc">
+				Description
+			</label>
+           <textarea rows=1 cols=45 wrap=soft id="cli_newsh_desc" name="pdescription">[newsh.ShiftDescription;noerr]</textarea>
+        </p>
+		<p>
+			<label for="cli_newsh_skills">
+				Skills
+			</label>
+			<select id="cli_newsh_skills" name="pskills[]" multiple="multiple" class="required">
+				[newsh.ChoiceList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+		<p>
+			<label for="cli_newsh_grade">
+				Grade
+			</label>
+			<select id="cli_newsh_grade" name="pgrade" class="required">
+				<option value=""></option>
+				[newsh.GradeList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+        <p>
+            <label for="cli_newsh_note">
+                Note
+            </label>
+            <input type="text" id="cli_newsh_note" name="pnote"  />
+        </p>
+		<p>
+			<label for="cli_newsh_orderreason">
+				Reason
+			</label>
+			<select id="cli_newsh_orderreason" name="porderreason" >
+				<option value=""></option>
+				[newsh.OrderReasonList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+		<p>
+		    <button type="submit" id="cli_newsh_submit" class="fixed formbutton" >
+		        Save
+		    </button>
+		    <button type="button" id="cli_newsh_reset" class="fixed formbutton" onclick="unaddjob()" >
+		        Undo
+		    </button>
+		</p>
+		<p>
+		    <span class="errormessage">[var.x_errormessage]</span>
+		</p>
+	
+	</fieldset>
+</form>
+

@@ -1,0 +1,360 @@
+<!--[onload;tplvars;newsh='NetClientShiftOrderReasons']-->
+
+<!-- 20140220 Time format drawn from Global -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var dlg=$('#divclientnewshiftweek').dialog({
+		title:'New Requirement',   
+		modal:true,
+		width:'[var.x_local.Switches.Width;noerr]',
+		position:[window.width/2,100],
+		close: function(){
+				$("#cli_newsh_daytable input.longdate").datepicker('hide');
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+		buttons: {
+			"Cancel": function(){
+				IQXDisableForm();
+				IQXcloseUIdialog(this);
+			},
+			"Save": function(e){
+				SubmitForm(this,e);
+			}
+		}
+	});
+		
+	IQXInitSection($("#frmclientnewshiftweek"));
+	
+	makeTableHead();
+		
+	var RowCount=10;
+	if('[var.x_local.Switches.RowCount;noerr]'!=''){RowCount='[var.x_local.Switches.RowCount;noerr]';}
+	for(var LoopCounter=1;LoopCounter<=RowCount;LoopCounter++){
+		makeTableRow(LoopCounter);
+	}
+	
+	IQXEnableForm("#frmclientnewshiftweek",{wholeformvalidator:shiftsFormValid,successhandler:function(){
+		IQXDisableForm();
+		IQXcloseUIdialog(dlg);
+		IQXRefreshTab();
+	}});
+	doPickList('SV','','#cli_newsh_vacancyid');
+	
+	});
+
+function SubmitForm(ThisDialog,e){
+	
+    var RowCount = 10;
+    for (LoopCounter = 1; LoopCounter <= RowCount; LoopCounter++) {
+        if ($('[for*="p' + LoopCounter + 'From"]').attr('style') == 'display: none;') { $('[for*="p' + LoopCounter + 'From"]').remove() }
+        if ($('[for*="p' + LoopCounter + 'To"]').attr('style') == 'display: none;') { $('[for*="p' + LoopCounter + 'To"]').remove() }
+    }
+
+    if ($('[class*="error"]').text() == 'There may be an error. Please correct your data before proceeding.') {
+        $('#ErrorMessagePopup').html('');
+    }
+
+    if ($('[class*="error"]').text() != '') {
+        $('#ErrorMessagePopup').html('There may be an error. Please correct your data before proceeding.');
+        //$('#ErrorMessagePopup').html($('[class*="error"]').text());
+        return;
+    };
+    
+    if ('[var.x_local.Switches.EnforceTimeEntry;noerr]' == '1') {
+        if ('[var.x_local.Switches.RowCount;noerr]' != '') { RowCount = '[var.x_local.Switches.RowCount;noerr]'; }
+        for (LoopCounter = 1; LoopCounter <= RowCount; LoopCounter++) {
+            if ($('#p' + LoopCounter + 'Date').val() != '') {
+                if (($('#p' + LoopCounter + 'From').val() == '' || $('#p' + LoopCounter + 'To').val() == '') || ($('#p' + LoopCounter + 'From').val() == $('#p' + LoopCounter + 'To').val())) {
+                    $('#ErrorMessagePopup').html('Error on line ' + LoopCounter + ' - please check the shift times');
+                    return;
+                }
+            };
+        } 
+    }
+
+	$(e.target).closest("button").html('<span class="ui-button-text" >Sending...</span>');
+	$(e.target).closest("button").attr('disabled','disabled');
+	
+	$('#frmclientnewshiftweek').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			if (data != 'Ok') {
+				$(e.target).closest("button").html('<span class="ui-button-text" style="color:red" >Error</span>');
+				$('#spanError').html(data);
+			}else{
+				IQXDisableForm();
+				LoadData('1',0);
+				IQXcloseUIdialog(ThisDialog);
+			}
+		},
+		error: function(data,textStatus){
+			$(e.target).closest("button").html('<span class="ui-button-text" style="color:red" >Error</span>');
+			$('#spanError').html(data);
+			},
+		dataType: "text"
+		});
+		
+}	
+
+function shiftsFormValid(){
+	var rv='';
+	var cnt=0;
+	$('#cli_newsh_daytable').find('tr').each(function(i,e){
+		var tds=$(this).children('td');
+		var shiftdate=tds.eq(0).find('input').val();
+		var shiftid=tds.eq(1).find('select').val();
+		var qty=parseInt(tds.eq(5).find('input').val());
+		var timefrom=tds.eq(2).find('input').val();
+		var timeto=tds.eq(3).find('input').val();
+		if (shiftdate && shiftid && qty) { // Unless shift date and type selected and qty>0, no booking will be made
+			if (!(timefrom && timeto)) {  
+				rv='Missing shift times for '+shiftdate;
+				return false; // Terminate the 'each' loop
+			}
+			cnt++;
+		}
+	});
+	if (rv) return rv;
+	if (cnt==0) return 'No shifts entered';
+}
+
+function doPickList(sType,sVacancyID,sSelector,fOnComplete){
+	
+	if (sVacancyID){sVacancyID='&pVacancyID='+sVacancyID;}
+	$.getJSON('IQXRawData.php?page=NetClientRequirementTemplates&pType='+sType+sVacancyID+'&render=text_plain__IQXNetResultJSONArray.xsl', function(aChoices){
+		$(sSelector).val('');
+		var sOptions='';
+		
+		$.each(aChoices, function(ix,x){
+			if (x[1]) x[0]+='|'+x[1];
+			if (x[3]) x[2]+=', '+x[3];
+			sOptions+='<option value="'+x[0]+'">'+x[2]+'</option>';
+		});
+		if (sOptions) sOptions='<option value=""> </option>'+sOptions;
+		$(sSelector).html(sOptions);
+		if (typeof(fOnComplete)=='function') {
+			fOnComplete();
+		}
+	});
+}
+
+function vacancyClicked(x){
+	$('#ErrorMessagePopup').html('');
+	var vacid=$(x).val();
+	if($('#CloseOrStay')==''){
+		$('#cli_newsh_daytable').find('select,input').val('');
+	}
+	$('#cli_newsh_daytable').find('select').attr('disabled','disabled');  // In IE the disabling and re-enabling is necessary to reliably force the new combo contents to appear
+	doPickList('SS',vacid,'#cli_newsh_daytable select.shiftselect',function(){
+		$('#cli_newsh_daytable').find('select').removeAttr('disabled');
+		});
+}
+
+function shiftClicked(x){
+	var s=$(x).val();
+	if(s!=''){	// if a shift type is present, then use it, otherwise clear line
+		var ar=s.split('|');
+		var tr=$(x).closest('tr');
+		if('[var.x_global.general.TimeFormat;noerr]'=='validFourDigitTime'){
+			tr.children('td').eq(2).find('input').val(ar[1].substr(0,5).replace(':','')); 
+			tr.children('td').eq(3).find('input').val(ar[2].substr(0,5).replace(':',''));
+		}else{
+			tr.children('td').eq(2).find('input').val(ar[1].substr(0,5));
+			tr.children('td').eq(3).find('input').val(ar[2].substr(0,5));
+		}
+		tr.children('td').eq(4).find('input').val(ar[3]);
+		if (ar[4]=='1'){  //moveable
+			tr.children('td').find('input.mover').removeClass('readonly').removeAttr('readonly','readonly');
+		} else {
+			tr.children('td').find('input.mover').addClass('readonly').attr('readonly','readonly');
+		}
+		if (tr.children('td').eq(5).find('input').val()=='') {
+			tr.children('td').eq(5).find('input').val('1');
+		}
+	}else{
+		var tr=$(x).closest('tr');
+		tr.children('td').eq(0).find('input').val('');
+		tr.children('td').eq(2).find('input').val('');
+		tr.children('td').eq(3).find('input').val('');
+		tr.children('td').eq(4).find('input').val('');
+	}
+}
+
+function makeTableHead(){
+	var s='<thead>';
+	s+='<th>Date</th>';
+	s+='<th>Type</th>';
+	s+='<th>From</th>';
+	s+='<th>To</th>';
+	s+='<th>Break<br>(mins)</th>';
+	s+='<th>Qty</tdh>';
+	if('[var.x_local.Switches.ShowNoteColumn;noerr]'==1){
+		s+='<th>Note</th>';
+	}
+	if('[var.x_local.Switches.ShowShiftNoteColumn;noerr]'==1){
+		s+='<th>Shift Note</th>';
+	}
+	if('[var.x_local.Switches.ShowClientRefColumn;noerr]'==1){
+		s+='<th>Client Ref</th>';
+	}
+	s+='</thead>';
+ 	$('#cli_newsh_daytable').append(s);
+}
+
+function makeTableRow(sDay){
+	var s='<tr>';
+	s+='<td><input id="p'+sDay+'Date" name="p'+sDay+'Date" autocomplete="off" class="medium longdate" onchange=CheckRequirement("p'+sDay+'Date") /></td>';
+	s+='<td><select class="medium noncheckbox shiftselect" name="p'+sDay+'" onchange="shiftClicked(this);"></select></td>';
+	s+='<td><input id="p'+sDay+'From" name="p'+sDay+'From" class="[var.x_global.general.TimeFormat;noerr]" /></td>';
+	s += '<td><input id="p' + sDay + 'To" name="p' + sDay + 'To" class="[var.x_global.general.TimeFormat;noerr]" /></td>';
+	s+='<td><input name="p'+sDay+'Brk" class="digits narrow mover" /></td>';
+	s+='<td><input name="p'+sDay+'Qty" class="digits narrow" /></td>';
+	if('[var.x_local.Switches.ShowNoteColumn;noerr]'==1){
+		s+='<td><input name="p'+sDay+'Note" id="p'+sDay+'Note" class="medium Normal" maxlength="50" onfocus="ShowCharacterCount('+sDay+')" onkeyup="CharacterCount('+sDay+')"/><span id="c'+sDay+'" style="visibility:hidden">50</span></td>';
+	}
+	if('[var.x_local.Switches.ShowShiftNoteColumn;noerr]'==1){
+		s+='<td><input id="p'+sDay+'Location" name="p'+sDay+'Location" class="medium" /></td>';
+	}
+	if('[var.x_local.Switches.ShowClientRefColumn;noerr]'==1){
+		s+='<td><input id="p'+sDay+'PONumber" name="p'+sDay+'PONumber" class="medium" /></td>';
+	}
+	
+	s+='</tr>';
+ 	$('#cli_newsh_daytable').append(s);
+}
+
+
+function ShowCharacterCount(BoxNo){
+	// show character count box for note on a particular row
+	
+		$('#c'+BoxNo).css('visibility','visible');
+}
+
+function CharacterCount(BoxNo){
+	// count charachters in notes fiels in a specific row
+
+	var CurrentCount=$('#p'+BoxNo+'Note').val().length;
+	if(CurrentCount>=50){
+		$('#p'+BoxNo+'Note').attr('class','medium Overflow');
+		$('#p'+BoxNo+'Note').val($('#p'+BoxNo+'Note').val().substring(0,50));
+	}else{
+		$('#p'+BoxNo+'Note').attr('class','medium Normal');
+	}
+	$('#c'+BoxNo).html(50-CurrentCount);
+	
+	
+}
+
+function CheckRequirement(DateBox){
+	var x=$('#'+DateBox).val();
+	
+	var ddat = new Date(UKtoJSdate(x));
+	var cdat = new Date();
+	cdat.setHours(0,0,0,0);
+	ddat.setHours(0,0,0,0);
+	
+	if($('#cli_newsh_vacancyid').val()==""){
+		$('#ErrorMessagePopup').html('Requirement must be chosen before entering dates');
+		return;
+	}else{
+		$('#ErrorMessagePopup').html('');
+	}
+	if(ddat < cdat){
+		$('#ErrorMessagePopup').html('Date must not be in the past');
+		$('#'+DateBox).val('');
+		return;	
+	}else{
+		$('#ErrorMessage').html('');
+	}
+	
+}
+
+function RollToNextPage(){
+	// advance date by one day and leave everything else alone
+	
+	$('#frmclientnewshiftweek').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			
+			var HashPos=data.indexOf('#');
+			var StatusString='';
+			var ReturnMessage='';
+			if (HashPos > 0) {
+				StatusString=data.substr(0,HashPos);
+				ReturnMessage=data.substr(HashPos+1);
+				}
+			else
+				{
+				StatusString=data;
+				};
+			if (textStatus == 'success') {
+				$('#CloseOrStay').html('Stay');	// flag to keep open
+				$('#ErrorMessagePopup').html('This page has been submitted');
+				}else{
+					$('#SFormError').html(data);
+				}
+			},
+		error: function(data,textStatus){
+			$('#SFormError').html(data);
+			},
+		dataType: "text"
+		});
+}
+
+function ResetError() {
+    $('[disabled*=disabled]').html('<span class="ui-button-text" >Save</span>');
+    $('[disabled*=disabled]').removeAttr('disabled');
+    $('#spanError').html('');
+}
+
+</script>
+
+<style type="text/css">
+	#frmclientnewshiftweek p label {
+		width:115px;
+	}
+	#cli_newsh_vacancyid {
+		width:450px;
+	}
+</style>
+
+<div id="divclientnewshiftweek">
+<form id="frmclientnewshiftweek" action="IQXPost.php?proc=NetClientAddShiftsMultiDay" method="post" accept-charset="utf-8">
+	<fieldset>
+        <p>
+            <label for="cli_newsh_vacancyid">
+                Requirement
+            </label>
+            <select id="cli_newsh_vacancyid" name="pvacancyid" class="required noncheckbox" onchange="vacancyClicked(this);"></select>
+        </p>
+		<table id="cli_newsh_daytable">
+			
+		</table>
+        <p>[onload_Ref;block=p;when [var.x_local.Switches.ShowRefBox;noerr]=='1']
+            <label for="cli_newsh_ref">
+                Reference
+            </label>
+            <input type="text" id="cli_newsh_ref" name="ptheirref" class="medium uppercase" />
+        </p>
+		<p>[onload_IP1;block=p;when [var.x_local.Switches.ShowRequirementsDropdown;noerr]=='1']
+			<label for="cli_newsh_orderreason">
+				Reason
+			</label>
+			<select id="cli_newsh_orderreason" name="porderreason" class="noncheckbox" onfocus="ResetError()">
+				<option value=""></option>
+				[newsh.OrderReasonList;magnet=p;ope=iqx;select;htmlconv=no;noerr]
+			</select>
+		</p>
+		<p>
+		    <span id="ErrorMessagePopup" class="errormessage">[var.x_errormessage]</span>
+		    <span id="CloseOrStay" style="visibility:hidden"></span>
+		</p>
+	</fieldset>	
+</form>
+<p>
+    <span id="spanError" class="errormessage">[var.x_errormessage]</span>
+</p>
+</div>
+

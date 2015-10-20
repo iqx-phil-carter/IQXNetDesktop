@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Job SYSTEM "C:\ddev_6\php\JobRunner_3_0.dtd">
+<Job title="Prepare Database for IQXNet">
+
+<IfCancelDialog text="This job will prepare your database for IQXNet. Press Ok to proceed.">
+	<Cancel/>
+</IfCancelDialog>
+
+<SQLExec>delete from wpkform where wpkformid='#netsettings'</SQLExec>
+<SQLExec>delete from wpkform where wpkformid='#netuser'</SQLExec>
+
+<SQLExec>grant connect to IQXNet</SQLExec>
+
+<SQLExec ignoreerror="YES">update params set noOLEblobwrappers=1</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into staff (staffid,shortid,name,userid,defaultdepartid,defunct) values ('WEBUSER','WU','Web User','WebUserIdentifier',(select first departmentid from department),1)</SQLExec>
+
+<SQLExec>update IQXNetSettings set defaultstaffid='WEBUSER',defaultdatabaseuser='IQXNet', portnumber=54000, authenticationrealm=(select first dbname from params) where IQXNetSettingsID='DEFAULT' and portnumber is null</SQLExec>
+<SQLExec>update IQXNetSettings set NonAuthenticatedCalls='NetQuestionnaire\x0D\x0ANetCandidateRegister\x0D\x0ANetCandidateRegisterPreCheck' where NonAuthenticatedCalls is null</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into status (type,status,name,final,help,sortorder,gridsortorder) values ('V','[','Template',0,'Template for web orders',200,200)</SQLExec>
+<SQLExec ignoreerror="YES">insert into status (type,status,name,final,help,sortorder,gridsortorder) values ('V',']','Unconfirmed',0,'Unconfirmed web order',210,210)</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into TempShiftCancelReason (TempShiftCancelReasonID,Name,AppliesToUnfilled,ClientAware,TempAware,Bill,Pay,Refill,SortOrder,ShortCode) values ('C','Client cancelled in good time',1,1,0,0,1,0,10,'CLI')</SQLExec>
+<SQLExec ignoreerror="YES">insert into TempShiftCancelReason (TempShiftCancelReasonID,Name,AppliesToUnfilled,ClientAware,TempAware,Bill,Pay,Refill,SortOrder,ShortCode) values ('T','Temp Cancelled',0,0,1,0,0,1,100,'TEMP')</SQLExec>
+<SQLExec ignoreerror="YES">insert into TempShiftCancelReason (TempShiftCancelReasonID,Name,AppliesToUnfilled,ClientAware,TempAware,Bill,Pay,Refill,SortOrder,ShortCode) values ('~','Not authorised',1,1,0,0,0,0,300,'NA')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetUserClass (IQXNetUserClassID,Name,SelfRegistrationAllowed,Services,Calls,Jobs) values ('CANDIDATE','Candidate',1,'%','%','%')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetUserClass (IQXNetUserClassID,Name,SelfRegistrationAllowed,Services,Calls,Jobs) values ('CLIENT','Client',0,'%','%','%')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetUserClass (IQXNetUserClassID,Name,SelfRegistrationAllowed,Services,Calls,Jobs) values ('AGENCY','Agency',0,'%','%','%')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetUserClass (IQXNetUserClassID,Name,SelfRegistrationAllowed,Services,Calls,Jobs) values ('OWNER','Owner',0,'%','%','%')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('LOGIN','Login',1)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('ORDERJOBS','Order Jobs',10)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('AUTHORISEJOBS','Authorise Jobs',20)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('FILLJOBS','Fill Jobs',30)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('ADDCANDIDATES','Add Candidates',70)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('SUBMITCANDIDATES','Submit Candidates for Jobs',80)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('FILLTIMESHEETS','Fill Timesheets',100)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('AUTHORISETIMESHEETS','Authorise Timesheets',110)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('MAINTAINCONTACTS','Maintain Contacts',200)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('CASCADESETTINGS','Can change the cascade settings for jobs',210)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('MANAGEMENTINFO','Management Information',300)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('DOCCANDUPLOAD','Upload Candidate Documents',320)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('DOCCANDDOWNLOAD','Download Candidate Documents',321)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('CANDBANKDETAILS','Show Candidate Payroll Tab',330)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRight (IQXNetRightID,Description,SortOrder) values ('VIEWDATEOFBIRTH','Able to view/edit Date Of Birth',340)</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('LOGIN','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('ORDERJOBS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('AUTHORISEJOBS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLJOBS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MAINTAINCONTACTS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MANAGEMENTINFO','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLTIMESHEETS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('AUTHORISETIMESHEETS','CLIENT','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDDOWNLOAD','CLIENT','*')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('LOGIN','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MAINTAINCONTACTS','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MANAGEMENTINFO','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLTIMESHEETS','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('ADDCANDIDATES','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('SUBMITCANDIDATES','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('CASCADESETTINGS','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDUPLOAD','AGENCY','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDDOWNLOAD','AGENCY','*')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('LOGIN','CANDIDATE','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLTIMESHEETS','CANDIDATE','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDUPLOAD','CANDIDATE','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDDOWNLOAD','CANDIDATE','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('CANDBANKDETAILS','CANDIDATE','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('VIEWDATEOFBIRTH','CANDIDATE','*')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('LOGIN','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MAINTAINCONTACTS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('MANAGEMENTINFO','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('ORDERJOBS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('AUTHORISEJOBS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLJOBS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('FILLTIMESHEETS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('AUTHORISETIMESHEETS','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('ADDCANDIDATES','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDUPLOAD','OWNER','*')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetRightAllowed (IQXNetRightID,IQXNetUserClassID,ID) values ('DOCCANDDOWNLOAD','OWNER','*')</SQLExec>
+
+<SQLExec>insert into IQXNetRightDefault (IQXNetRightID,IQXNetUserClassID,ID) select IQXNetRightID,IQXNetUserClassID,ID from IQXNetRightAllowed x
+ where not exists (select * from IQXNetRightDefault  where IQXNetRightID=x.IQXNetRightID and IQXNetUserClassID=x.IQXNetUserClassID and ID=x.ID) </SQLExec>
+
+<SQLExec>update IQXNetEmailDetails set DefaultUserPassword='password' where IQXNetEmailDetailsID='DEFAULT' and AgencyName is null</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_candidates_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_candidates_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_contacts_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_contacts_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_profile_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_profile_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_requirements_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_requirements_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_timesheets_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_timesheets_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_welcome_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('agency_welcome_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_documents_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_documents_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_diary_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_diary_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_profile_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_profile_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_timesheets_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_timesheets_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_welcome_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('candidate_welcome_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_contacts_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_contacts_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_previousemps_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_previousemps_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_profile_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_profile_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_requirements_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_requirements_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_stats_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_stats_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_timesheets_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_timesheets_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_welcome_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('client_welcome_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('timesheets_bottom')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('timesheets_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('new_candidate_top')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetPageText (IQXNetPageTextID) values ('new_candidate_bottom')</SQLExec>
+
+<SQLExec>update IQXNetPageText set UpdatedFlag=1 where PageText is not null</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetMessageRecipient (MessageType) values ('PAYROLL')</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetMessageRecipient (MessageType) values ('TIMESHEET')</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into IQXNetReport (IQXNetReportID,Description,DBProcedure,IQXNetUserClassID,SortOrder) values ('CLIENTTIMESHEET','Timesheet Report','NetReportTimesheets','CLIENT',10)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetReport (IQXNetReportID,Description,DBProcedure,IQXNetUserClassID,SortOrder) values ('CLIENTSPEND','Spend Report','NetReportSpend','CLIENT',20)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetReport (IQXNetReportID,Description,DBProcedure,IQXNetUserClassID,SortOrder) values ('CLIENTFULFILMENT','Fulfilment Report','NetReportFulfilment','CLIENT',30)</SQLExec>
+<SQLExec ignoreerror="YES">insert into IQXNetReport (IQXNetReportID,Description,DBProcedure,IQXNetUserClassID,SortOrder) values ('CLIENTSTATS','Statistics','NetReportClientStats','CLIENT',100)</SQLExec>
+
+<SQLExec ignoreerror="YES">insert into tag (tagid,taglocation,tagtype,description,sortorder,fixed,displaygroup) values ('9X0','C','D','Web Contract Start Date',1000,1,-10)</SQLExec>
+
+</Job>

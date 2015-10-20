@@ -1,0 +1,99 @@
+<script>
+
+$(document).ready(function(){
+	SendTimeAndPosition();	
+});
+
+function SendTimeAndPosition(){
+	try{
+		var CurrLoc=localStorage.getItem('LocationString');
+		if(CurrLoc.length>=7){
+			var SendString=localStorage.getItem('LocationAction')+CurrLoc;
+			localStorage.setItem('LocationString',SendString);
+		
+			alert('sending times '+SendString);
+			localStorage.setItem('LocationString','');
+			localStorage.setItem('LocationAction','');
+		}
+	}
+	catch(error){
+		if(error.toString().indexOf('22')>-1){
+			$('#localerrormessage').text('Unable to use Geolocation data. Is your browser in Private mode?');
+		}else{
+			$('#localerrormessage').text('error in storage '+error);
+		}
+		$('#btnArrive').hide();
+		$('#btnLeave').hide();
+		return;
+	}
+}	
+
+function LogTimeAndPosition(Action){
+	
+		if (navigator.geolocation) {
+			localStorage.LocationAction='~'+Action.substr(0,1);
+			navigator.geolocation.getCurrentPosition(Geosuccess,Geoerror);
+		}else{
+	alert('error');
+	}
+}
+
+function Geosuccess(position) {
+
+	var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+    var LocString='X'+lat+'Y'+lng+'T'+CreateDate();   
+  	localStorage.LocationString=LocString+localStorage.getItem('LocationString');
+    SendTimeAndPosition();
+}
+
+function Geoerror(error){
+      		
+	switch(error.code){
+        case error.PERMISSION_DENIED:
+      		$('#localerrormessage').text("User denied the request for Geolocation.");
+      		break;
+    	case error.POSITION_UNAVAILABLE:
+      		$('#localerrormessage').text("Location information is unavailable.");
+      		break;
+    	case error.TIMEOUT:
+      		$('#localerrormessage').text("The request to get user location timed out.");
+      		break;
+    	case error.UNKNOWN_ERROR:
+      		$('#localerrormessage').text("An unknown error occurred.");
+      		break;
+   	}   
+}
+      	
+function CreateDate(){
+	var dt = new Date();
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	var h=dt.getHours();
+	var n=dt.getMinutes();
+	return day+'-'+month+'-'+year+' '+h+':'+n;
+}
+
+</script>
+
+<nav role="navigation">
+    <a href="" class="btnMenu" data-role="button" onclick="LogTimeAndPosition('Arrive')">Arrive</a>
+    <a href="" class="btnMenu" data-role="button" onclick="LogTimeAndPosition('Leave')">Leave</a>
+    <a href="iqxnet.php?P=candidatecalendar" class="btnMenu" data-role="button">Calendar</a>
+    <a href="iqxnet.php?P=CandProvTimesheets" class="btnMenu" data-role="button">Current Timesheets</a>
+    <a href="iqxnet.php?P=HistoricTimesheets&pStartDate&pEndDate&pPageNo=1&SearchString=&SampleSize=25" class="btnMenu" data-role="button">Historic Timesheets</a>
+    <a href="iqxnet.php?P=" class="btnMenu" data-role="button">Announcements</a>
+    <a href="iqxnet.php?P=changepassword" class="btnMenu" data-role="button">Change Password</a>
+    <a href="iqxnet.php?P=logout" class="btnMenu" data-role="button">Logout</a>
+</nav>
+    
+
+    
+        
+        
+
+	

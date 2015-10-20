@@ -1,0 +1,146 @@
+<!--[onload;tplvars;VacancyDesc='NetOwnerVacancyDetails?pVacancyID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	IQXInitSection("#FormVacancy");
+	$("#FormVacancy .questionnaire").questionnaire();		
+			
+	if ($('#ObjID').val().length == 0) {	// if a new record, unlock text fields for editing
+		$('input[id*="L_"]','#OwnerActiveDiv').val('New');
+		FormVacancyEdit();
+		//$('#VacancyNewPayrate').hide();
+		$('#OwnerPayRateDisplayDiv').hide();
+		$('#OwnerSubmitFormDiv').hide();
+		$('#EM_' + $('#TempParent').val()).css('background', '#CC9900');
+	}	
+	$('#ParentObject').val($('#TempParent').val());	// carried forward from previous object		
+	$('E_').first().focus();
+	});
+
+function FormVacancyEdit(){
+	// ## Enable local form for editing, add successhandler for successful submit, deal with returned parent value from database
+	
+	IQXEnableForm('#FormVacancy', {
+		successhandler: function(response){
+			if (response.success) {
+				$('#OwnerTreeRoot').jstree("refresh");
+				$('#OwnerActiveDiv').html('');
+				var Obj={IngoingValue:response.id,ObjID:0,ParentID:0};
+				SplitReturnValue(Obj);
+				if(Obj.ParentID){$('#TempParent').val(Obj.ParentID)};
+				var nxt = {
+					action: 'func',
+					func: function(){
+						var LiIdStr="[id*="+String.fromCharCode(34)+'VA_' + Obj.ObjID+String.fromCharCode(34)+"]";	// LIstIDSTRing - duplicate nodes in 'All Vacancies' list need highlit as well as main vacancy entry in Contact list
+						$('li'+LiIdStr).css('background','#CFCFCF');
+						//$('#VA_' + Obj.ObjID).css('background', '#CFCFCF');
+						if(($("#OwnerPayRateTable tr").length)==4){
+							$('#OwnerSubmitFormDiv').show();
+							$('#VacancyNewPayRate').hide();
+							$('#NoPayRateDetailDiv').show();
+						}
+					}
+				};
+				IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerVacancySubScreen&pVacancyID='+Obj.ObjID,nextlink:nxt});
+			}
+			else {
+				$('#ErrorMessage').html(response.message);
+			}
+		},
+		responsetype: 'json'
+	});
+}
+
+
+
+function FormVacancyCancel(){
+	// ## General cancel routine not used because of special requirements of PayRate detail
+	
+	IQXDisableForm('#FormVacancy');
+	if($('#TempParent').val()==$('#ObjID').val()){
+		if ($('#ObjID').val().length == 0) {
+			$('#EmpNewVacancy', '#OwnerActiveDiv').hide();
+		}
+		$('#OwnerActiveDiv').html('');
+		$('#OwnerDetailDiv').html('');
+	}else{
+	OwnerNodeClicked('EM#' + $('#TempParent').val())};
+	
+}
+
+</script>
+
+
+<div id="OwnerVacancyDiv" style="float:left" >
+	<form id="FormVacancy" method="post"  action="IQXPost.php?proc=NetOwnerVacancyEdit&jsonresponse=1" accept-charset="utf-8" >
+		<fieldset class="Narrow ui-corner-all">	
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Position</div>
+				<div style="float:left">
+					<input id="E_Position" name="pPosition" class="Wide required" readonly="readonly" value="[VacancyDesc.Position]" />
+					<input id="OldPosition" name="pOldPosition" class="Wide hidden" value="[VacancyDesc.Position]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Their Ref</div>
+				<div style="float:left">
+					<input id="E_Their_Ref" name="pTheir_Ref" class="Wide" readonly="readonly" value="[VacancyDesc.Their_Ref]" />
+					<input id="OldTheir_Ref" name="pOldTheir_Ref" class="Wide hidden" value="[VacancyDesc.Their_Ref]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow"  >
+				<div class="qquestion ui-widget-header">Start Date</div>
+				<div style="float:left">
+					<input id="E_Start_Date__DT" name="pStart_Date__DT" class="medium longdate" readonly="readonly" value="[VacancyDesc.Start_Date__DT]" />
+					<input id="OldStart_Date__DT" name="pOldStart_Date__DT" class="MedNarrow hidden" value="[VacancyDesc.Start_Date__DT]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Finish Date</div>
+				<div style="float:left">
+					<input id="E_Finish_Date__DT" name="pFinish_Date__DT" class="medium longdate" readonly="readonly" value="[VacancyDesc.Finish_Date__DT]" />
+					<input id="OldFinish_Date__DT" name="pOldFinish_Date__DT" class="MedNarrow hidden" value="[VacancyDesc.Finish_Date__DT]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Expiry Date</div>
+				<div style="float:left">
+					<input id="E_Expiry_Date__DT" name="pExpiry_Date__DT" class="medium longdate" readonly="readonly" value="[VacancyDesc.Expiry_Date__DT]" />
+					<input id="OldExpiry_Date__DT" name="pOldExpiry_Date__DT" class="MedNarrow hidden" value="[VacancyDesc.Expiry_Date__DT]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Our Ref</div>
+				<div style="float:left">
+					<input id="E_Our_Ref" name="pOur_Ref" class="Wide" readonly="readonly" value="[VacancyDesc.Our_Ref]" />
+					<input id="OldOur_Ref" name="pOldOur_Ref" class="Wide hidden" value="[VacancyDesc.Our_Ref]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Contract Ref</div>
+				<div style="float:left">
+					<input id="E_Contract_Ref" name="pContract_Ref" class="Wide" readonly="readonly" value="[VacancyDesc.Contract_Ref]" />
+					<input id="OldContract_Ref" name="pOldContract_Ref" class="Wide hidden" value="[VacancyDesc.Contract_Ref]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow" >
+				<div class="qquestion ui-widget-header">Notes</div>
+				<div style="float:left">
+					<input id="E_Notes" name="pNotes" class="Wide" readonly="readonly" value="[VacancyDesc.Notes]" />
+					<input id="OldNotes" name="pOldNotes" class="Wide hidden" value="[VacancyDesc.Notes]" />
+				</div>
+			</div>
+			<div>
+				<input id="ObjID" name="pObjID" class="Wide hidden" value="[VacancyDesc.ObjID]" />
+				<input id="ParentObject" name="pParentObject" class="Wide hidden" value="" />
+			</div>
+		</fieldset> 
+		<div id='OwnerButtonDiv' class="FloatDivLeft" >
+			<button type="button" id="VacancyEdit" class="fixed nonformbutton" onclick="FormVacancyEdit()">Edit</button>
+			<button type="button" id="VacancyNewPayRate" class='fixed nonformbutton' onClick="PayRateButtonHandler('N','PayRate','New')" >Add Pay Rate</button>
+			<button type="submit" id="VacancySubmit" class="fixed formbutton" >Save</button>
+			<button type="button" id="VacancyCancel" class="fixed formbutton" onClick="FormVacancyCancel()" >Cancel</button>
+		</div>
+	</form>   	
+</div>

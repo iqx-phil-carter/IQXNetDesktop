@@ -1,0 +1,54 @@
+<!-- 20120113 remove logout button
+			  routine to shrink headline
+			  -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#candtabs");
+	$('a').click(function(){
+		if($(this).attr('href') == '#tabcontent-1'){
+			$('#divheading').show();
+			$('#divheadingSmall').hide();
+		}else{
+			$('#divheading').hide();
+			$('#divheadingSmall').show();
+		}
+	})
+});
+</script>
+
+<div id="candtabs" >
+    <ul>
+        <li><a href="#tabcontent-1"><span>Welcome</span></a></li>
+        <li><a href="IQXPage.php?page=candprofile"><span>Profile</span></a></li>
+		<li><a href="IQXPage.php?page=candAdmin"><span>Payroll[onload_CANDBANKDETAILS;block=li;when [var.x_rights.CANDBANKDETAILS;noerr]=1]</span></a></li>
+        <li><a href="IQXPage.php?page=candregistration"><span>Registration</span></a></li>
+		<li><a href="IQXPage.php?page=candidatedocuments"><span>Documents[onload_DOCCANDDOWNLOAD;block=li;when [var.x_rights.DOCCANDDOWNLOAD;noerr]=1]</span></a></li>
+		<li id="D"><a href="IQXPage.php?page=candidatecalendar"><span>Calendar</span></a></li>
+        <li id="P"><a href="IQXPage.php?page=candprovtimesheets"><span>Current Timesheets</span></a></li>
+        <li id="T"><a href="IQXPage.php?page=timesheets"><span>Historic Timesheets</span></a></li>
+        <li><a href="IQXPage.php?page=jobsearch"><span>Job Search</span></a></li>
+        <li><a href="IQXPage.php?page=reports"><span>Reports[onload_reports;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]</span></a></li>
+		<li><a href="IQXPage.php?page=test"><span>Test[onload_TESTONLY;block=li;when [var.x_rights.TESTONLY;noerr]=1]
+</span></a></li>
+    </ul>
+    <div id="tabcontent-1">
+    	<div class="usertext">[onload;file=txt_candidate_welcome_top.html;noerr]</div>
+		<div id="Candidatenonstandardtext" class="usertext">[onload;file=txt_candidate_nonstandard_welcome.html;noerr;]</div>
+		<div id="Candidatestandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title] Candidate Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Update your details and password</li>
+				<li>Upload your CV and other documents</li>
+				<li>Notify your availability</li>
+				<li>Browse jobs and register interest</li>
+				<li>View your bookings</li>
+				<li>Complete your timesheets</li>
+			</ul>
+			<p>Please explore the options, and if you have queries, contact [var.x_title].</p>
+		</div>
+    	<div class="usertext">[onload;file=txt_candidate_welcome_bottom.html;noerr]</div>
+    </div>
+ </div>

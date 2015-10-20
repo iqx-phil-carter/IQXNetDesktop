@@ -1,0 +1,187 @@
+<!--[onload;tplvars;FurgCommentSet='SynNetFurgsComments?pPlacementID']-->
+
+<!-- 20121113 RC4 remove enforcement on comment -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	IQXInitSection($("#divFurgsComment"));  
+	
+	var fdts=$('#tblFurgsDetail').dataTable({
+		"sPaginationType": "full_numbers",
+		"sDom": '<"clear">rt'
+		});
+	$('.dataTables_wrapper').css('min-height','0');
+	});
+	
+	
+function HideEditMessage(ButtonID){
+	// Hide Edit message if either entry is blank
+
+	ShowTTDetail(ButtonID);
+	$('#MustBeEdited'+$(ButtonID).attr('id').substring(1)).hide();
+}
+
+function ShowTTDetail(ButtonID){
+	// create ToolTip popup for long text
+		
+	var StartPos='#'+$(ButtonID).attr('id');
+	var CellID='#CL'+$(ButtonID).attr('id');
+	var Offset='#tblFurgsDetail_wrapper';
+	
+	var txt=$(CellID).html();
+	var x=$(StartPos).position().left;
+	var y=$(StartPos).position().top;
+	
+	var ox=$(Offset).position().left;
+	var oy=$(Offset).position().top;
+	
+	$('#divPopup').css('top',y+oy);
+	$('#divPopup').css('left',x+ox);
+	$('#divPopup').show();
+	$('#divPopup').html(txt);
+}
+
+function EditRow(btn){
+	// draw Furgs Choice List and reveal text box for comment
+		
+	var LineID=$(btn).attr('id').substring(1,25);
+	var WeekNo=LineID.substring(0,(LineID.length-20));
+	var ResultString;
+	var RatingValue=$('#RS'+LineID).html().length;
+	var CommentValue=$('#CS'+LineID).html().length;
+	
+	if (RatingValue > 0){RatingValue = 1;}
+	if (CommentValue > 0){CommentValue = 1;}
+	
+	if(RatingValue+CommentValue==2){
+		if($('#NoEdit'+LineID).attr('style').length==0){
+			$('#NoEdit'+LineID).hide();
+		}else{
+			$('#NoEdit'+LineID).show();
+			$('#B'+LineID).hide();
+		}
+		return;
+	}
+	
+	$('.FixedA').attr('disabled','disabled');
+	
+	$('#S'+LineID).css('display','inline');
+	$('#U'+LineID).css('display','inline');
+	$('#B'+LineID).css('display','none');		
+
+	if(RatingValue==0 && $('#L'+LineID).html()==null){
+		$.get('IQXRawData.php?page=SynNetFurgsChoiceListOuter?pQuestionID='+WeekNo, function(data,textStatus){
+			ResultString = data; // below: lose xml headers and add option tags
+			var StartPoint = ResultString.indexOf('![CDATA[');
+			var Endpoint = ResultString.indexOf(']]><');
+			ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+			ResultString = "<option value=''></option>" + ResultString + "</option>";
+			ResultString = "<select id='L"+LineID+"' name='pShiftType' >"+ResultString+"</select>"
+			$('#R'+LineID).html($('#R'+LineID).html()+ResultString);
+		});
+	}
+	$('#L'+LineID).show();
+	
+	if(CommentValue==0){
+		$('#EC'+LineID).show();
+		$('#EC'+LineID).removeAttr('readonly');
+	}
+}
+	
+function SaveLine(row){
+	// edit comment inputbox
+	
+	var CommentValue='';
+	var LineID=$(row).attr('id').substring(1,25);
+	var WeekNo=LineID.substring(0,(LineID.length-20));
+	var PlacementID=LineID.substring((LineID.length-20));
+	var SelectValue=$('#L'+LineID).val();
+	if($('#EC'+LineID).val()!=''){CommentValue=$('#EC'+LineID).val();}
+	
+	if(SelectValue=='' ){
+		$('#MustBeEdited'+WeekNo+PlacementID).show();
+		return;
+		}
+	
+	$('#pPlacementID').val(PlacementID);
+	$('#pWeekNo').val(WeekNo);
+	$('#pSelectValue').val(SelectValue);
+	$('#pCommentValue').val(CommentValue);
+		
+	$('#frmFurgsComment').attr('action','IQXPost.php?proc=SynNetFurgsRatingsUpdate');
+	$('#frmFurgsComment').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var HashPos=data.indexOf('#');
+			var BarPos=data.indexOf('|');
+			var RatingString=data.substr(HashPos+1,BarPos-HashPos-1);
+			var CommentString=data.substr(BarPos+1);
+			$('#RS'+LineID).html(RatingString);
+			$('#CS'+LineID).html(CommentString);
+			
+			if (textStatus == 'success') {
+				CancelEdit(LineID);
+				}else{
+				$('#SFormError').html(data);
+				}
+			},
+		dataType: "text"
+		});	
+	CancelEdit(LineID);
+}
+
+function CancelEdit(LineID){
+	// reinstate edit line
+	
+	$('#L'+LineID).css('display','none');
+	$('#EC'+LineID).css('display','none');
+	$('#B'+LineID).css('display','inline');
+	$('#S'+LineID).css('display','none');
+	$('#U'+LineID).css('display','none');
+	$('.FixedA').removeAttr('disabled');
+	$('#MustBeEdited'+LineID).hide();
+	LoadData();
+	DisplayFurgsTotal();
+}
+</script>
+
+<div id="divFurgsComment">
+	<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+<table class="Xtablesorter" id="tblFurgsDetail">
+	<thead>
+		<tr>
+			<th>Week No</th>
+			<th>Rating</th>
+			<th>Comment</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="[FurgCommentSet.PlacementID;block=tr]">
+			<td width="20%">[FurgCommentSet.WeekNo]</td><!--GetFurgsChoiceList(this)-->
+	    	<td width="30%" id="R[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" onclick="HideEditMessage(this)" ><span id="RS[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]">[FurgCommentSet.ColA;noerr]</span><span id="ER[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" style="display:none;" ></span></td>
+			<td width="30%" id="C[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" onclick="HideEditMessage(this)" ><span id="CS[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]">[FurgCommentSet.ColBShort;noerr]</span><span id="CLC[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]"style="display:none">[FurgCommentSet.ColBLong;noerr]</span><input class="tdeditable" id="EC[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" style="display:none;" ></input></td>
+			<td width="20%">
+				<span>[FurgCommentSet.EditButton;ope=nif:N,minv;magnet=span]
+					<button id="B[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" onclick="EditRow(this)" class="FixedA" >Edit</button>
+				</span>
+				<button id="S[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" onclick="SaveLine(this)" style="display:none;">Save</button>
+				<button id="U[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" onclick="CancelEdit('[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]')" style="display:none;">Cancel</button>
+				<span id="MustBeEdited[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" style="display:none" class="errormessage">The Rating must be entered</span>
+			</td>
+			<span id="F[FurgCommentSet.WeekNo][FurgCommentSet.PlacementID]" style="display:none"></span>
+		</tr>
+	</tbody>
+</table>
+<span class="errormessage">[var.x_errormessage]</span>
+<div style="display:none">
+	<form id='frmFurgsComment' method='post'>
+		<input id='pPlacementID' Name='pPlacementID' ></input>
+		<input id='pWeekNo' Name='pWeekNo' ></input>
+		<input id='pSelectValue' Name='pSelectValue' ></input>
+		<input id='pCommentValue' Name='pCommentValue' ></input>
+	</form>
+</div>
+	
+</div>

@@ -1,0 +1,158 @@
+/* Vision */
+
+#divheading {
+	height: 120px;
+	margin-bottom: 10px;
+	background-color: white;
+	color: #872075;
+	font-family: Calibri, sans-serif;
+	font-size:20px;
+	background-image: url(images/sitelogo.png);
+	background-repeat: no-repeat;
+	background-position: top center;
+	overflow:auto;
+	top:0px;
+}
+
+#divheading h1 {
+	display:none;
+	color: #872075;
+	top:0px;
+}
+
+#divheading h2 {
+	/*display:none;*/
+	vertical-align: bottom;
+	top:90px;
+	color: #FFA448;
+	position: absolute;
+	width:100%;
+}
+
+#divheading h3 {
+	text-align:center;
+	width:100%;
+	vertical-align:bottom;
+	top:100px;
+	height: 10%;
+	position:absolute;
+	text-indent:10px;
+	color: #872075;
+}
+
+#divheadingSmall {
+	height: 25px;
+	margin-bottom: 10px;
+	background-color: #872075;
+	text-align:center;
+	vertical-align:top;
+	color: white;
+	background-repeat: no-repeat;
+	background-position:right;
+	display: none;
+}
+
+.divtitle{
+	width:600px;
+}
+
+div.divlogo {	/* logo on left */
+	height: 70px;
+	top:15px;
+	left:10px;
+	float:left;
+}
+
+#divheadingSmallSpanLeft {
+	font-size:20px;
+	color: #FFFFFF;
+	margin-bottom:10px;
+	float:left;
+	padding-left:10px;
+}
+
+#divheadingSmallSpanCentre {
+	font-size:18px;
+	color: #FFFFFF;
+	margin-bottom:10px;
+	margin-bottom:2px;
+}
+
+#divheadingSmallSpanRight {
+	font-size:18px;
+	margin-bottom:10px;
+	float:right;
+	padding-right:10px;
+}
+
+#Agencystandardtext {	/* remove standard text when non-standard text file is present */
+	display:none;
+}
+
+.logoutlink{	/* set colour for logout link */
+	color: #FFA448;
+}
+
+/* white text on active tab */
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a {
+    cursor: text;
+    color: #FFA448;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default { 
+	border: 1px 
+	solid #aed0ea; 
+	background: #d7ebf9 url(images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x; font-weight: bold; 
+	color: #872075; 
+	outline: none;
+}
+
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { 
+	color: #872075; 
+	text-decoration: none; 
+	outline: none;
+}
+
+table.Xtablesorter {
+	width:100%;
+	border-collapse: collapse;
+	border:1px solid #CDCDCD;
+}
+
+
+table.Xtablesorter tbody {
+	color:#000000;
+}
+
+table.Xtablesorter thead th {
+	color:black;
+	background-color:white;
+	border-collapse: collapse;
+}
+
+table.tablesorter tbody td {
+    background-color: #F0F0F6;
+    color: #000000;
+    padding: 4px;
+    vertical-align: top;
+}
+
+table.tablesorter tbody tr.odd td {
+	background-color:#F0F0F6;
+}
+
+table.tablesorter tbody tr.even td {
+	background-color:#F0F0F6;
+}
+
+div.LoginSpacing {
+	width:100%;
+	float:left;
+	overflow:auto;
+	padding-top:10px;
+}
+
+form.centreform label.ForgottenPassword {	
+	text-decoration:underline;
+	color:blue;
+}

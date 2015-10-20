@@ -1,0 +1,96 @@
+<!-- 20110923 Lines 8,12-36,59-68 Forgotten Password routines -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	IQXInitSection("#frmlogin");
+	IQXEnableForm("#frmlogin",{successhandler:IQXRefreshBrowser});
+	$('#labForgotten').show();	// starts off hidden so does not show if javascript is disabled
+});
+  
+  
+  function ForgottenPassword(){
+		$('#frmlogin').attr('action','IQXlogin.php?forgotten=true');
+		$('#frmlogin').ajaxSubmit({
+			success: function (data, textStatus){
+				if (textStatus=='success') {
+					if(data=='Ok'){	
+						$('#resp').text('A request has been placed. Your new password will be emailed to you shortly.');	
+						$('#parForgotten').hide();
+						$('#divForgotten').hide();
+					}else{
+						$('#respnse').text(data);	
+					}
+				} else {
+					$('#respnse').text(data);
+				}
+			},
+			dataType: "html"
+		});
+	}
+	
+ function ShowForgotten(){
+ 	$('#respnse').text('');
+ 	$('#labForgotten').hide();
+ 	$('#divForgotten').show();
+ }
+	
+</script>
+<form id="frmlogin" class="centreform" name="login" action="IQXLogin.php" method="POST" accept-charset="utf-8">
+    <fieldset>
+        <p>
+            <label for="login_uid" >
+                User ID
+            </label>
+            <input type="text" id="login_uid" name="login_uid" class="required" />
+        </p>
+        <p>
+            <label for="login_pwd" >
+                Password
+            </label>
+            <input type="password" id="login_pwd" name="login_pwd" class="required" />
+        </p>
+        <p>
+            <button type="submit" id="login_submit" class="fixed">
+                Login
+            </button>
+			
+        </p> 
+        <p id='parForgotten' >
+		<label id='labForgotten' onClick='ShowForgotten()' class='ForgottenPassword' >Forgotten password?</label>
+			<div id='divForgotten' style="display:none">
+				<label for="login_email"  >
+                	email address
+            	</label>
+            	<input type="text" id="login_email" name="login_email" />
+				<button type="button" onclick="ForgottenPassword()" >Reset password</button>
+			</div>
+		</p>
+        <p>
+            <span id='respnse' class="errormessage" ></span>
+        </p>
+    </fieldset>	
+</form>
+
+<noscript>
+		<div style="overflow:auto">
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+				<div style="background-color:lightgray;float:left;overflow:auto;width:60%">
+					<p>Your browser does not support javascript, or javascript is disabled in your settings.</p>
+					<p>Please check your browser security settings:</p>
+					<ul>
+						<li>Internet Explorer - Internet Options / Security / Internet / Custom Level / Scripting</li>
+						<li>Firefox - options / Content / Enable Javascript Tickbox</li>
+					</ul>
+					<p>or use one of the following browsers:</p>
+					<ul>
+						<li>Internet Explorer 8 onwards</li>
+						<li>Firefox 4 onwards</li>
+						<li>Chrome 11 onwards</li>
+						<li>Safari 5 onwards</li>
+						<li>Opera 11 onwards</li>
+					</ul>
+				</div>
+			<div style="float:left;overflow:auto;width:20%;height:100px">&nbsp;</div>
+		</div>	
+</noscript>

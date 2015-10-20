@@ -1,0 +1,78 @@
+<!--[onload;tplvars;clicont='NetClientContact']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("form");
+	});
+	
+	function StartChangePassword(){
+		$("#frmclicontact").hide();
+		IQXChain('#divchangepassword',{action:'load',page:'changepassword'});
+	}
+	
+	function StopChangePassword() {
+		IQXDisableForm();
+		$("#divchangepassword").empty();
+		$("#frmclicontact").show();
+	}
+</script>
+
+<div class="usertext">[onload;file=txt_client_profile_top.html;noerr]</div>
+<form id="frmclicontact" name="clicontact" action="IQXPost.php?proc=NetClientContactSet" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+        <input type="hidden" id="clicont_employmentid" name="pemploymentid" value="[clicont.employmentid;block=fieldset]" />
+        <input type="hidden" id="clicont_olddirectphone" name="polddirectphone" value="[clicont.directphone;noerr]" />
+        <input type="hidden" id="clicont_oldmobile" name="poldmobile" value="[clicont.mobile;noerr]" />
+        <input type="hidden" id="clicont_oldemail" name="poldemail" value="[clicont.email;noerr]" />
+        <input type="hidden" id="clicont_olddirectfax" name="polddirectfax" value="[clicont.directfax;noerr]" />
+        <input type="hidden" id="clicont_oldposition" name="poldposition" value="[clicont.position;noerr]" />
+        <input type="hidden" id="clicont_olddepartment" name="polddepartment" value="[clicont.department;noerr]" />
+        <p>
+            <label for="clicont_direct_phone">
+                Direct Line
+            </label>
+            <input type="text" id="clicont_direct_phone" name="pdirectphone" value="[clicont.directphone;noerr]" />
+        </p>
+        <p>
+            <label for="clicont_mobile">
+                Mobile Phone
+            </label>
+            <input type="text" id="clicont_mobile" name="pmobile" value="[clicont.mobile;noerr]" />
+        </p>
+        <p>
+            <label for="clicont_email">
+                Email Address
+            </label>
+            <input type="text" id="clicont_email" name="pemail" value="[clicont.email;noerr]" class="required email"  />
+        </p>
+        <p>
+            <label for="clicont_direct_fax">
+                Direct Fax
+            </label>
+            <input type="text" id="clicont_direct_fax" name="pdirectfax" value="[clicont.directfax;noerr]" />
+        </p>
+        <p>
+            <label for="clicont_position">
+                Position
+            </label>
+            <input type="text" id="clicont_position" name="pposition" value="[clicont.position;noerr]" />
+        </p>
+        <p>
+            <label for="clicont_department">
+                Department
+            </label>
+            <input type="text" id="clicont_department" name="pdepartment" value="[clicont.department;noerr]" />
+        </p>
+        <div class="ButtonGroup" > 
+			<button type="button" id="clicont_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">Edit</button>
+    		<button type="button" id="clicont_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">Refresh</button>
+    		<button type="button" id="clicont_changepassword" class="fixed nonformbutton" onclick="StartChangePassword()">Change Password</button>
+    		<button type="submit" id="clicont_submit" class="fixed formbutton" >Save</button>
+    		<button type="button" id="clicont_reset" class="fixed formbutton" onclick="IQXDisableForm()" >Undo</button>
+    	</div>
+    	<span class="errormessage">[var.x_errormessage]</span>
+    </fieldset>
+</form>
+<div id="divchangepassword" ></div>
+<div class="usertext">[onload;file=txt_client_profile_bottom.html;noerr]</div>
+

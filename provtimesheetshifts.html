@@ -1,0 +1,381 @@
+<!--[onload;tplvars;tss='NetProvTimesheetShifts?ptempprovtimesheetid']-->
+
+<!-- 20140124 hide buttons when shift is not worked -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	var completed=$("#divtimesheets").data("zoomedts").completed;
+	if (completed){
+		$("#tblshifts td.buttoncolumn").text("");
+		$("#timesheetshiftcalculate").remove();
+		$("#tblshifts td.tickable").addClass("locked");
+		$("#divTSSFlowEdit").hide();
+	}
+	
+	var ShowFlowEdit=false;
+	if('[var.x_userclass;noerr]'=='CLIENT' && '[var.x_local.Client.ShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}
+	if('[var.x_userclass;noerr]'=='CANDIDATE' && '[var.x_local.Candidate.ShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}
+	if('[var.x_userclass;noerr]'=='AGENCY' && '[var.x_local.Agency.ShowFlowEdit;noerr]'=='1'){ShowFlowEdit=true;}	
+	if(ShowFlowEdit==false){$("#divTSSFlowEdit").hide();}
+	
+	var ShowEditCol=false;
+	if('[var.x_userclass;noerr]'=='CLIENT' && '[var.x_local.Client.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+	if('[var.x_userclass;noerr]'=='CANDIDATE' && '[var.x_local.Candidate.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}
+	if('[var.x_userclass;noerr]'=='AGENCY' && '[var.x_local.Agency.ShowEditCol;noerr]'=='1'){ShowEditCol=true;}	
+	if(ShowEditCol==false){
+		$("[id*= colEditColumn]").hide();
+		$("#colEditColumnHead").hide();
+	}
+	
+	IQXInitSection($("#divtimesheetshifts"));
+	if (!completed) {
+		$("td.tickable button").click(hiderates);
+	}
+	if('[var.x_local.Switches.ClientHideDetail;noerr]'==''){
+		$('#Button1').hide();
+		$('#ShowTSDetail').attr('style','');
+	}
+	
+	processshifts();
+	
+	});
+	
+function editshift(row){
+	
+	IQXDisableForm();
+	hiderates();
+	var shiftid=$(row).attr("id");
+	var FlowEdit=$('#btnTSSFlowEdit').attr('class');
+	
+	IQXEnableForm("#frmtimesheetshifts",{
+		successhandler:loadshifts,
+		row:row,
+		idfieldname: "ptempshiftid",
+		idvalue: shiftid
+	});
+	
+	var DateOffset='[var.x_local.Switches.DialogDateOffset;noerr]';
+	$('input[class*=hasDatepicker]').bind('change',function(){
+		if(DateOffset>0){
+			var PickerDateVal=$(this).val();
+			var PickerDay=PickerDateVal.substring(4,6);
+			var PickerMonth=PickerDateVal.substring(7,9);
+			var PickerYear= PickerDateVal.substring(10,14);
+			var PickerDate= new Date(PickerYear+'/'+PickerMonth+'/'+PickerDay);
+			var Today=new Date();
+			var CalculatedDate=(Today-PickerDate)/86400000;
+			if (CalculatedDate > DateOffset){
+				var ReturnMessage='The date you chose was '+PickerDateVal.substring(4)+'.\n\nThat is over '+DateOffset+' days ago. Please ensure it is correct.'; 
+				alert(ReturnMessage);
+				}
+			if (CalculatedDate <0){
+				var ReturnMessage='The date you chose was '+PickerDateVal.substring(4)+'.\n\nYou should not add shifts for times in the future. If you do, the shift will be added to a timesheet in the future, and you will not be paid for that shift until then.\n\nBe aware that shifts in the future will not be displayed on the current timesheet.'; 
+				alert(ReturnMessage);
+				}
+		} 
+	});
+		
+	if(FlowEdit=='FlowEdit1'){	
+		$('input[class*=hasDatepicker]').focus();
+		$('input[class*=digits]').bind('blur',function(){
+			SubmitForm(this);	
+			});
+		}
+		$(row).attr('id',shiftid);
+		ReinstateButtons();
+	}
+
+		
+function uneditshift(row){
+	// Cancel Edit
+	
+	IQXDisableForm();
+	ReinstateButtons();
+	$("td.tickable").click(hiderates);
+	if ($(row).data("rowjustadded")==1){
+		$(row).remove();
+	};
+	}
+
+function ReinstateButtons(){
+	// skip down each row, check if buttons should be visible, then reinstate them if need be
+	
+	var RowCount=$('#tblshifts tr').length-1;
+	var LoopCounter=1;
+	var LogoType='';
+	for(LoopCounter=1;LoopCounter<=RowCount;LoopCounter++){
+		LogoType=$('#trs'+LoopCounter+'_Tick').children('button').children('span').attr('class');
+		LogoType=LogoType.substring(LogoType.length-5);
+		if(LogoType=='minus'){
+			$('#ButtonDiv'+LoopCounter).hide();
+		}else{
+			$('#ButtonDiv'+LoopCounter).show();
+		}
+	}
+	
+		
+}	
+
+function copyshift(row){
+	// Copy shift
+	
+	var NewRowCount=$('#tblshifts tr').length;
+	var idcount=$("#tblshifts").data("rowaddid");
+	if (idcount==undefined){
+		idcount=0;
+	}
+	idcount=idcount+1;
+	$("#tblshifts").data("rowaddid",idcount);
+	var newid='Copy' + idcount + $(row).attr("id");
+	$(row).clone().attr('id',newid).appendTo('#tblshiftsbody');	
+	var newrow=$("#"+newid).get(0);
+	$(newrow).data("rowjustadded",1);
+	$(newrow).find("td.tickable").tickable();
+	$(newrow).find("button.tickable").addClass("ticked");  // New row is automatically ticked
+	$(newrow).find("td button").mouseoverclass();
+	
+	$(newrow).find('[id$="pshiftdate"]').attr('id','trs'+NewRowCount+'_pshiftdate');
+	$(newrow).find('[id$="ptimefrom"]').attr('id','trs'+NewRowCount+'_ptimefrom');
+	$(newrow).find('[id$="ptimeto"]').attr('id','trs'+NewRowCount+'_ptimeto');
+	$(newrow).find('[id$="pbreakminutes"]').attr('id','trs'+NewRowCount+'_pbreakminutes');
+	$(newrow).find('[id$="pduration"]').attr('id','trs'+NewRowCount+'_pduration');
+	$(newrow).find('[id$="description"]').attr('id','trs'+NewRowCount+'_description');
+	$(newrow).find('[id$="Tick"]').attr('id','trs'+NewRowCount+'_Tick');
+	$(newrow).find('[id^="ButtonDiv"]').attr('id','ButtonDiv'+idcount);
+	$(newrow).find('[id$="_Tick"]').attr('onclick','HideEditButton(this,'+NewRowCount+')');
+	$(newrow).find('[id^="E"]').attr('id','E'+NewRowCount);
+	$(newrow).find('[id^="E"]').attr('id','C'+NewRowCount);
+	$(newrow).find('[id^="E"]').attr('id','S'+NewRowCount);
+	$(newrow).find('[id^="E"]').attr('id','U'+NewRowCount);
+	editshift(newrow);
+	}
+
+function processshifts(){
+	// Process shifts
+	
+	var shiftlist = [];
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	$("tr > td > button.ticked",$("#divtimesheetshifts")).each(function(){
+		shiftlist.push(this.parentNode.parentNode.id);
+	});
+	IQXChain('#divtimesheetrates',{action:'send',proc:'NetProvTimesheetShiftsSelect',postdata:{pTempProvTimesheetID:tsid,pShiftList:shiftlist.toString()},
+	 nextlink:{action:'send',service:'ProvTSProcessRateScript',postdata:{id:tsid},
+	 nextlink:{action:'func',func:loadrates}}});
+}	
+
+function loadrates(){
+	var tsid=$("#divtimesheets").data("zoomedts").id;
+	IQXChain('#divtimesheetrates',{action:'load',page:'provtimesheetrates&ptempprovtimesheetid=' + encodeURIComponent(tsid)});
+}
+
+function TSShowDetail(){
+	// Show timesheet details
+	
+	var VacID=$('#VacID').val();
+	
+	
+	if($('#btnShowTSSDetail').html()=='Show Details'){
+		$('#ShowTSSDetail').show();
+		$('#btnFlowEdit').show();
+		
+		$('#btnShowTSSDetail').html('Hide Details');
+		if('[var.x_local.Switches.ShowRowStriping;noerr]'=='1'){
+			$('td.tdeditable.required.longdate').each(function(i){
+				var LineDay=$(this).html().substring(4,6);
+				if(LineDay%2==0){$(this).parent().children().css('background-color','#DFDFDF');};
+			});
+		}
+	}else{
+		$('#ShowTSSDetail').hide();
+		$('#btnTSSFlowEdit').hide();
+		$('#btnShowTSSDetail').html('Show Details');
+	
+	}
+}
+
+function ShowDetail(){
+	// Show timesheet details
+	
+	if($('#btnShowTSDetail').html()=='Show Details'){
+		$('#ShowTSDetail').show();
+		$('#btnFlowEdit').show();
+		
+		$('#btnShowTSDetail').html('Hide Details');
+
+		$('td.tdeditable.required.longdate').each(function(i){
+			var LineDay=$(this).html().substring(4,6);
+			if(LineDay%2==0){$(this).css('background-color','#CFCFCF');};
+		});
+	}else{
+		$('#ShowTSDetail').hide();
+		$('#btnFlowEdit').hide();
+		$('#btnShowTSDetail').html('Show Details');
+	
+	}
+}
+
+function SubmitForm(row){
+	// submit form, and either return, or flow edit
+	
+	$('#frmtimesheetshifts').attr('action','IQXPost.php?proc=NetProvTimesheetShiftSet');
+	
+	var Err = $('[class*=error]').text().length;
+	var IsVisible=$('[class*=error]').css('display');
+	if(Err!=0 && IsVisible!='none'){
+		alert('There appears to be an error - please check and correct before proceeding');
+		$('[class*=error]').text('');
+		exit;
+	}
+	
+	var ThisRow=$(row).parent().parent().attr('id');
+	var NextRow=$(row).parent().parent().next('tr');
+	var pdate=$('td[id*=pshiftdate]').children('input').val();
+	var pfrom=$('td[id*=ptimefrom]').children('input').val();
+	var pto=$('td[id*=ptimeto]').children('input').val();
+	var pbreak=$('td[id*=pbreakminutes]').children('input').val();
+	var pNote=$('td[id*=pNote]').children('input').val();
+	var FlowEdit=$('#btnTSSFlowEdit').attr('class');
+	var ReturnTime;
+	var ReturnRowID;
+	
+	$('#frmtimesheetshifts').ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			if (textStatus != 'success') {
+				$('.errormessage').html(data);
+				exit;
+				}
+				
+			ReturnTime=data.substring(data.indexOf('#')+1,data.indexOf('|'));
+			ReturnRowID=data.substring(data.indexOf('|')+1);
+						
+			IQXDisableForm();
+			$("td.tickable").click(hiderates);
+			
+			$('#'+ThisRow +' td[id*=pshiftdate]').html(pdate);
+			$('#'+ThisRow +' td[id*=ptimefrom]').html(pfrom);
+			$('#'+ThisRow +' td[id*=ptimeto]').html(pto);
+			$('#'+ThisRow +' td[id*=pbreakminutes]').html(pbreak);
+			$('#'+ThisRow +' td[id*=pNote]').html(pNote);
+					
+			if((FlowEdit=='FlowEdit1') && ($(NextRow).attr('id')!=null)){
+				editshift($(NextRow,1));
+			}else{
+				IQXDisableForm();
+				$("td.tickable").click(hiderates);
+				if($(NextRow).attr('id')==null){
+					$('#btnFlowEdit').hide();
+					$('#spanTSSFlowEditInstructions').hide();
+					}
+					
+				}
+			$('#'+ThisRow +' td[id*=pduration]').html(ReturnTime);
+			$('#'+ThisRow).attr('id','Shift_'+ReturnRowID);
+			},
+		error: function(data,textStatus){
+			$('.errormessage').html(data);
+			},
+		dataType: "text"
+		});	
+	
+}
+
+function TSSFlowEdit(){
+	// Flow Edit all table lines, using tab to skip between fields
+	
+	var active=$('#btnTSSFlowEdit').attr('class');
+	
+	if(active=='FlowEdit mouseover'){
+		$('#btnTSSFlowEdit').attr('class','FlowEdit1 mouseover');
+		$('#spanTSSFlowEditInstructions').show();
+	}else{
+		$('#btnTSSFlowEdit').attr('class','FlowEdit mouseover');
+		$('#spanTSSFlowEditInstructions').hide();
+	}
+}
+
+function NewRow(){
+	// add a new row where there are none
+	
+	var HtmlString="";
+	HtmlString+='<tr id="Copy_Shift" >';
+	HtmlString+='<td id="trsNew_pshiftdate" name="pshiftdate" class="tdeditable required longdate" tabindex="1"></td>';
+	HtmlString+='<td id="trsNew_ptimefrom" name="ptimefrom" class="tdeditable required time" tabindex="2"></td>';
+	HtmlString+='<td id="trsNew_ptimeto" name="ptimeto" class="tdeditable required time" tabindex="3"></td>';
+	HtmlString+='<td id="trsNew_pbreakminutes" name="pbreakminutes" class="tdeditable digits" tabindex="4"></td>';
+	HtmlString+='<td id="trsNew_pduration" name="pduration" class="number twodp rightalign"></td>';
+	HtmlString+='<td id="trsNew_description" name="description" ></td>';
+	HtmlString+='<td width=30 align="center" class="tickable"></td>';
+	HtmlString+='<td id="trsNew_pNote" name="pNote" class="tdeditable" tabindex="5">[onload_TH2;block=td;when [var.x_local.Switches.ShowNoteColumn;noerr]!='';noerr]</td>';
+	HtmlString+='<td class="buttoncolumn" width=120>';
+	HtmlString+='<button type="button" class="tablebutton formbutton" onclick="SubmitForm(this)">Save</button>';
+	HtmlString+='<button type="button" class="tablebutton formbutton" onclick="uneditshift(this.parentNode.parentNode)">Undo</button>';
+	HtmlString+='</td>';
+	HtmlString+='</tr>';
+		
+	$('#tblshiftsbody').html(HtmlString);
+	editshift($('#Copy_Shift'));
+}
+
+function HideEditButtons(btn,RowID){
+	
+	var IsTicked=$(btn).children().attr('class').indexOf('ticked');
+	if(IsTicked==-1){
+		$('#E'+RowID).hide();
+		$('#C'+RowID).hide();
+	}else{
+		$('#E'+RowID).show();
+		$('#C'+RowID).show();
+	}
+}
+</script>
+
+<button type="button" id="btnShowTSDetail" class="fixed nonformbutton" onclick="ShowDetail()" >Show Details</button>
+
+<div id="ShowTSDetail" style="display:none" >
+	<form id="frmtimesheetshifts"  method="post" accept-charset="utf-8">
+		<table class="tablesorter" id="tblshifts" >
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>From</th>
+					<th>To</th>
+					<th>Break (minutes)</th>
+					<th>Hours</th>
+					<th>Description</th>
+					<th>Worked</th>
+					<th>[onload_TH1;block=th;when [var.x_local.Switches.ShowNoteColumn;noerr]!='';noerr][var.x_local.Switches.ShowNoteColumn;noerr]</th>
+					<th>
+		    			<div id="divTSSFlowEdit">
+	        		    	<button type="button" id="btnTSSFlowEdit" onClick="TSSFlowEdit()" class="FlowEdit" title="Red = tab from one line to the next S">Flow Edit</button>
+	        		    	<div id="spanTSSFlowEditInstructions" style="display:none" class="ToolTipPopupNarrow" >Click Edit on the line you want to start editing.<br /><br />Use the tab key to move between fields.<br /><br />To finish editing, unclick the Flow Edit button, then press Save, on the final line</div>
+            			</div>
+					</th>
+				</tr>
+			</thead>
+			<tbody id="tblshiftsbody">
+				<tr id="Shift_[tss.tempshiftid;block=tr]" >
+					<td id="trs[tss.#]_pshiftdate" class="tdeditable required longdate" tabindex="1">[tss.shiftdate]</td>
+					<td id="trs[tss.#]_ptimefrom" class="tdeditable required time" tabindex="2">[tss.timefrom]</td>
+					<td id="trs[tss.#]_ptimeto" class="tdeditable required time" tabindex="3">[tss.timeto]</td>
+	    			<td id="trs[tss.#]_pbreakminutes" class="tdeditable digits" tabindex="4">[tss.breakminutes;noerr]</td>
+	    			<td id="trs[tss.#]_pduration" class="number twodp rightalign">[tss.shiftduration;noerr]</td>
+	    			<td id="trs[tss.#]_description" >[tss.description;noerr]</td>
+					<td width=30 align="center" id="trs[tss.#]_Tick" class="tickable" onclick="HideEditButtons(this,'[tss.#]')">[tss.tick;noerr]</td>
+					<td width=30 id="trs[tss.#]_pNote" class="tdeditable" tabindex="5">[onload_TD1;block=td;when [var.x_local.Switches.ShowNoteColumn;noerr]!='';noerr][tss.TSNote;noerr]</td>
+	    			<td id="ButtonDiv[tss.#]"class="buttoncolumn" width=120>
+	    				<button type="button" id="E[tss.#]" class="tablebutton nonformbutton" onclick="editshift(this.parentNode.parentNode)">Edit</button>
+	    				<button type="button" id="C[tss.#]" class="tablebutton nonformbutton" onclick="copyshift(this.parentNode.parentNode)">Copy</button>
+	    				<button type="button" id="S[tss.#]" class="tablebutton formbutton" onclick="SubmitForm(this)">Save</button>
+	    				<button type="button" id="U[tss.#]" class="tablebutton formbutton" onclick="uneditshift(this.parentNode.parentNode)">Undo</button>
+	    				<input type="hidden" id="VacID" value="[tss.VacancyID;noerr]" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+
+	<span class="errormessage">[var.x_errormessage]</span>
+	<button type="button" id="timesheetshiftcalculate" class="fixed nonformbutton" onclick="processshifts()" >Calculate</button>
+</div>

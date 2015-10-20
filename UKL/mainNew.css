@@ -1,0 +1,166 @@
+/* WORDPRESS OVERRIDE */
+label {font-size:1em; font-weight:normal; float:none; margin:0;}
+form input, form select, form textarea {width:auto; border:none; font-size:1.2em; font-weight:bold; font-style:italic; padding:5px 21px;}
+form select option.indent {font-weight:normal;}
+form input[type=file] {background:none; padding:0;}
+
+li, p, span, dl {font-size:1em;}
+form input, form select, form textarea {font-famly: Lucida Grande,Lucida Sans,Arial,sans-serif; font-weight:normal; font-style:normal;}
+
+h1, h2, h3, h4, h5, h6 {font-style:normal; text-decoration:none;}
+
+#content {font-size:1.25em;}
+
+/* REGISTRATION FORM OVERRIDE */
+#left li, #left p, #left span, #left dl {font-size:1.2em; line-height:1.6em;}
+
+#left .qquestrow .qquestion {font-size:1.2em; float:left; display:block; width:50%; margin:3px 0 0;}
+#left .qmultientry input {float:left; display:block; margin:0 10px 5px 0;}
+#left .qmultientry {clear:both; width:96%; margin:10px 2%;}
+#left .qquestrow .qquestion {width:37%; font-weight:bold;}
+#left .qquestrow {width:100%; display:block; margin-bottom:10px;}
+#left {position:relative;}
+#left li.contact-btn {position:absolute; bottom:10px; right:10px;}
+#left .qquestrow .qhead {display:block; text-indent:-99999px;}
+
+#left.register-form {float:none; width:auto;}
+#content .register-form .reg-desc {width:66%;}
+#content .register-form fieldset {margin-bottom:30px; padding-bottom:15px; border-bottom:1px solid #999999;}
+#content .register-form legend {color:#999999; font-size:1.6em; font-style:italic; font-weight:bold; padding-bottom:10px;}
+#content .register-form label {font-size:1em; font-weight:bold; float:left; margin: 7px 15px 0 0; width:134px;}
+#content .register-form label.error {width:auto; font-weight:normal; margin:0; float:none;}
+#content .register-form li.gr-pass label.error {display:block;}
+#content .register-form li.split {width:50%; float:left;}
+#content .register-form .gr-account li.split { height:65px;}
+#content .register-form .gr-account li.split.gr-pass {float:none;}
+#content #cand_email, #content #cand_username {width:225px;}
+#content .register-form .gr-about .qquestrow {margin-bottom:0;}
+#content .register-form .gr-details .qquestrow {margin-bottom:0;}
+#content .register-form .gr-details .qquestrow input {width:225px;}
+#content .register-form .gr-details .qquestrow input#cand_postcode {width:100px;}
+#content .register-form .gr-details .qquestrow.address input {margin-bottom:-3px;}
+#content .register-form .gr-details .qquestrow.address.ad_last input {-moz-border-radius-topleft: 0px; -moz-border-radius-topright: 0px; -moz-border-radius-bottomright: 7px; -moz-border-radius-bottomleft: 7px; -webkit-border-top-left-radius: 0px; -webkit-border-top-right-radius: 0px; -webkit-border-bottom-right-radius: 7px; -webkit-border-bottom-left-radius: 7px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; margin-bottom:5px;}
+#content .register-form .gr-details .qquestrow.address.ad_mid input {-moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px;}
+#content .register-form .gr-details .qquestrow.address.ad_top input {-moz-border-radius-topleft: 7px; -moz-border-radius-topright: 7px; -moz-border-radius-bottomright: 0px; -moz-border-radius-bottomleft: 0px; -webkit-border-top-left-radius: 7px; -webkit-border-top-right-radius: 7px; -webkit-border-bottom-right-radius: 0px; -webkit-border-bottom-left-radius: 0px;  border-top-left-radius: 7px; border-top-right-radius: 7px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px;}
+#content .register-form .gr-details input {margin-bottom:5px;}
+#content .register-form .gr-about input {width:225px;}
+#content .register-form .gr-about select {width:80px; background:#EEEBE6; padding:5px;}
+#content .register-form #cand_password {margin-bottom:3px;}
+#content .register-form #cand_password, #content .register-form #cand_passwordcheck {width:225px;}
+
+#head form input, #head form select {font-weight:bold; font-style:italic; font-size:1.4em;}
+#head form li.all-links {margin-top:-4px;}
+#head form li.all-links ul li {margin-bottom:2px;}
+#head form li.all-links ul li a {font-size:1.2em;}
+
+#tblcandreg .qmultientry label {font-size:1.2em; float:left; display:block; width:33%; margin:3px 0 0;}
+#tblcandreg .qmultientry input {float:left; display:block; margin:0 10px 5px 0;}
+#tblcandreg .qmultientry {clear:both; width:96%; margin:10px 2%;}
+
+#candtabs, #clienttabs {margin-top:-10px; background:#FFFFFF; -moz-border-radius-topleft: 0px; -moz-border-radius-topright: 0px; -moz-border-radius-bottomright: 7px; -moz-border-radius-bottomleft: 7px; -webkit-border-top-left-radius: 0px; -webkit-border-top-right-radius: 0px; -webkit-border-bottom-right-radius: 7px; -webkit-border-bottom-left-radius: 7px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; -webkit-box-shadow:  0px 1px 3px #555555; -moz-box-shadow: 0px 1px 3px #555555; box-shadow: 0px 1px 3px #555555;}
+.ui-widget-header {background:none; border:0;}
+.ui-widget-content {border:0; float:left; width:100%;}
+.ui-tabs {padding:6px 6px 6px 18px;}
+.ui-tabs-nav {width:100%; float:left; margin-bottom:10px; display:block; clear:both; font-family:Georgia, "Times New Roman", Times, serif; font-weight:bold; cursor:pointer; font-style:italic; text-shadow: 1px 1px 2px #000000; filter: dropshadow(color=#000000, offx=1, offy=1);}
+.ui-tabs-nav .ui-state-active a, .ui-state-active a:hover, .ui-state-active:active, .ui-state-active:focus, .ui-state-active:visited {color:#FFE700; border:0;  -moz-border-radius-topleft: 0px; -moz-border-radius-topright: 0px; -moz-border-radius-bottomright: 0px; -moz-border-radius-bottomleft: 0px; -webkit-border-top-left-radius: 0px; -webkit-border-top-right-radius: 6px; -webkit-border-bottom-right-radius: 0px; -webkit-border-bottom-left-radius: 0px; border-top-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-bottom-left-radius: 0px;}
+.ui-tabs-nav .ui-state-default a, .ui-state-default a:hover, .ui-state-default:active, .ui-tabs-selected, .ui-state-default:focus, .ui-state-default:visited {color:#FFFFFF;}
+.ui-tabs-nav .ui-state-active {color:#FFE700; background:#5E5D5B;}
+#content #login-form input:focus, #content #login-form input:active {background:#FFFFFF;}
+
+.ui-tabs-nav #D {display:none;}
+.ui-tabs-nav .ui-state-default {background:#888888; border:0;}
+.ui-state-active, .ui-widget-content .ui-state-active {margin-right:3px; border:none; float: left; font-size:1.2em; padding:4px 10px;}
+.ui-tabs-hide {display:none;}
+
+#content input {background:#EEEBE6; padding:7px 10px; margin:3px 0 3px;}
+#content input:focus {background:#DFD9D2;}
+
+.fc .fc-grid td { border-color:#999999; }
+.ui-state-default, .ui-widget-content .ui-state-default {margin-right:3px; color:#666666; float:left; font-size:1.2em;}
+.fc-content .fc-not-today { background:#ECECEC; }
+.ui-state-default, .ui-widget-content th.ui-state-default { padding:4px 10px; background:#888888; font-family:Georgia, "Times New Roman", Times, serif; text-shadow: 1px 1px 2px #000000; filter: dropshadow(color=#000000, offx=1, offy=1); color:#FFFFFF; font-style:italic; filter: dropshadow(color=#000000, offx=1, offy=1);}
+.fc-header-center .ui-state-default, .fc-header-right .ui-state-default, .fc-header-center .ui-widget-content .ui-state-default {background:#999999; border:none; color:#FFE700;}
+.fc-header-center .ui-tabs-nav .ui-state-default a, .fc-header-right .ui-state-default a, .fc-header-center .ui-state-default a:hover, .fc-header-center .ui-state-default:active { background:none; color:#FFFFFF;}
+.fc-header-center .ui-state-default a, .fc-header-right .ui-state-default a, .fc-header-center .ui-state-default a:link, .fc-header-center .ui-state-default a:visited {color:#FFFFFF; text-shadow: 1px 1px 2px #000000; filter: dropshadow(color=#000000, offx=1, offy=1); font-family:Georgia, "Times New Roman", Times, serif; font-style:italic;}
+.fc-header-center .ui-state-active {color:#FFE700; background:#5E5D5B;}
+.qquestrow .qhead {display:none;}
+
+.ui-state-default .ui-icon {background-image:url(jqueryUI/images/ui-icons_ffffff_256x240.png);}
+
+#divcontent {padding-top:10px;}
+#login-form {width:40.75%; margin-bottom:15px;}
+#login-form label {float:left; font-size:1.3em; margin-top:8px; font-weight:bold;}
+
+.fixed.btn {margin:25px 0 0 20px;}
+
+#clienttabs #tblFtimesheets {width:100%;}
+#clienttabs tr.odd {background:#ECECEC;}
+#clienttabs tr.odd td.sorting_1, #clienttabs tr.odd td.sorting_2 {background:#CCCCCC;}
+#clienttabs tr.even td.sorting_1, #clienttabs tr.even td.sorting_2 {background:#F5F5F5;}
+#clienttabs table td, #clienttabs table th {padding:5px 10px;}
+#clienttabs #ui-tabs-72 {padding:30px 0;}
+#clienttabs #tblcliprevtemp {width:66%;}
+
+#frmclicontact p {padding-bottom:0;}
+#frmclicontact label { display:block; }
+#frmclicontact #clicont_email {width:200px;}
+
+.home #content .qmultientry {float:left; clear:both; width: 100%; margin:5px 0 10px 10px;}
+.home #content .qmultientry label {font-weight:bold; float:left; width:23.35%; margin-bottom:5px; font-size:0.8em;}
+.home #content .qmultientry label input {float:left; margin:-1px 3px 0 0;}
+
+.questionnaire .qquestrow .qquestion {font-weight:bold;}
+
+.questionnaire button.btn {position:absolute; bottom:20px; right:20px;}
+
+.user-list li {font-size:1.2em;}
+.user-list li a {text-decoration:underline;}
+
+table#tblcandreg, table#tblcanddocs {width:50%; margin:10px 0;}
+table#tblFtimesheets {width:85%; margin:10px 0;}
+.sorting_asc, .sorting_desc, .sorting {background:none;}
+table#tblcandreg th, table#tblcanddocs th, table#tblFtimesheets th {font-weight:bold;}
+table#tblFtimesheets th {font-size:0.9em;}
+table#tblcandreg td, table#tblcanddocs td {padding:2px 0;}
+
+table#tblcandreg button, #candreg_refresh, #cand_edit, #cand_refresh, #cand_changepassword, #SelectFileButton, table#tblcanddocs a,
+.dataTables_search {
+    font-family:Georgia, "Times New Roman", Times, serif;
+    font-weight:bold;
+    cursor:pointer;
+    border:none;
+    font-style:italic;
+    padding:3px 5px;
+    background:url(../../wp-content/themes/ukl/images/styling/btn-bg.png) repeat-x;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow:0px 1px 3px #555555;
+    -moz-box-shadow: 0px 1px 3px #555555;
+    box-shadow: 0px 1px 3px #555555;
+}
+
+#cand_edit, #cand_refresh {margin-right:10px;}
+
+.dataTables_empty {background:#EEEBE6;}
+
+table.ui-datepicker-calendar a.ui-state-default {color:#FFFFFF; background:none;}
+#ui-datepicker-div {width:182px; background:#DFD9D2; padding:10px; font-size:1.2em;}
+.ui-datepicker-calendar {background:#CCCCCC; }
+.ui-datepicker-calendar td, .ui-datepicker-calendar th {padding:3px; border:1px solid #999999; text-shadow: 1px 1px 2px #000000;}
+.ui-datepicker-calendar th {color:#FFE700; background:#666666;}
+.ui-datepicker-calendar td {}
+.ui-datepicker-calendar a, .ui-datepicker-calendar .ui-state-active {margin:0; padding:0; width:100%; height:100%; text-align:center;}
+table.ui-datepicker-calendar td:hover, table.ui-datepicker-calendar td.ui-datepicker-current-day {background:#999999;}
+table.ui-datepicker-calendar a.ui-state-default:hover, table.ui-datepicker-calendar a.ui-state-active {color:#FFE700;}
+
+.ui-datepicker-title {float: right; margin-bottom:10px;}
+.ui-datepicker-header a {float:left; margin-right:10px; cursor:pointer;}
+.hasDatepicker {border:0; width:182px;}
+.dataTables_filter input {border:0;}
+
+.dataTables_length {width:17%; margin-top:9px;}
+.dataTables_dateRange {float:left; width:59%;}
+#tblFtimesheets_filter {float:left; width:22%;}
+
+.dataTables_search {margin-left:3px;}

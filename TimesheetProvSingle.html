@@ -1,0 +1,113 @@
+<!--[onload;tplvars;ts='NetProvTimesheet?ptempprovtimesheetid';tss=NetProvTimesheetShifts?ptempprovtimesheetid;tst='NetProvTimesheetTimes?ptempprovtimesheetid';tsr='NetProvTimesheetRates?ptempprovtimesheetid']-->
+
+<!-- 20131108 Date and Ref columns added -->
+
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+	
+	IQXInitSection($('#divTimesheetSingle'));
+	$(".tstotal",'#divTimesheetSingle').totalcolumn("#tstotal",2);
+	
+	$('#tstotal').attr('id','tstotal1');
+	$('#divTimesheetSingle').attr('id','divTimesheetSingle1');
+	
+	});
+	
+</script>
+
+<div id="divTimesheetSingle" class="printablePage">
+	
+	<div class="usertext">[onload;file=txt_timesheet_printable_top.html;noerr]</div>
+
+	<div class="printableSection">
+		<h4>Timesheet Details</h4>
+		<p><label>Client</label>[ts.companyname;block=div;noerr]</p>	
+		<p><label>Timesheet Number</label>[ts.serialnumber;noerr]</p>	
+		<p><label>Period End Date</label>[ts.weekenddate;noerr]</p>	
+		<p><label>Temp</label>[ts.tempname;noerr]</p>	
+		<p><label>Position</label>[ts.position;noerr]</p>	
+		<p><label>Authorised</label>[ts.completedat;noerr;magnet=p]</p>	
+		<p><label>Authorised By</label>[ts.completedby;noerr;magnet=p]</p>	
+	</div>
+
+	<div class="printableSection">	
+		<h4>Shifts Worked</h4>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>From</th>
+					<th>To</th>
+					<th>Break (minutes)</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr id="[tss.shiftdate;block=tr]">
+					<td>[tss.shiftdate;block=tr]</td>
+					<td>[tss.timefrom]</td>
+					<td>[tss.timeto]</td>
+	    			<td>[tss.breakminutes;noerr]</td>
+	    			<td>[tss.description;noerr]</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="printableSection">[onload;block=div;when [var.x_params.ptstype;noerr]='T']
+		<h4>Times Worked</h4>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th class="rightalign">Hours</th>
+					<th>Start Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="longdate">[tst.shiftdate;block=tr]</td>
+					<td class="number twodp rightalign">[tst.hours;noerr]</td>
+					<td class="time">[tst.timefrom;noerr]</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="printableSection">
+		<h4>Charges</h4>
+		<table>
+			<thead>
+				<tr>
+					<th>Day</th>
+					<th>Ref</th>
+					<th>Pay Type</th>
+					<th>Unit</th>
+					<th class="rightalign">Units</th>
+					<th class="rightalign">Rate</th>
+					<th class="rightalign">Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>[tsr.ShiftDay]</td>
+					<td>[tsr.TheirRef]</td>
+					<td>[tsr.BandDescription;block=tr]</td>
+					<td>[tsr.UnitDescription;noerr]</td>
+					<td class="number twodp rightalign">[tsr.Units;noerr]</td>
+		    		<td class="number twodp rightalign">[tsr.Rate;noerr]</td>
+					<td class="tstotal twodp rightalign">[tsr.Total]</td>
+				</tr>
+				<tr>
+					<td colspan=6>Total</td>	
+					<td id='tstotal' class="twodp rightalign">[ts.serialnumber;noerr]</td>	
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="usertext">[onload;file=txt_timesheet_printable_bottom.html;noerr]</div>
+
+</div>

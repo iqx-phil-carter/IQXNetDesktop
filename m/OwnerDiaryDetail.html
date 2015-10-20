@@ -1,0 +1,185 @@
+﻿<!--[onload;tplvars;DiaryListDetail='MobileNetOwnerDiary?pCalendarLineID&pEventType&pDaysInFuture']-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($('#pLineID').val() == '' || '[DiaryListDetail.pCalendarLineID;noerr]' == 'new') { DiaryEdit('new'); }
+        $('#btnOwnerDDDiary').attr('href', 'iqxnet.php?P=OwnerDiary&pEventType=[DiaryListDetail.EventType;noerr]&pDaysInFuture=[DiaryListDetail.pDaysInFuture;noerr]');
+        $('#DDTaskButtons').hide();
+        $('#btnOwnerDDHelp').attr('href', window.HelpRoot + 'hat_1');
+        if ('[DiaryListDetail.EventType;noerr]' != 'P') { $('#btnOwnerDDHistory').hide(); }
+        $('form').keypress(function (event) {
+            if (event.which == 13) {
+                event.preventDefault();
+                DiarySave();
+            }
+        })
+        
+    });
+
+    function LoadDiaryDetailPage(line) {
+
+        var LineID = $(line).attr('id');
+        if (LineID == '') { return; }
+        var PageType = $("td", line).html();
+        var DestPage = 'iqxnet.php?P=Owner' + PageType + '&p' + PageType + 'ID=' + LineID + '&pEventType=[DiaryListDetail.EventType;noerr]';
+        window.pReturnID = '[DiaryListDetail.LineID;noerr]';
+        window.pEventType = '[DiaryListDetail.EventType;noerr]';
+        window.pContactEventLineID = '[DiaryListDetail.LineID;noerr]';
+       
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
+
+    function DiaryEdit(line) {
+        DDShowNav();
+
+        if (line == 'Note' || line=='new') {
+            $('#NoteArea').html('<textarea id="NoteText" name="pNote" value="" onblur="DiarySave()" />');
+        }
+        if (line == 'Priority' || line == 'new') {
+            var SelectString = '<select id="PriorityText" name="pPriority"> ';
+            for (var Loopcounter = 1; Loopcounter <= 5; Loopcounter++) {
+                SelectString = SelectString + '<option value="' + Loopcounter + '"';
+                if (Loopcounter == '[DiaryListDetail.Priority;noerr]') { SelectString = SelectString + ' selected="true" '; }
+                SelectString = SelectString + '>' + Loopcounter + '</option>';
+            }
+            SelectString = SelectString + '</select>';
+            $('#PriorityArea').html(SelectString);
+        }
+        if (line == 'Status') {
+            if ('[DiaryListDetail.EventType;noerr]' != 'D') {
+                $.get('IQXRawData.php?page=MobileNetOwnerContactEventDropdownOuter?pClass=' + '[DiaryListDetail.pEventType;noerr]' + '&pDefaultVal=' + $('#StatusArea').html() + '&render=text_plain', function (data) {
+                    var ResultString = data;		// below: lose xml headers and add option tags
+                    var StartPoint = ResultString.indexOf('![CDATA[');
+                    var Endpoint = ResultString.indexOf(']]><');
+                    ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+                    ResultString = '<select id="comboStatus" name="pStatus"><option value=""></option>' + ResultString + '</option></select>';
+                    $('#StatusArea').html(ResultString);
+                });
+            } else {
+                $('#StatusArea').html('<input type="hidden" id="comboStatus" name="pStatus" value="" />');
+            }
+        }
+        if (line == 'new') {
+            $('#StatusArea').html('<select id="comboStatus" name="pStatus"><option value="Rem">Diary entry</option></select>');
+            $('#TimeArea').html(Date);
+        }
+        $('#btnOwnerDDComplete').show();
+    }
+
+    function DiarySave() {
+       var PriorityValue = '';
+        var NoteText = '';
+        var StateValue = '';
+        if('[DiaryListDetail.Priority;noerr]' != $('#PriorityText').val()){PriorityValue=($('#PriorityText').val());}
+        if ($('#NoteText').val() != '') {NoteText = $('#NoteText').val();}
+        if ($('#comboStatus option:selected').html() != '[DiaryListDetail.Status;noerr]') { StateValue = $('#comboStatus option:selected').html(); }
+        if (NoteText == '' && PriorityValue == '' && StateValue=='') {
+            
+            $('#PriorityArea').html('[DiaryListDetail.Priority;noerr]');
+            $('#StatusArea').html($('option:selected').html());
+        } else {
+            $('#frmCreateDiaryEntry').ajaxSubmit({
+                success: function (data, textStatus) {
+                    if (textStatus == 'success' && data == 'Ok') {
+                        $('#NoteArea').html(NoteText);
+                        $('#PriorityArea').html(PriorityValue);
+                        $('#StatusArea').html(StateValue);
+                    } else {
+                        $('#ErrorDiv').html(data);
+                    }
+                },
+                error: function (data, textStatus) {
+                    $('#ErrorDiv').html(data);
+                },
+                dataType: "html"
+            });
+        }
+        $('#btnOwnerDDComplete').hide();
+        $('#btnOwnerDDEdit').show();
+    }
+
+    function ShowHistory() {
+
+        var DestPage = 'iqxnet.php?P=OwnerDiaryDetailHistory&pLineID=[DiaryListDetail.LineID;noerr]';
+        
+        jQuery.mobile.changePage(DestPage, {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+
+    }
+
+    function DDShowNav() {
+        $('#DDTaskButtons').fadeIn();
+        $('#DDTaskButtons').fadeOut();
+        $('#DDTaskButtons').fadeIn();
+    }
+
+</script>
+
+<nav role="navigation" style="display:block;float:left">
+    <span class="btnNavLeft"><a id="btnOwnerDDHome" href="iqxnet.php?P=[var.x_userclass;noerr]_tabs" data-role="button" data-icon="home" data-iconpos="notext">Home</a></span>
+    <span class="btnNavLeft"><a id="btnOwnerDDDiary" href="" data-role="button" data-icon="arrow-l" data-iconpos="notext">Diary</a></span>
+    <span class="btnNavLeft"><a id="btnOwnerDDHistory" href="" data-role="button" data-icon="grid" data-iconpos="notext" onclick="ShowHistory()">History</a></span>
+    <span class="btnNavLeft"><a id="btnOwnerDDHelp" href="" data-role="button" data-icon="info" data-iconpos="notext" target="_new">Help</a></span>
+</nav>
+<span>Diary Detail</span>
+<nav id="DDTaskButtons" role="navigation" style="display:block;float:right">
+    <span class="btnNavRight"><a id="btnOwnerDDComplete" href="" data-role="button" data-icon="check" data-iconpos="notext" onclick="DiarySave()">Complete</a></span>
+</nav>
+<br />
+
+<div id="divDiaryDetail">
+    <form id="frmCreateDiaryEntry" method="post" action="IQXPost.php?proc=MobileNetOwnerEditDiaryDetail">
+        <input type="hidden" id="pLineID" name="pLineID" value="[DiaryListDetail.LineID;noerr]" />
+        <input type="hidden" name="pTypeID" value="[DiaryListDetail.EventType;noerr]" />
+        <input type="hidden" name="pCutoffDate" value="[DiaryListDetail.pDaysInFuture;noerr]" />
+        <table class="tablesorter">
+            <tr>
+                <td>Time</td>
+                <td id="TimeArea">[DiaryListDetail.ActionDate;] [DiaryListDetail.ActionTime]</td>
+            </tr>
+            <tr id="[DiaryListDetail.PositionID;noerr]" onclick="LoadDiaryDetailPage(this)">
+                <td>Position</td>
+                <td id="PositionAreal">[DiaryListDetail.Position;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.LineID;noerr]" ondblclick="DiaryEdit('Status')">
+                <td>Status</td>
+                <td id="StatusArea">[DiaryListDetail.Status;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.CompanyID;noerr]" onclick="LoadDiaryDetailPage(this)">
+                <td>Company</td>
+                <td id="CompanyArea">[DiaryListDetail.CompanyName;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.ContactID;noerr]" onclick="LoadDiaryDetailPage(this)">
+                <td>Contact</td>
+                <td id="ContactArea">[DiaryListDetail.ContactName;noerr]</td>
+            </tr>
+            <tr id="[DiaryListDetail.ApplicantID;noerr]" onclick="LoadDiaryDetailPage(this)">
+                <td>Candidate</td>
+                <td id="CandidateArea">[DiaryListDetail.ApplicantName;noerr]</td>
+            </tr>
+            <tr>
+                <td>Made by</td>
+                <td id="MadeByArea">[DiaryListDetail.Made;noerr]</td>
+            </tr>
+            <tr ondblclick="DiaryEdit('Priority')">
+                <td>Priority</td>
+                <td id="PriorityArea">[DiaryListDetail.Priority;noerr]</td>
+            </tr>
+        </table>
+        <table class="tablesorter">
+            <tr id="[DiaryListDetail.LineID;noerr]" onclick="DiaryEdit('Note')">
+                <td id="NoteArea">[DiaryListDetail.Note;noerr]</td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="divAction"></div>
+<div id="ErrorDiv" ></div>   
+

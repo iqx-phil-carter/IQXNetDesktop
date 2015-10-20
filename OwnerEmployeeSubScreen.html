@@ -1,0 +1,130 @@
+<!--[onload;tplvars;EmployeeDesc='NetOwnerEmployeeDetails?pEmployeeID']-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	IQXInitSection("#FormEmployee");
+	$("#FormEmployee .questionnaire").questionnaire();				
+	if ($('#ObjID').val().length == 0) {	// if a new record, unlock text fields for editing
+		$('input[id*="L_"]','#OwnerActiveDiv').val('New');
+		FormEmployeeEdit();
+		$('#EmpNewVacancy').hide();
+		$('#CO_' + $('#TempParent').val()).css('background', '#CC9900');
+	}	
+	$('#ParentObject').val($('#TempParent').val());	// carried forward from previous object		
+	$('E_').first().focus();
+});
+	
+function FormEmployeeEdit(){
+	// ## Enable local form for editing, add successhandler for successful submit, deal with returned parent value from database
+	
+	IQXEnableForm('#FormEmployee', {
+		successhandler: function(response){
+			if (response.success) {
+				$('#OwnerTreeRoot').jstree("refresh");
+				$('#OwnerActiveDiv').html('');
+				var Obj={IngoingValue:response.id,ObjID:0,ParentID:0};
+				SplitReturnValue(Obj);
+				if(Obj.ParentID){$('#TempParent').val(Obj.ParentID)};
+				var nxt = {
+					action: 'func',
+					func: function(){$('#EM_' + Obj.ObjID).css('background', '#CFCFCF');}
+				};
+				IQXChain('#OwnerActiveDiv',{action:'load',page:'OwnerEmployeeSubScreen&pEmployeeID='+Obj.ObjID,nextlink:nxt});
+			}
+			else {
+				$('#ErrorMessage').html(response.message);
+			}
+		},
+		responsetype: 'json'
+	});
+}
+
+</script>
+
+<div id="OwnerEmployeeDiv" style="float:left" >
+	<form id="FormEmployee" method="post"  method="POST" action="IQXPost.php?proc=NetOwnerEmployeeEdit&jsonresponse=1" accept-charset="utf-8">
+		<fieldset class="Narrow ui-corner-all" >	
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Forenames</div>
+				<div class="qquestrow bg">
+					<input id="E_Forenames" name="pForenames" class="Wide required" readonly="readonly" value="[EmployeeDesc.Forenames]" />
+					<input id="OldForenames" name="pOldForenames" class="Wide hidden" value="[EmployeeDesc.Forenames]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Surname</div>
+				<div class="qquestrow bg">
+					<input id="E_Surname" name="pSurname" class="Wide required" readonly="readonly" value="[EmployeeDesc.Surname]" />
+					<input id="OldSurname" name="pOldSurname" class="Wide hidden" value="[EmployeeDesc.Surname]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Salutation</div>
+				<div class="qquestrow bg">
+					<input id="E_Salutation" name="pSalutation" class="Wide" readonly="readonly" value="[EmployeeDesc.Salutation]" />
+					<input id="OldSalutation" name="pOldSalutation" class="Wide hidden" value="[EmployeeDesc.Salutation]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Direct Phone</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Direct_Phone" name="pDirect_Phone" class="MedNarrow" readonly="readonly" value="[EmployeeDesc.Direct_Phone]" /></div>
+					<input id="OldDirect_Phone" name="pOldDirect_Phone" class="MedNarrow hidden" value="[EmployeeDesc.Direct_Phone]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Mobile</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Mobile" name="pMobile" class="MedNarrow" readonly="readonly" value="[EmployeeDesc.Mobile]" /></div>
+					<input id="OldMobile" name="pOldMobile" class="MedNarrow hidden" value="[EmployeeDesc.Mobile]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Email</div>
+				<div class="qquestrow bg">
+					<input id="E_Email" name="pEmail" class="Wide" readonly="readonly" value="[EmployeeDesc.Email]" />
+					<input id="OldEmail" name="pOldEmail" class="Wide hidden" value="[EmployeeDesc.Email]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Direct Fax</div>
+				<div class="qquestrow bg">
+					<div style="float:left"><input id="E_Direct_Fax" name="pDirect_Fax" class="MedNarrow" readonly="readonly" value="[EmployeeDesc.Direct_Fax]" /></div>
+					<input id="OldDirect_Fax" name="pOldDirect_Fax" class="MedNarrow hidden" value="[EmployeeDesc.Direct_Fax]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Position</div>
+				<div class="qquestrow bg">
+					<input id="E_Position" name="pPosition" class="Wide" readonly="readonly" value="[EmployeeDesc.Position]" />
+					<input id="OldPosition" name="pOldPosition" class="Wide hidden" value="[EmployeeDesc.Position]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Department</div>
+				<div class="qquestrow bg">
+					<input id="E_Department" name="pDepartment" class="Wide" readonly="readonly" value="[EmployeeDesc.Department]" />
+					<input id="OldDepartment" name="pOldDepartment" class="Wide hidden" value="[EmployeeDesc.Department]" />
+				</div>
+			</div>
+			<div class="qquestrow Narrow">
+				<div class="qquestion ui-widget-header">Notes</div>
+				<div class="qquestrow bg">
+					<input id="E_Notes" name="pNotes" class="Wide" readonly="readonly" value="[EmployeeDesc.Notes]" />
+					<input id="OldNotes" name="pOldNotes" class="Wide hidden" value="[EmployeeDesc.Notes]" />
+				</div>
+			</div>
+			<div>
+				<input id="ObjID" name="pObjID" class="Wide hidden" value="[EmployeeDesc.ObjID]" />
+				<input id="ParentObject" name="pParentObject" class="Wide hidden" value="" />
+			</div>
+		</fieldset> 
+		<div id='OwnerButtonDiv' class="FloatDivLeft" >
+			<button type="button" id="EmpEdit" class="fixed nonformbutton" onclick="FormEmployeeEdit()">Edit</button>
+			<button type="button" id="EmpNewVacancy" class='fixed nonformbutton' onClick="OwnerFormNew('VA')" >Add Vacancy</button>
+        	<button type="submit" id="EmpSubmit" class="fixed formbutton" >Save</button>
+			<button type="button" id="EmpReset" class="fixed formbutton" onclick="OwnerFormUndo('Employee')" >Undo</button>
+		</div> 
+	</form>     	
+</div>

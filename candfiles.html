@@ -1,0 +1,27 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+ 		$('#cmbCandFilesSelect').multiSelect({
+				noneSelected: 'Select the Document Type...'
+			}, showCandFiles);
+		}
+		);
+		
+	function showCandFiles(xitem){
+		var tp=xitem.val();
+		if (tp){
+			IQXChain('#divCandFilesContent',{action:'load',page:'candfilescontent&pfiletype=' + tp});
+		}
+		}
+
+</script>
+
+<div id="divCandFiles">
+	<label for="cmbCandFilesSelect">Document Type</label>
+	<select id="cmbCandFilesSelect" name="cfsName">
+		<option value=""></option>
+		<option value="A">Payslips[onload_payslips;block=option;when [var.x_rights.PAYE;noerr]=1]</option>
+		<option value="B">Weekly Statements</option>
+		<option value="C">Self-Bill Invoices[onload_sbinvoices;block=option;when [var.x_rights.SEC;noerr]=1]</option>
+	</select>
+    <div id="divCandFilesContent"></div>
+</div>

@@ -1,0 +1,165 @@
+<!--[onload;tplvars;vacancies='NetClientVacancies?pStartDate&pEndDate&pPageNo&SearchString&SampleSize&pOrderType']-->
+
+<!-- 20140107 modified method of hiding columns to avoid resizing after defining table -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+	$('#divVacDetail').show();
+
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+
+	$('#tblclivacs').data('IQXdtDateFilter',{dateColumn:3,clearButtonText:"Clear"});
+	var ArrayCounter=0;
+	var HideList=[];
+	
+	if('[var.x_local.client.ShowColYourRef;noerr]' !='1'){
+		HideList[ArrayCounter]=9;
+		ArrayCounter++;
+	}
+	
+	
+	if('[var.x_local.client.SummariseDateColumns;noerr]' !='1' ){
+		HideList[ArrayCounter]=7;
+		ArrayCounter++;
+	}else{
+		HideList[ArrayCounter]=4;
+		ArrayCounter++;
+		HideList[ArrayCounter]=5;
+		ArrayCounter++;
+		HideList[ArrayCounter]=6;
+		ArrayCounter++;
+	}
+	if('[var.x_local.client.ShowFinishDateColumn;noerr]' !='1'){
+		HideList[ArrayCounter]=5;
+		ArrayCounter++;
+	}
+	
+	var oTbl=$('#tblclivacs').dataTable({
+		"bJQueryUI": false,
+		"sPaginationType": "full_numbers",
+		"sDom": '<"clear">rt',	
+		"iDisplayLength":100,
+		"aaSorting":[[19,'[var.x_local.Switches.SampleDirection]']],		
+		"aoColumnDefs": [{aTargets:[0],fnRender: function(oObj){
+			if (oObj.aData[18]){
+				return oObj.aData[0]+'<br/>'+oObj.aData[18];
+			} else {
+				return oObj.aData[0];
+			}
+		}},
+		{aTargets:[14,15,16,17,18,19],bVisible:false,bSearchable:false},
+		{aTargets:HideList,bVisible:false,bSearchable:false}
+		]
+	});
+		
+		
+	if (!IQXDeepLink("R",oTbl)){
+		setThisWeek(oTbl);
+		}
+	
+	var RecordCount=$('#RecordCount').val();
+	var SampleSize=$('#VacSampleSize').val();
+	var PageCount=RecordCount/SampleSize;
+	var Root=(PageCount | 0);
+	var Mantissa=PageCount-Root;
+	if(Mantissa>0){Mantissa=1;}
+	PageCount=Root+Mantissa;
+	$('#LastPage').html(PageCount);
+	$('#NavButtons').hide();
+	if($('#LastPage').html() != 'NaN'){
+		$('#NavButtons').show();
+	}else{
+		$('#divVacDetail').hide();		
+		} 
+	
+	if('[var.x_local.client.colFilledBy;noerr]' !=''){
+		$('#th11').html('[var.x_local.client.colFilledBy;noerr]');
+	}
+
+	$('[id*=divPopup]').hide();
+		
+	});
+	
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+	<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+	<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+
+	<table class="Xtablesorter" id="tblclivacs">
+		<thead>
+			<tr>
+				<th>Position</th>
+				<th id="th2">Shift Note</th>
+				<th id="th3">Client Ref</th>
+				<th>Start Date</th>
+				<th id="th5">Start Time</th>
+				<th id="th6">Finish Date</th>
+				<th id="th7">Finish Time</th>
+				<th id="th13">Time (From and To)</th>
+				<th id="th8">Shift Ref</th>
+				<th id="th9">Your ref</th>
+				<th id="th10">Client Comment</th>
+				<th id="th11">Filled By</th>
+				<th id="th12">Status</th>
+				<th></th>
+				<th>Filled</th>
+				<th>Unconfirmed</th>
+				<th>VacancyID</th>
+				<th>TempShiftPlanID</th>
+				<th>Shift Description</th>
+				<th>OrderColumn</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr id="[vacancies.ShiftRef;block=tr]">
+	    		<td>[vacancies.Position;noerr]</td>
+	    		<td id="td2">[vacancies.Location;noerr]</td>
+	    		<td id="td3">[vacancies.PONumber;noerr]</td>
+	    		<td id="SD[vacancies.RowID]" class="longdate">[vacancies.StartDate;noerr]</td>
+	    		<td id="STime[vacancies.RowID]" class="time" ><span id="SpanSTime[vacancies.RowID]" onclick="EditTime(this)">[vacancies.StartTime;noerr]</span><input id="InputSTime[vacancies.RowID]" class="validFourDigitTime" style="visibility:hidden;display:none" onblur="UpdateTime(this)" ></input></td>
+	    		<td id="FD[vacancies.RowID]" class="longdate">[vacancies.FinishDate;noerr]</td>
+	    		<td id="FTime[vacancies.RowID]" class="time" ><span id="SpanFTime[vacancies.RowID]" onclick="EditTime(this)">[vacancies.FinishTime;noerr]</span><input id="InputFTime[vacancies.RowID]" class="validFourDigitTime" style="visibility:hidden;display:none" onblur="UpdateTime(this)"></input></td>
+	    		<td id="td13">[vacancies.CombinedTime;noerr]</td>
+	    		<td id="SRef[vacancies.RowID]">[vacancies.ShiftRef;noerr]</td>
+	    		<td id="td9">[vacancies.YourRef;noerr]</td>
+	    		<td id="CC[vacancies.ShiftRef]"  title='[vacancies.ClientComment;noerr]'>[vacancies.ClientCommentShort;noerr]<span style="display:none">[vacancies.ClientComment;noerr]</span></td>
+				<td><span id="[vacancies.PersonID;noerr]" class="CandidateLink[vacancies.BlockColour;noerr]" onclick="OpenCandidateDetails('[vacancies.PersonID;noerr]','[vacancies.DepartmentID;noerr]');" >[vacancies.FilledBy;noerr]</span></td>
+				<td id="Info[vacancies.RowID]"  class='Status[vacancies.BlockColour;noerr]' title='[vacancies.TextStatus;noerr]'>[vacancies.CombinedStatus;noerr]<span style="display:none">[vacancies.TextStatus;noerr]</span></td>
+				<td class="center"><img id="I[vacancies.RowID]" class="dataTableExpand" src="css/images/details_open.png" title="Show Details" onclick="showShiftActions(this,'[vacancies.ShiftRef;]','[vacancies.CancelButton;]','[vacancies.ConfirmButton;]','[vacancies.RejectButton;]','[vacancies.FillButton;]','[vacancies.CancelState;]')" /><input id="CB[vacancies.ShiftRef]" type="hidden" value="[vacancies.CreatedBy;noerr]" /><input id="CT[vacancies.ShiftRef]" type="hidden" value="[vacancies.CreateTime;noerr]" /><input id="RecordCount" type="hidden" value="[vacancies.RowCount;noerr]" /><input id="VA[vacancies.ShiftRef]" type="hidden" value="[vacancies.VacancyID;noerr]" /><input id="CS[vacancies.ShiftRef]" type="hidden" value="[vacancies.CancelState;noerr]" /></td>
+				<td>[vacancies.Filled;noerr]</td>
+				<td>[vacancies.Unconfirmed;noerr]</td>
+				<td>[vacancies.VacancyID;noerr]</td>
+				<td>[vacancies.TempShiftPlanID;noerr]</td>
+				<td>[vacancies.CompanyAddress;noerr]</td>
+				<td>[vacancies.OrderColumn;noerr]</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p>
+	    <span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+	</p>
+
+</div>
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="CandDetailsPopups" class="ui-helper-hidden"></div>
+<div id="DocDetails" class="ui-helper-hidden"></div>
+
+<input type="hidden" id="TempShiftDate" ></input>
+
+<div id="FormDiv" ></div>
+
+

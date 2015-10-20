@@ -1,0 +1,218 @@
+<!-- 20110923 Lines 106,116,197 changes made to classes to incorporate masks, or datepicker -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var subtitle='Candidate Registration';
+		$('#divheading h3').text(subtitle);
+		document.title=document.title+' - '+subtitle;
+		$("#cand_password","#frmnewcand").pstrength();	
+		var nxt={action:'func',func:InitAfterIQXChain};
+		IQXChain("#questholderdiv",{action:'load',page:'newcandidatequestionnaire&noauth=yes',nextlink:nxt});
+	});
+	
+	function InitAfterIQXChain(){
+		// Init form after IQXChain has responded
+		IQXInitSection("form");
+		IQXEnableForm('#frmnewcand',{successhandler:IQXRefreshBrowser});
+	};
+	
+	function ResetForm(){
+		IQXDisableForm();
+		IQXEnableForm('#frmnewcand');
+	}
+	
+	function EmailToUsername(){
+		if(!$("#cand_username").val()){
+			$("#cand_username").val($("#cand_email").val())
+		}
+	}
+	
+</script>
+
+<div class="usertext">[onload;file=txt_new_candidate_top.html;noerr]</div>
+<form id="frmnewcand" name="newcand" action="IQXNewUser.php?proc=NetCandidateRegister" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+        <input type="hidden" id="cand_class" name="puserclass" value="CANDIDATE" />
+		<p>
+	    		<span class="errormessage">[var.x_errormessage]</span>
+		</p>
+		<div class="questionnaire">
+        <div class="qquestrow">
+            <div class="qquestion">
+                Email Address
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_email" name="pemail" class="required email qpseudoquestanswer"  />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                User name
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_username" name="pusername" class="required qpseudoquestanswer" onfocus="EmailToUsername()" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Password
+            </div>
+			<div class="qanswer">
+            <input type="password" id="cand_password" name="ppassword" class="required qpseudoquestanswer safepassword" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Repeat Password
+            </div>
+			<div class="qanswer">
+            <input type="password" id="cand_passwordcheck" name="ppasswordcheck" equalto="#cand_password" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Forenames
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_forenames" name="pforenames" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Surname
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_surname" name="psurname" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Gender
+            </div>
+			<div class="qanswer">
+ 			<select id="cand_gender" name="pgender" class="required qpseudoquestanswer" >
+				<option value="" ></option>
+				<option value="F" >Female</option>
+				<option value="M" >Male</option>
+			</select>
+            </div>
+        </div>
+<!--
+        <div class="qquestrow">
+            <div class="qquestion">
+                Date of Birth
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_dob" name="pDOB" class="dateofbirth qsingleentry required hasDatepicker"  />
+            </div>
+        </div>
+-->
+<!--
+		<div class="qquestrow">
+            <div class="qquestion">
+                National Insurance Number
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_NI" name="pNINumber" class="validNiNumber uppercase qpseudoquestanswer" />
+            </div>
+        </div>
+-->
+        <div class="qquestrow">
+            <div class="qquestion">
+                Home Telephone
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_home_phone" name="phomephone" class="qpseudoquestanswer" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Day Telephone
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_day_phone" name="pdayphone" class="qpseudoquestanswer" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Mobile
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_mobile" name="pmobile" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Address
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_addr1" name="paddr1" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                &nbsp;
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_addr2" name="paddr2" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                &nbsp;
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_addr3" name="paddr3" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Town
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_town" name="ptown" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                County
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_county" name="pcounty" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Country
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_country" name="pcountry" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Postcode
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_postcode" name="ppostcode" class="required validPostCode uppercase qpseudoquestanswer" />
+            </div>
+        </div>
+		</div>
+		<div class="cleardiv" ></div> 
+	   	<div id="questholderdiv"> </div>  
+		<div class="cleardiv" ></div> 
+	    <p>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="ResetForm()" >
+                Reset
+            </button>
+	    </p>
+		<p>
+	    		<span class="errormessage">[var.x_errormessage]</span>
+		</p>
+    </fieldset>
+</form>
+<div class="usertext">[onload;file=txt_new_candidate_bottom.html;noerr]</div>
+

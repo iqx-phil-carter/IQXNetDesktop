@@ -1,0 +1,97 @@
+<!--
+<script type="text/javascript" src="[var.x_local.client.StarsScriptPathway;noerr]" ></script>
+-->
+
+<script type="text/javascript">
+
+// 20140519 Split header and allow dressing of logout link
+
+$(document).ready(function(){
+	IQXInitSection($("body"));
+	IQXSetupTabs("#clienttabs");
+	if('[var.x_global.Layout.SubstituteHeader;noerr]'=='1'){
+		$('#divheadingSmall').hide();
+	}else{
+		if('[var.x_global.Layout.ReducedHeightHeader;noerr]'=='1'){
+			$('a').click(function(){
+				if($(this).attr('href') == '#tabcontent-1'){
+					$('#divheading').show();
+					$('#divheadingSmall').hide();
+				}else{
+					$('#divheading').hide();
+					$('#divheadingSmall').show();
+				}
+			});
+		}
+	}
+	
+	if('[var.x_local.Switches.StarsTab;noerr]'!=''){
+		DisplayFurgsTotal();
+		}
+			
+	// set default date values
+	$.data(document.body,'CurrentRequirements',{Start:0,End:0,Search:'',Sample:'[var.x_local.client.CurrentRequirementsDropdownDefault;noerr]'});
+	$.data(document.body,'HistoricTimesheets',{Start:0,End:0,Search:'',Sample:'[var.x_local.client.HistoricTimesheetsDropdownDefault;noerr]'});
+	$.data(document.body,'PreviousTemps',{Start:0,End:0,Search:'',Sample:'[var.x_local.client.PreviousTempsDropdownDefault;noerr]'});
+	
+	if('[var.x_local.Switches.SplitHeader;noerr]'!=''){
+		var Cli='[var.x_usertitle;noerr]';
+		var CommaPos=Cli.indexOf(',');
+		if(CommaPos >= 1){
+			$('#divheadingSmallSpanCentre').html(Cli.substring(CommaPos+1,100));
+			$('#divheadingSmallSpanRight').html(Cli.substring(Cli.indexOf('for')+4,CommaPos));
+		}
+	}	
+});
+
+
+</script>
+
+<div id="divNotification" ></div>
+
+<div id="clienttabs" >
+    <ul>
+        <li>[onload_IP1;block=li;when [var.x_local.Switches.WelcomeTab;noerr]!='']<a href="#tabcontent-1"><span>[var.x_local.Switches.WelcomeTab;noerr]</span></a></li>
+        <li>[onload_IP2;block=li;when [var.x_local.Switches.DiaryTab;noerr]!='']<a href="IQXPage.php?page=SynNetCalendarShifts"><span>[var.x_local.Switches.DiaryTab;noerr]</span></a></li>
+        <li>[onload_IP3;block=li;when [var.x_local.Switches.ContactDetailsTab;noerr]!='']<a href="IQXPage.php?page=clientprofile"><span>[var.x_local.Switches.ContactDetailsTab;noerr]</span></a></li>
+        <li id="R">[onload_IP4;block=li;when [var.x_local.Switches.CurrentRequirementsTab;noerr]!='']<a href="IQXPage.php?page=clientvacancies"><span id="CRTitle">[var.x_local.Switches.CurrentRequirementsTab;noerr]</span></a></li>
+        <li id="R">[onload_IP5;block=li;when [var.x_local.Switches.CurrentRequirementsExtendedTab;noerr]!='']<a href="IQXPage.php?page=clientvacancies&pGroupID=C&pFormName=R"><span id="CRTitle">[var.x_local.Switches.CurrentRequirementsExtendedTab;noerr]</span></a></li>
+        <li id="P">[onload_IP6;block=li;when [var.x_local.Switches.CurrentTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=clientprovtimesheets"><span>[var.x_local.Switches.CurrentTimesheetsTab;noerr]</span></a></li>
+        <li id="T">[onload_IP7;block=li;when [var.x_local.Switches.HistoricTimesheetsTab;noerr]!='']<a href="IQXPage.php?page=timesheets"><span>[var.x_local.Switches.HistoricTimesheetsTab;noerr]</span></a></li>
+        <li id="T">[onload_IP8;block=li;when [var.x_local.Switches.HistoricTimesheetsExtendedTab;noerr]!='']<a href="IQXPage.php?page=timesheetsExtended&pGroupID=C&pFormName=T"><span>[var.x_local.Switches.HistoricTimesheetsExtendedTab;noerr]</span></a></li>
+        <li>[onload_IP9;block=li;when [var.x_local.Switches.PreviousTempsTab;noerr]!='']<a href="IQXPage.php?page=clientpreviousemployees&pGroupID=C&pFormName=P"><span>[var.x_local.Switches.PreviousTempsTab;noerr]</span></a></li>
+        <li>[onload_IP10;block=li;when [var.x_rights.MAINTAINCONTACTS;noerr]=1]<a href="IQXPage.php?page=companycontacts"><span>[var.x_local.Switches.CompanyContactsTab;noerr]</span></a></li>
+        <li>[onload_IP11;block=li;when [var.x_rights.MANAGEMENTINFO;noerr]=1]<a href="IQXPage.php?page=reports"><span>[var.x_local.Switches.ReportsTab;noerr]</span></a></li> 
+        <li>[onload_IP12;block=li;when [var.x_local.Switches.QuestionnaireTab;noerr]!='']<a href="IQXPage.php?page=clientquest"><span>[var.x_local.Switches.QuestionnaireTab;noerr]</span></a></li>
+   		<li>[onload_IP13;block=li;when [var.x_local.Switches.StarsTab;noerr]!='']<a href="IQXPage.php?page=Furgs"><span>[var.x_local.Switches.StarsTab;noerr]</span></a></li>
+   		<li>[onload_IP14;block=li;when [var.x_local.Switches.StarsToCompleteTab;noerr]!='']<a href="IQXPage.php?page=FurgsIncomplete"><span id="tabFurgsComplete" class="tabFurgsComplete">[var.x_local.Switches.StarsToCompleteTab;noerr]</span></a></li>
+   		<li>[onload_IP15;block=li;when [var.x_rights.TESTONLY;noerr]='1']<a href="IQXPage.php?page=testclient"><span>[var.x_local.Switches.TestTab;noerr]</span></a></li>
+   		<li>[onload_IP16;block=li;when [var.x_local.Switches.NotificationTab;noerr]!='']<a href="IQXPage.php?page=NotificationPage"><span>[var.x_local.Switches.NotificationTab;noerr]</span></a></li>
+	</ul>
+	
+	<div style='color:red;'>[onload_UT1;block=div; when [var.x_global.general.VisualUpdateWarningText;noerr]!=''][var.x_local.Switches.VisualUpdateWarningText;noerr]</div>
+	
+    <div id="tabcontent-1">[onload_IP17;block=div;when [var.x_local.Switches.WelcomeTab;noerr]!='']
+    	<div class="usertext">[onload;file=txt_client_welcome_top.html;noerr]</div>
+		<div id="Clientnonstandardtext" class="usertext">[onload;file=txt_client_nonstandard_welcome.html;noerr;]</div>
+		<div id="Clientstandardtext" class="usertext" > 
+        	<p>Welcome to the [var.x_title;noerr] Client Portal.</p>
+			<p>Here you can </p>
+			<ul>
+				<li>Update your contact details and password</li>
+				<li>View and enter job requirements</li>
+				<li>Complete and authorise temporary workers' timesheets</li>
+				<li>View historical details and management information</li>
+			</ul>
+			<p>Please explore the options, and if you have queries, contact [var.x_title;noerr].</p>
+		</div>
+    	<div class="usertext">[onload;file=txt_client_welcome_bottom.html;noerr]</div>
+    </div>
+    <div id="tabcontent-blank">
+    </div>
+</div>
+
+<div style='width:97%;text-align:[var.x_local.Switches.LogOutButtonAlign;noerr];'>[onload_IP18;block=div;when [var.x_local.Switches.LogOutButtonAlign;noerr]!='']
+	<span id="button_logout" class="logoutlink" onclick="IQXLogout()">Logout</span>
+</div>
+

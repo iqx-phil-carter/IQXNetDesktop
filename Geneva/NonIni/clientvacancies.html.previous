@@ -1,0 +1,587 @@
+<!--[onload;tplvars;DateOffset='GenevaNetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20121113 retain previous search length value when seeking next record -->
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+	
+	// set defaults from stored values
+	var StoredStartDate=$.data(document.body,'CurrentRequirements').Start;
+	var StoredEndDate=$.data(document.body,'CurrentRequirements').End;
+	var StoredSearchString=$.data(document.body,'CurrentRequirements').Search;
+	var StoredSampleString=$.data(document.body,'CurrentRequirements').Sample;
+	if(StoredSearchString!=''){$('#VacSearchString').val(StoredSearchString)};
+	$('#VacSampleSize option[value="'+StoredSampleString+'"]').attr('selected','selected');
+	
+	$('.divVacTableDetail').html('');
+			
+	if ($('#DocDetails').html()==''){
+		if(StoredStartDate!='0'){
+			$('#VacFilterStart').val(StoredStartDate);
+			$('#VacFilterEnd').val(StoredEndDate);
+		}
+	}
+		
+	$('#VacFilterStart').datepicker({dateFormat:'dd/mm/yy'});
+	$('#VacFilterEnd').datepicker({dateFormat:'dd/mm/yy'});
+	
+	$('#VacFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#VacFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+
+	$('#NavButtons').hide();
+	
+	LoadData('1',0);
+});
+
+function LoadData(PageNo,ResetValue){
+	// Fetch and load detail table
+	 
+	var StartDate=$('#VacFilterStart').val();
+	var EndDate=$('#VacFilterEnd').val();
+	var SearchString=$('#VacSearchString').val();
+	var SampleSize=$('#VacSampleSize').val();
+	
+	$('#OutDateStart').html(StartDate);
+	$('#OutDateEnd').html(EndDate);
+	$('#RowCount').html(PageNo);
+	
+	if(StartDate && EndDate){
+		if(ResetValue !='0'){
+			nxt={action:'func',func:$('#VacSampleSize option:eq('+ResetValue+')').attr('selected','selected')};
+			IQXChain('#divVacDetail',{action:'load',page:'clientvacanciesDetail&pStartDate='+StartDate+'&pEndDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize,nextlink:nxt});
+		}else{
+			IQXChain('#divVacDetail',{action:'load',page:'clientvacanciesDetail&pStartDate='+StartDate+'&pEndDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize});
+		}
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+function setThisWeek(oTbl){
+	// populate dates into search boxes at top of form
+	
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+
+
+function actionCleanup(){
+	// remove data from temp recordset populated in doVacancyAction()
+	
+	$IQXFormContext = null;
+	if (!$('#divclivacs').data('selectedvacancy')) return; // Already cleaned up
+	$("#divclivacs").removeData("selectedvacancy");
+};
+	
+	
+function ActionFill(rowid,caption){
+	// Open subform to select candidate
+		
+	var id=$(rowid).attr('id').substring(1);	
+	if ($('#divclivacs').data('dlgIsLoaded')) {
+		$('#cliPlacDlg').dialog('option','title',caption);
+		$('#cliPlacDlg').dialog('open');
+	} else {
+		$('body').delegate('#cliPlacDlg','PlacementEvent',function(e,sType,sID,sName){
+			if (sType=='DialogCreate'){
+				$('#divclivacs').data('dlgIsLoaded',true);
+				$('#cliPlacDlg').dialog('option','title',$('#divclivacs').data('selectedvacancy').caption);
+			} else if (sType=='DialogClose'){
+				actionCleanup();
+				RemoveForm(id,'');
+			} else if (sType=='Request'){
+				doFillVacancy(sID,sName);
+			}
+		});
+		
+		$('#TempShiftDate').val($('#SD'+rowid).html().substring(4));
+		IQXChain('#divclivacFillerDlg', {action: 'load', page: 'clientemployeestoplacedialog'});
+	}
+} 
+
+function ActionConfirm(rowid){
+	// Confirm action, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	var InsertString=CompileReferences(id);
+	$('#N'+id).val(InsertString);
+	DiaryAddSave(id,'F');
+} 
+
+function ActionCancel(rowid){
+	// Cancel action, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	var Caption='Cancel';	
+	var Headline='Cancel this Shift?';
+	if($('#ComboCancel option:selected').text() != ''){
+		IQXUIDialog(Headline,{xDlgType:'YesNo',modal:false,title:Caption},function(){
+			var InsertString=CompileReferences(id);
+			$('#N'+id).val(InsertString+$('#ComboCancel option:selected').text());
+			DiaryAddSave(id,'N');
+		})
+	}else{
+		IQXUIDialog('Choose a Cancel reason',{xDlgType:'Ok',modal:false,title:Caption}) 
+	};
+	return;
+} 
+
+function ActionComment(rowid){
+	// Comment action, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	var InsertString=CompileReferences(id);
+	$('#N'+id).val(InsertString+$('#N'+id).val());	
+	DiaryAddSave(id,'M');
+}
+
+function ActionReject(rowid){
+	// Reject action, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	var Caption='Reject candidate';
+	if($('#ComboCancel option:selected').text() != ''){
+		var InsertString=CompileReferences(rowid);
+		$('#N'+id).val(InsertString+$('#ComboCancel option:selected').text());
+		DiaryAddSave(id,'R');
+		IQXUIDialog('Remeber to create a new Requirement',{xDlgType:'Ok',modal:false,title:Caption})
+	}else{
+		IQXUIDialog('Choose a rejection reason',{xDlgType:'Ok',modal:false,title:Caption})
+	}
+}
+
+function ActionRequest(rowid){
+	// Request candidate action, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	var InsertString=CompileReferences(id);
+	$('#N'+id).val(InsertString+$('#N'+id).val());	
+	DiaryAddSave(id,'Q');
+}
+
+function ActionLocation(rowid){
+	// Request new location, forwarded to DiaryAddSave()
+	
+	var id=$(rowid).attr('id').substring(1);
+	if(InsertString !=''){
+		var InsertString=CompileReferences(id);
+		$('#N'+id).val(InsertString+$('#N'+id).val());
+		DiaryAddSave(id,'L');
+	}
+	
+}
+
+
+function CompileReferences(rowid){
+	// Create reference list for notifications
+	
+	var RequestName=$('#CandReq'+rowid).val();
+	var offset=$('#'+rowid).closest('tr').children('td').next('td').next('td');
+	var PONo=offset.html();
+	var ShiftRef=offset.next('td').next('td').next('td').next('td').html();
+	var CR=String.fromCharCode(13)+String.fromCharCode(10);
+	
+	if(RequestName>''){	//if using free text candidate request
+		var InsertString='Request: '+RequestName+';'+CR+'Shift Ref: '+ShiftRef+';';
+	}else{
+		var InsertString='Reference: '+PONo+';'+CR+'Shift Ref: '+ShiftRef+';'+CR+'Note: ';
+	}
+	return InsertString;
+}	
+
+function DiaryAddSave(RowID,Action){
+	// send request to database
+	// retreive response, and use to update parent row with new message and colour
+	
+	$('#pTransactionType','#F'+RowID).val(Action);	
+	$('#F'+RowID).attr('action','IQXPost.php?proc=GenevaNetClientVacanciesLineStatusUpdate');
+	$('#F'+RowID).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var HashPos=data.indexOf('#');
+			var StatusString='';
+			var ReturnMessage='';
+			if (HashPos > 0) {
+				StatusString=data.substr(0,HashPos);
+				ReturnMessage=data.substr(HashPos+1);
+				}
+			else
+				{
+				StatusString=data;
+				};
+			if (textStatus == 'success') {
+				RemoveForm(RowID,ReturnMessage);
+				}else{
+					$('#SFormError').html(data);
+				}
+				RefreshRow(RowID);
+			},
+		error: function(data,textStatus){
+			$('#SFormError').html(data);
+			},
+		dataType: "text"
+		});
+		$IQXFormContext = null;	// otherwise trying to open the requirements popups fail
+		
+	};
+	
+function RefreshRow(RowID){
+	// refresh Client Comment and Temp without redrawing table
+	
+	$('#'+RowID).attr('action','IQXPost.php?proc=GenevaNetClientVacanciesSingleLineRefresh?pLineNo='+RowID);
+	$('#'+RowID).ajaxSubmit(
+		{
+		success: function(data, textStatus){
+			var SourceString = data;
+			var TempString=SourceString.substr(0,SourceString.indexOf(':'));
+			SourceString=SourceString.substr(SourceString.indexOf(':')+1);
+			var ClientString=SourceString.substr(0,SourceString.indexOf(':'));
+			var LocationString=SourceString.substr(SourceString.indexOf(':')+1);
+			var OffsetPosition=$('#Info'+RowID).prev('td').children('span');
+			
+			OffsetPosition.html(TempString);
+			OffsetPosition=OffsetPosition.parent().prev('td');
+			OffsetPosition.html(ClientString);
+			OffsetPosition=OffsetPosition.prev('td').prev('td').prev('td').prev('td').prev('td').prev('td');
+			OffsetPosition.html(LocationString);
+		},
+		error: function(data,textStatus){
+			$('#ErrorMessage').html('error '+data);
+			},
+		dataType: "text"
+		});	
+}	
+
+function RemoveForm(RowID,State){
+	// Update cell and remove subform once submitted and return img to original
+
+	if ($('form').length > 0) {	// only call if form available to close
+		if (State>'') {
+			$('#Info' + RowID).attr('class', 'Status' + State.substr(0, 1));
+			$('#Info' + RowID).html(State.substr(1,State.indexOf(':')-1));
+			$('#Info' + RowID).attr('title', State.substr(State.indexOf(':')+1));
+		}
+		var Row = RowID;
+		if (!RowID) {	// if blank then returning from fill popup, so choose only open form and set colour as provisional
+			Row = $('form').attr('id').substr(1);
+			$('#Info' + Row).attr('class', 'StatusP');
+		}
+		$('img dataTableExpand').attr('src', 'css/images/details_open.png');
+		$('img dataTableExpand').attr('title', 'Show Details');
+		$('#I' + Row).attr('src', 'css/images/details_open.png');
+		$('#I' + Row).attr('title', 'Show Details');
+		$('#' + Row).next('tr').remove();
+	}
+}
+
+function doFillVacancy(personid,personname) {
+	// called by action on clientemployeestoplacedialog.html
+	// use temp table declared in ready() to update parent row and send request to database
+	
+	var filldata=$("#divclivacs").data('selectedvacancy');
+	var postdata={pvacancyid:filldata.vacancyid,pshiftplanid:filldata.shiftplanid,ppersonid:personid};
+	var nxt={action:'func',func:function(){
+		filldata.table.fnUpdate('1',filldata.tablerow,10,false,false);  // Filled
+		filldata.table.fnUpdate(personname,filldata.tablerow,8,false,false);
+		filldata.table.fnUpdate('',filldata.tablerow,9,false,true);  // Force fnRender. Avoiding redraw because filtering not affected (although sorting could be if currently sorted on candidate)
+		$('#cliPlacDlg').dialog('close');
+	}};
+	IQXChain('',{action:'send',proc:'NetVacancyFill',postdata:postdata,nextlink:nxt});
+}
+
+
+function doAddVacancies(sPage) {
+	// create dialog for Add Vacancies page from 'clientnewshiftmultidayrequirement.html' or 'clientnewcontractrequirement.html'
+	
+	IQXChain('#divclivacNewReqDlg',{action:'load',page:sPage});
+}
+
+function OpenCandidateDetails(CandLink,DeptID){
+	// open subform with candidate details, from click action on FilledBy column
+	
+	if (CandLink.id) {
+		hideAnyCluetips();
+		IQXChain('#CandDetailsPopups', {
+			action: 'load',
+			page: 'clientpreviousemployeedetails&pPersonID=' + encodeURIComponent(CandLink.id) + '&pid=' + encodeURIComponent(CandLink.id) + '&pname=' + encodeURIComponent(CandLink.innerHTML) + '&pDeptID=A' + encodeURIComponent(DeptID)
+		});
+	}	
+}
+
+function showcanddocuments(persid) {
+	// load subform for candidate document list
+	
+	IQXChain('#CandDetailsPopups',{action:'load',page:'ClientCandidateDocuments&pPersonID='+encodeURIComponent(persid)});
+	}
+	
+function GetCancelList(ListLength){
+	// ListLength = 0: List for Cancel shift
+	//				1: List for Reject client
+	var ResultString;
+	$.get('IQXRawData.php?page=GenevaNetClientShiftCancelReasonsOuter?NeedsRefill='+ListLength, function(data,textStatus){
+			ResultString = data;		// below: lose xml headers and add option tags
+			var StartPoint = ResultString.indexOf('![CDATA[');
+			var Endpoint = ResultString.indexOf(']]><');
+			ResultString = ResultString.substring(StartPoint + 8, Endpoint);
+			ResultString = "<option value=''></option>" + ResultString + "</option>";
+			$('#ComboCancel').html(ResultString);
+		});
+	}
+
+function showShiftActions(img,Rowid,CancelButton,ConfirmButton,RejectButton,FillButton,Note) {
+	// Create subform for notes
+		
+	var row=$(img).closest('tr').get(0);
+	var dt=$("#tblcliprevtemp").data('dataTable');
+	var bOpen=img.src.match(/details_open/);
+	var TargetDiv;
+	
+	var frm=0;
+	if($('form').attr('id')){
+		frm=$('form').attr('id');	// if there is a form then close it
+	}
+
+	if(frm != 0){
+		var RowToClose=frm.substr(1);
+		if($('#' + RowToClose).next('tr').attr('id')){//
+		}else{
+			$('#' + RowToClose).next('tr').remove();
+			$('#I'+RowToClose).attr('src', 'css/images/details_open.png');
+			$('#I'+RowToClose).attr('title', 'Show Details');
+		};	
+	
+		if (!bOpen){
+		img.src = 'css/images/details_open.png';
+		img.title = 'Show Details';
+		return;
+		}
+	}
+
+	img.src = 'css/images/details_close.png';
+	img.title = 'Hide Details';
+	$(row).rowafter({dataTable:dt,divs:[{divclass:"zoomeddivCurrent"}]});
+	TargetDiv=$(row).next('tr').find("div.zoomeddivCurrent");
+	$(TargetDiv).parent().attr('colspan','11');
+	
+	var FormString="<form id='F"+Rowid+"' method='post' >";
+	FormString=FormString+"<div>"+$('#CB'+Rowid).val()+" "+$('#CT'+Rowid).val()+"</div><hr />";
+	if (CancelButton == '1') { FormString = FormString + "<div class='ZoomedDivSub'><span class='ZoomedSpanLeft' ><select id='ComboCancel' name='pCancelReason' style='FixedWidth' onClick='EnableButton(C" + Rowid + ")'></select></span><span class='ZoomedSpanRight'  ><button class='fixedA' type='button' id='C" + Rowid + "' onClick='ActionCancel(this)' >Cancel</button></span></div><hr />"; }
+	if (RejectButton == '1') { FormString = FormString + "<div class='ZoomedDivSub'><span class='ZoomedSpanLeft'  ><select id='ComboCancel' name='pCancelReason' onClick='EnableButton(R" + Rowid + ")' ></select></span><span class='ZoomedSpanRight'><button class='fixedA' type='button' id='R" + Rowid + "' onClick='ActionReject(this)' >Reject</button></span></div><hr />"; }
+	if (ConfirmButton == '1' && '[var.x_rights.AUTHORISEJOBS;noerr]' == '1') { FormString = FormString + "<divclass='ZoomedDivSub'><span class='ZoomedSpanRight' ><button class='fixed' type='button' id='D" + Rowid + "' onclick='ActionConfirm(this)' >Confirm</button></span></div>"; }
+	if (FillButton=='1' && '[var.x_rights.FILLJOBS;noerr]'=='1') {
+	    FormString = FormString + "<div class='ZoomedDivSub'><span class='ZoomedSpanLeft'  ><input id='CandReq" + Rowid + "' size='35' onClick='EnableButton(Q" + Rowid + ")'></input></span><span class='ZoomedSpanRight'><button class='fixedA' type='button' id='Q" + Rowid + "' onClick='ActionRequest(this)' >Request</button></span></div><hr />"; //use this line for free text name entry
+		}
+		FormString = FormString + "<div class='ZoomedDivSub' ><span class='ZoomedSpanLeft'  ><textarea id='N" + Rowid + "' name='pNote' rows='3' cols='40' onkeypress='NoteCountdown(this)' onClick='EnableButton(M" + Rowid + ")' />&nbsp;<span id='CharCount'>150</span></span><span class='ZoomedSpanRight'><button  class='fixedA' type='button' id='M" + Rowid + "' onClick='ActionComment(this)' >Comment</button></span></div><hr />";
+		if (CancelButton == '1') { FormString = FormString + "<div class='ZoomedDivSub'><span class='ZoomedSpanLeft'  ><input id='Loc" + Rowid + "' name='pLocation' size='35' class='normal' onClick='EnableButton(L" + Rowid + ")' /></span><span class='ZoomedSpanRight'><button  class='fixedA' type='button' id='L" + Rowid + "' onClick='ActionLocation(this)' >Shift Note</button></span></div>"; }
+	FormString=FormString+"<input type='hidden' id='pLineNo' name='pLineNo' value= '"+Rowid+"' />";
+	FormString=FormString+"<input type='hidden' id='pTransactionType' name='pTransactionType' />";
+	FormString=FormString+"<input type='hidden' id='pOurRef' name='pOurRef' />";
+	FormString=FormString+"</form>";
+	FormString=FormString+"<span id='SFormError' class='errormessage'></span>";
+	TargetDiv.html(TargetDiv.html() + FormString);
+	GetCancelList(RejectButton);	// load contents afterwards, to give ajax a chance to retreive data
+									// Use different list to reject candidate.
+	$('button.fixedA').attr('disabled','disabled');
+	}
+
+function EnableButton(ButtonID){
+	// set all buttons to disabled, except for the one which has been activated
+	
+	// remember about the request button
+	$('button.fixedA').attr('disabled','disabled');
+	$(ButtonID).removeAttr('disabled');
+}	
+
+function NoteCountdown(InputID){
+	// character count for note 
+	
+	var FieldLength=149-$(InputID).val().length;
+	if (FieldLength <= 0) {
+		$(InputID).attr('class','Overflow');
+		$(InputID).val($(InputID).val().substring(0,149));
+		$('#CharCount').html('0');
+	} else{
+		$(InputID).attr('class','Normal');
+		$('#CharCount').html(FieldLength);
+	}
+	
+}
+
+function ShowTT(CellID){
+	// create ToolTip popup for long text
+
+	var txt=$(CellID).children('span').html();
+	var x=$(CellID).position().left+30;
+	var y=$(CellID).position().top+247;
+		
+	$('#divPopup').css('top',y);
+	$('#divPopup').css('left',x);
+	$('#divPopup').show();
+	$('#divPopup').html(txt);
+}
+
+function EditTime(CellID){
+	// Make edit box visible if shift is unfilled
+	
+	var rowid=$(CellID).attr('id').substring(9);
+	var WhichTime=$(CellID).attr('id').substring(4,5);
+	var Status=$('#Info'+$(CellID).attr('id').substring(9)).html().substring(0,5);
+	
+	if(Status == "Unfil" || Status == "In Pr" || Status == "Pendi"){ // only edit if Unfilled, In Progress or Pending
+		var txt=$(CellID).html();
+		$('#Span'+WhichTime+'Time'+rowid).css('display','none');
+		$('#Input'+WhichTime+'Time'+rowid).css('display','inline');
+		$('#Input'+WhichTime+'Time'+rowid).css('visibility','visible');
+		$('#Input'+WhichTime+'Time'+rowid).removeAttr('readonly');
+		$('#Input'+WhichTime+'Time'+rowid).val(txt);
+	}
+}
+
+function UpdateTime(CellID){
+	// Edit time and send back to database
+	
+	var rowid=$(CellID).attr('id').substring(10);
+	var WhichTime=$(CellID).attr('id').substring(5,6);
+	var NewTime=$('#Input'+WhichTime+'Time'+rowid).val();
+	var OldTime=$('#Span'+WhichTime+'Time'+rowid).html();
+		
+	if(NewTime != OldTime){
+		$('#FormDiv').html('<Form id="FrmTime"></Form>');
+		$('#FrmTime').attr('action', 'IQXPost.php?proc=GenevaNetClientVacanciesLineTimesUpdate?pRowData='+rowid+'~'+NewTime+'~'+WhichTime);
+		$('#FrmTime').ajaxSubmit(
+			{
+				
+			success: function(data, textStatus){
+				
+				if (data.substring(0,7)=='success') {
+					$('#ErrorMessage').html('');
+					$('#Span'+WhichTime+'Time'+rowid).html(data.substring(8));
+					$('#Span'+WhichTime+'Time'+rowid).css('display','inline');
+					$('#Span'+WhichTime+'Time'+rowid).css('visibility','visible');
+					$('#Input'+WhichTime+'Time'+rowid).css('visibility','hidden');
+					$('#Input'+WhichTime+'Time'+rowid).css('display','none');
+				}else {
+					$('#ErrorMessage').html('Error: ' + data);
+				}
+			},
+			error: function(data, textStatus){
+				
+				$('#ErrorMessage').html('Error: ' + data);	
+			},
+			dataType: "text"
+		});	
+	}else{	// no change
+		$('#Span'+WhichTime+'Time'+rowid).html(OldTime);
+		$('#Span'+WhichTime+'Time'+rowid).css('visibility','visible');
+		$('#Span'+WhichTime+'Time'+rowid).css('display','inline');
+		$('#Input'+WhichTime+'Time'+rowid).css('visibility','hidden');
+	}
+
+}
+
+function HideTime(CellID){
+	// hide time span if no change
+	
+	$('#'+$(CellID).attr('id')).css('visibility','hidden');	
+}
+
+function MoveOnePage(Direction){
+	// move to next or previous data page
+	
+	var LastPage=$('#LastPage').html();
+	if(Direction=='Z')
+		{NextPage=LastPage}
+	else
+		{
+		var NextPage=parseInt($('#RowCount').html())+parseInt(Direction);
+		if(Direction==0){NextPage=0}
+		if(NextPage<=1){
+			NextPage=1;
+		}
+	}
+	if(NextPage>LastPage){return};
+	$('#RowCount').html(NextPage);
+	LoadData(NextPage,0);	
+}
+
+function MostRecent(){
+	// load a single record dataset, based on most recent shift Ref
+	
+	var PreviousSetting=$('#VacSampleSize Option:selected').attr('id');
+	$('#VacSampleSize option:eq(0)').attr('selected','selected');
+	LoadData('1',PreviousSetting);
+}
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+	
+<div id="divVacFilter" class="">
+	<div class="LoadPage" style="padding: 10px">
+		Search between
+		<input id="VacFilterStart" class="" onChange="StoreDateChange('Vac')" value="[DateOffset.StartDate]">
+		and
+		<input id="VacFilterEnd" class="" onChange="StoreDateChange('Vac')" value="[DateOffset.EndDate]">
+		filter:
+		<input id="VacSearchString" class="" onChange="StoreDateChange('Vac')">
+		size:
+		<select id="VacSampleSize" name="SampleSize" class="" style="width:100" onChange="StoreDateChange('Vac')">
+			<option id="0" value="1">1</option>
+			<option id="1" value="10">10</option>
+			<option id="2" value="25" selected="true">25</option>
+			<option id="3" value="50">50</option>
+			<option id="4" value="100">100</option>
+		</select>
+		<span style="padding:10px;"></span>
+		<button class="fixed dataTables_search" onClick="LoadData('1',0)" >Search</button>
+		<button onClick="MostRecent()">Most Recent</button>
+		<span style="padding:5px;"></span>
+		<span id="NavButtons">
+			<button onClick="MoveOnePage('0')">First</button>
+			<button onClick="MoveOnePage('-1')">Previous</button>
+			<span id="RowCount" style="padding:3px;">1</span> of <span id="LastPage" style="padding:3px;">0</span>
+			<button onClick="MoveOnePage('1')">Next</button>
+			<button onClick="MoveOnePage('Z')">Last</button>
+		</span>
+		<span style="padding:10px;"></span>
+		<div id="pclivacbuttons" style="padding:3px;" >[onload_add;block=p;when [var.x_rights.ORDERJOBS;noerr]=1]
+			<button type="button" id="clivac_addshift"  onclick="doAddVacancies('clientnewshiftmultidayrequirement')">Add Bookings</button>
+			<button type="button" id="clivac_addcontract"  onclick="doAddVacancies('clientnewcontractrequirement')">Add New Contract Requirements</button>
+		</div>
+	</div>
+	
+	<div id="divVacDetail" class="divFilterTableDetail" > </div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="CandDetailsPopups" class="ui-helper-hidden"></div>
+<div id="DocDetails" class="ui-helper-hidden"></div>
+<input type="hidden" id="TempShiftDate" ></input>
+<div id="FormDiv" ></div>
+
+

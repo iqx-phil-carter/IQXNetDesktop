@@ -1,0 +1,161 @@
+<!--[onload;tplvars;DateOffset='GenevaNetSearchDateOffsetValues?pGroupID&pFormName']-->
+
+<!-- 20121025 remove default dates --> 
+
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+	// set defaults from stored values
+	var StoredStartDate=$.data(document.body,'CurrentRequirements').Start;
+	var StoredEndDate=$.data(document.body,'CurrentRequirements').End;
+	var StoredSearchString=$.data(document.body,'CurrentRequirements').Search;
+	var StoredSampleString=$.data(document.body,'CurrentRequirements').Sample;
+	if(StoredSearchString!=''){$('#VacSearchString').val(StoredSearchString)};
+	$('#VacSampleSize option[value="'+StoredSampleString+'"]').attr('selected','selected');
+	
+	$('.divVacTableDetail').html('');
+	
+	if ($('#DocDetails').html()==''){
+		
+		if(StoredStartDate!='0'){
+			$('#VacFilterStart').val(StoredStartDate);
+			$('#VacFilterEnd').val(StoredEndDate);
+		}
+	}
+		
+	$('#VacFilterStart').datepicker({dateFormat:'dd/mm/yy'});
+	$('#VacFilterEnd').datepicker({dateFormat:'dd/mm/yy'});
+	
+	$('#VacFilterStart').keydown(function(e){if(e.keyCode == 8){return false}});
+	$('#VacFilterEnd').keydown(function(e){if(e.keyCode == 8){return false}});
+	
+	$('#cliPlacDlg').remove();  // If returning to this tab, any prior instance of the placement dialog must be removed
+	$('form').next('tr').remove(); // and also any prior detail divisions
+	$('form').remove();
+	
+	$('body').undelegate('#cliPlacDlg','PlacementEvent');  // Ditto the delegation to body
+
+	$('#NavButtons').hide();
+	
+	LoadData('1');
+});
+
+function CreateDate(dt,Offset){
+	dt.setDate(dt.getDate()-Offset);
+	var d=dt.getDate();
+	var day=(d < 10) ? '0' + d : d;
+	var m = dt.getMonth() + 1;
+	var month = (m < 10) ? '0' + m : m;
+	var y = dt.getFullYear();
+	var year = (y < 100) ? y + 1900 : y;
+	return day+'/'+month+'/'+year;
+}
+
+	
+function LoadData(PageNo){
+	var StartDate=$('#VacFilterStart').val();
+	var EndDate=$('#VacFilterEnd').val();
+	var SearchString=$('#VacSearchString').val();
+	var SampleSize=$('#VacSampleSize').val();
+	
+	$('#OutDateStart').html(StartDate);
+	$('#OutDateEnd').html(EndDate);
+	$('#RowCount').html(PageNo);
+	$('.errormessage').html('');
+	
+	if(StartDate && EndDate){
+		IQXChain('#divVacDetail',{action:'load',page:'AgencyVacanciesDetail&pStartDate='+StartDate+'&pEndDate='+EndDate+'&pPageNo='+PageNo+'&SearchString='+encodeURIComponent(SearchString)+'&SampleSize='+SampleSize});
+	}else{
+		$('.errormessage').html('Please ensure both Search dates are present');
+	}
+}
+
+function setThisWeek(oTbl){
+	// populate dates into search boxes at top of form
+		
+	var dDat = new Date();
+	var nDayMillisecs = 1000 * 60 * 60 * 24;
+	while (dDat.getDay() != 1) {
+		dDat.setTime(dDat.getTime() - nDayMillisecs);
+	}
+	$('input.dataTables_dateRange_from','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	dDat.setTime(dDat.getTime() + nDayMillisecs*6);
+	$('input.dataTables_dateRange_to','#divclivacs').val($.datepicker.formatDate('dd/mm/yy', dDat));
+	var oSettings = oTbl.fnSettings();	
+	oSettings.oApi._fnReDraw(oSettings);
+	}
+
+function MoveOnePage(Direction){
+	// move to next or previous data page
+	
+	var LastPage=$('#VacLastPage').html();
+	if(Direction=='Z')
+		{NextPage=LastPage}
+	else
+		{
+		var NextPage=parseInt($('#RowCount').html())+parseInt(Direction);
+		if(Direction==0){NextPage=0}
+		if(NextPage<=1){
+			NextPage=1;
+		}
+	}
+	if(NextPage>LastPage){return};
+	$('#RowCount').html(NextPage);
+	LoadData(NextPage);	
+}
+
+
+
+</script>
+
+<div class="usertext">[onload;file=txt_client_requirements_top.html;noerr]</div>
+<div id="divclivacs">
+<div id="divPopup" onclick="$(this).hide()" class="ToolTipPopup"></div>
+<span id="ErrorMessage" class="errormessage">[var.x_errormessage]</span>
+	
+<div id="divVacFilter" class="">
+	<div class="LoadPage" style="padding: 10px">
+		Search between
+		<input id="VacFilterStart" class="" onChange="StoreDateChange('Vac')" value="[DateOffset.StartDate]">
+		and
+		<input id="VacFilterEnd" class=""  onChange="StoreDateChange('Vac')" value="[DateOffset.EndDate]">
+		filter:
+		<input id="VacSearchString" class="" onChange="StoreDateChange('Vac')" >
+		size:
+		<select id="VacSampleSize" name="SampleSize" class="" style="width:100" onChange="StoreDateChange('Vac')">
+			<option value="10">10</option>
+			<option value="25">25</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+		</select>
+		<span style="padding:10px;"></span>
+		<button class="fixed dataTables_search" onClick="LoadData('1')" >Search</button>
+		<span style="padding:10px;"></span>
+		<span id="NavButtons">
+			<button onClick="MoveOnePage('0')">First</button>
+			<button onClick="MoveOnePage('-1')">Previous</button>
+			<span id="RowCount" style="padding:3px;">1</span> of <span id="VacLastPage" style="padding:3px;">0</span>
+			<button onClick="MoveOnePage('1')">Next</button>
+			<button onClick="MoveOnePage('Z')">Last</button>
+			
+		</span>
+		<span style="padding:10px;"></span>
+	</div>
+	
+	<div id="divVacDetail" class="divFilterTableDetail" > </div>
+</div>
+
+<p>
+    <span class="errormessage">[var.x_errormessage]</span>
+</p>
+
+<div class="usertext">[onload;file=txt_client_requirements_bottom.html;noerr]</div>
+<div class="ui-helper-hidden">
+	<div id="divclivacFillerDlg"></div>
+	<div id="divclivacNewReqDlg"></div>
+</div>
+<div id="CandDetailsPopups" class="ui-helper-hidden"></div>
+<div id="DocDetails" class="ui-helper-hidden"></div>
+<input type="hidden" id="TempShiftDate" ></input>
+<div id="FormDiv" ></div>

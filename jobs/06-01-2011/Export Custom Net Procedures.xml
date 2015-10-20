@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Job title="Export Net Database Procedures">
+	<Parameters>
+		<Parameter name="procPrefix" value="Net" required="YES">
+			Procedure name prefix
+		</Parameter>
+	</Parameters>
+	<IfOKDialog text="This will export all current {procPrefix} database procedures into an import job. Press Ok to continue.">
+		<ExportFile extension="xml">
+			<WriteXMLTag tag="Job" _title="{procPrefix} Database Procedure Import">
+				<WriteXMLTag tag="IfYesDialog" _text="This job will update the {procPrefix} database procedures. Ok to proceed?">
+					<SQLQuery>
+						<SQLSelect>select proc_name as pname,replace(proc_defn,'{{','{{{{') as pdefn 
+from sys.sysprocedure where pname like '{procPrefix}%' and 
+creator=(select  first user_id from sys.sysuserperm where user_name='pears') order by pname</SQLSelect>
+						<ForEachRow>
+									<If x1="{pdefn}" comparison="%" x2="create procedure" trim="YES" ignorecase="YES">
+										<SetVariable name="rtype" value="procedure" />
+									</If>
+									<Else>
+										<SetVariable name="rtype" value="function" />
+									</Else>	
+						            <WriteXMLTag tag="SQLExec" _ignoreerror="YES"><Writeln cdata="YES">drop {rtype} pears.{pname}</Writeln></WriteXMLTag>
+									<WriteXMLTag tag="SQLExec" _parameters="NO"><Writeln cdata="YES">{pdefn}</Writeln></WriteXMLTag>
+						            <WriteXMLTag tag="SQLExec" _ignoreerror="YES"><Writeln cdata="YES">grant execute on pears.{pname} to IQXNet</Writeln></WriteXMLTag>
+						</ForEachRow>
+					</SQLQuery>
+				</WriteXMLTag>
+			</WriteXMLTag>
+		</ExportFile>
+	</IfOKDialog>
+</Job>

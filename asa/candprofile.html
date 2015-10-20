@@ -1,0 +1,199 @@
+<!--[onload;tplvars;cand='NetCandidateProfile';candquest='F_questions_div?ptaglocation=P']-->
+
+<!-- 20130710 Enforce length of address, and lock Name fields -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		IQXInitSection("form");
+		$(".questionnaire").questionnaire();
+	});
+	
+	function StartChangePassword(){
+		$("#frmcandprofile").hide();
+		IQXChain('#divchangepassword',{action:'load',page:'changepassword'});
+	}
+	
+	function StopChangePassword() {
+		IQXDisableForm();
+		$("#divchangepassword").empty();
+		$("#frmcandprofile").show();
+	}
+</script>
+
+<div class="usertext">[onload;file=txt_candidate_profile_top.html;noerr]</div>
+<form id="frmcandprofile" name="candprofile" action="IQXPost.php?proc=NetCandidateProfileSet" method="POST" accept-charset="utf-8">
+    <fieldset class="regular">
+        <input type="hidden" id="cand_personid" name="ppersonid" value="[cand.PersonID;block=fieldset]" />
+        <input type="hidden" name="poldforenames" value="[cand.Forenames;noerr]" />
+        <input type="hidden" name="poldsurname" value="[cand.Surname;noerr]" />
+        <!--input type="hidden" name="poldgender" value="[cand.Gender;noerr]" /-->    
+        <input type="hidden" name="poldaddr1" value="[cand.Addr1;noerr]" />
+        <input type="hidden" name="poldaddr2" value="[cand.Addr2;noerr]" />
+        <input type="hidden" name="poldaddr3" value="[cand.Addr3;noerr]" />
+        <input type="hidden" name="poldtown" value="[cand.Town;noerr]" />
+        <input type="hidden" name="poldcounty" value="[cand.County;noerr]" />
+        <input type="hidden" name="poldcountry" value="[cand.Country;noerr]" />
+        <input type="hidden" name="poldpostcode" value="[cand.Postcode;noerr]" />
+        <input type="hidden" name="poldhomephone" value="[cand.HomePhone;noerr]" />
+        <input type="hidden" name="polddayphone" value="[cand.DayPhone;noerr]" />
+        <input type="hidden" name="poldmobile" value="[cand.Mobile;noerr]" />
+        <input type="hidden" name="poldemail" value="[cand.Email;noerr]" />
+		<div class="questionnaire">
+		<div class="qquestrow">
+            <div class="qquestion">
+                Forenames
+            </div>
+			<div class="qanswer">
+				<span class="required qpseudoquestanswer">[cand.Forenames;noerr]</span>
+            	<input type="hidden" id="cand_forenames" name="pforenames" value="[cand.Forenames;noerr]" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Surname
+            </div>
+			<div class="qanswer">
+				<span class="required qpseudoquestanswer">[cand.Surname;noerr]</span>
+            	<input type="hidden" id="cand_surname" name="psurname" value="[cand.Surname;noerr]" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+        <!--
+		<div class="qquestrow">
+            <div class="qquestion">
+                Gender
+            </div>
+			<div class="qanswer">
+ 			<select id="cand_gender" name="pgender" class="required qpseudoquestanswer" >
+				<option value="" ></option>
+				<option value="F" [cand.Gender;noerr;if [val]='F';then 'selected="true"';else ''] >Female</option>
+				<option value="M" [cand.Gender;noerr;if [val]='M';then 'selected="true"';else ''] >Male</option>
+			</select>
+            </div>
+        </div>
+        -->
+		<div class="qquestrow">
+			<input type="hidden" name="polddob" value="[cand.DOB;ope=iqx;shortdate;noerr]" />
+            <div class="qquestion" >
+                Date of Birth
+            </div>
+			<div class="qanswer" >
+            	<input type="text" id="cand_dob" name="pDOB" value="[cand.DOB;ope=iqx;shortdate;noerr]" class="required dateofbirth qpseudoquestanswer" />
+            </div>
+			[onload_dob;block=div;when [var.x_rights.VIEWDATEOFBIRTH;noerr]=1]
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Home Telephone
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_home_phone" name="phomephone" value="[cand.HomePhone;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Day Telephone
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_day_phone" name="pdayphone" value="[cand.DayPhone;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Mobile
+            </div>
+			<div class="qanswer">
+            <input type="text" id="cand_mobile" name="pmobile" value="[cand.Mobile;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+        <div class="qquestrow">
+            <div class="qquestion">
+                Email Address
+            </div>
+			<div class="qanswer">
+            <input type="text"id="cand_email" name="pemail" value="[cand.Email;noerr]" class="required email qpseudoquestanswer"  />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Address
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="35" id="cand_addr1" name="paddr1" value="[cand.Addr1;noerr]" class="required qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                &nbsp;
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="35" id="cand_addr2" name="paddr2" value="[cand.Addr2;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                &nbsp;
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="35" id="cand_addr3" name="paddr3" value="[cand.Addr3;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Town
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="30" id="cand_town" name="ptown" value="[cand.Town;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                County
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="30" id="cand_county" name="pcounty" value="[cand.County;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Country
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="30" id="cand_country" name="pcountry" value="[cand.Country;noerr]" class="qpseudoquestanswer" />
+            </div>
+        </div>
+		<div class="qquestrow">
+            <div class="qquestion">
+                Postcode
+            </div>
+			<div class="qanswer">
+            <input type="text" maxlength="30" id="cand_postcode" name="ppostcode" value="[cand.Postcode;noerr]" class="required uppercase qpseudoquestanswer" />
+            </div>
+        </div>
+		</div>
+		<div class="cleardiv" ></div>
+	   	<div>[candquest;block=div]</div>  
+	    <p>
+            <button type="button" id="cand_edit" class="fixed nonformbutton" onclick="IQXEnableForm(this.form)">
+                Edit
+            </button>
+            <button type="button" id="cand_refresh" class="fixed nonformbutton" onclick="IQXRefreshTab()">
+                Refresh
+            </button>
+            <button type="button" id="cand_changepassword" class="fixed nonformbutton" onclick="StartChangePassword()">
+                Change Password
+            </button>
+            <button type="submit" id="cand_submit" class="fixed formbutton" >
+                Save
+            </button>
+            <button type="button" id="cand_reset" class="fixed formbutton" onclick="IQXDisableForm()" >
+                Undo
+            </button>
+	    </p>
+		<p>
+	    		<span class="errormessage">[var.x_errormessage]</span>
+		</p>
+    </fieldset>
+</form>
+<div id="divchangepassword" ></div>
+<div class="usertext">[onload;file=txt_candidate_profile_bottom.html;noerr]</div>
+

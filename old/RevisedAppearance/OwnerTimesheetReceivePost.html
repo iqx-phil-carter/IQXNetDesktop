@@ -1,0 +1,42 @@
+<!--[onload;tplvars;rts='NetOwnerTimesheetCreate']-->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		});
+</script>
+<div id="postedTimesheets">
+<h2>Timesheets Posted</h2>
+<div align="right">
+	<button onclick="IQXRefreshBrowser();">Add More Timesheets</button>
+	<button onclick="window.close();">Close</button>
+</div>
+<span id="msg_error" class="errormessage">[var.x_errormessage]</span>
+   	
+<table class="tablesorter">
+	<thead>
+		<tr>
+			<th>Account</th>
+			<th>Site</th>
+			<th>Vacancy</th>
+			<th>Candidate</th>
+			<th>Pay Band</th>
+			<th>Units</th>
+			<th>Timesheet Number</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>[rts.AcName;block=tr]</td>
+			<td>[rts.SiteAddr;noerr]</td>
+			<td>[rts.JobTitle;noerr]</td>
+			<td>[rts.TempName;noerr]</td>
+			<td>[rts.PayBand;noerr]</td>
+			<td>[rts.Units;noerr]</td>
+			<td>[rts.TimesheetNumber;noerr]</td>
+		</tr>
+	</tbody>
+</table>
+<button onclick="IQXRefreshBrowser();">Add More Timesheets</button>
+<button onclick="window.close();">Close</button>
+
+</div>
